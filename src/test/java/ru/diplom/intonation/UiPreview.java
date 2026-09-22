@@ -3,6 +3,7 @@ package ru.diplom.intonation;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ComboBox;
 import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -27,11 +28,15 @@ public final class UiPreview {
                     stage.setHeight(Double.parseDouble(args[3]));
                 }
                 if (args.length > 1) {
-                    if (Integer.parseInt(args[1]) == 1) {
+                    if (Integer.parseInt(args[1]) >= 1) {
                         ToggleButton exercise = (ToggleButton) stage.getScene().getRoot().lookupAll(".mode-button")
                                 .stream().filter(node -> ((ToggleButton) node).getText().equals("Распевки"))
                                 .findFirst().orElseThrow();
                         exercise.setSelected(true);
+                        if (Integer.parseInt(args[1]) == 2) {
+                            ComboBox<?> choices = (ComboBox<?>) stage.getScene().getRoot().lookup(".exercise-toolbar .combo-box");
+                            choices.getSelectionModel().selectLast();
+                        }
                     }
                 }
                 PauseTransition delay = new PauseTransition(Duration.seconds(1));

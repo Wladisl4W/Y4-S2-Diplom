@@ -31,7 +31,7 @@ public final class IntonationApp extends Application {
     private final PitchTimeline timeline = new PitchTimeline();
     private final ExerciseHistory history = new ExerciseHistory();
     private ComboBox<MicrophoneCapture.Device> devices;
-    private ComboBox<Exercise> exercises;
+    private ComboBox<ExerciseCatalog.Option> exercises;
     private Button microphoneButton;
     private Button exerciseButton;
     private Button cancelExerciseButton;
@@ -155,28 +155,33 @@ public final class IntonationApp extends Application {
     }
 
     private void exerciseView() {
-        List<Exercise> presets = Exercise.beginners();
+        List<ExerciseCatalog.Option> presets = ExerciseCatalog.beginners();
         exercises = new ComboBox<>(FXCollections.observableArrayList(presets));
-        exercises.setPrefWidth(190);
+        exercises.setPrefWidth(230);
         exercises.setCellFactory(list -> new ListCell<>() {
-            @Override protected void updateItem(Exercise item, boolean empty) {
+            @Override protected void updateItem(ExerciseCatalog.Option item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? "" : item.title());
+                setText(empty || item == null ? "" : item.toString());
             }
         });
         exercises.setButtonCell(new ListCell<>() {
-            @Override protected void updateItem(Exercise item, boolean empty) {
+            @Override protected void updateItem(ExerciseCatalog.Option item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? "Выберите распевку" : item.title());
+                setText(empty || item == null ? "Выберите распевку" : item.toString());
             }
         });
         exercises.setValue(presets.get(0));
-        exerciseChart = new ExerciseChartState(presets.get(0));
+        exerciseChart = chartState(presets.get(0));
         exercises.valueProperty().addListener((obs, old, selected) -> {
-            if (selected != null) exerciseChart = new ExerciseChartState(selected);
+            if (selected != null) {
+                exerciseChart = chartState(selected);
+                if (target != null) target.setText("Целевая нота: —");
+                if (exerciseProgress != null) exerciseProgress.setProgress(0);
+                if (exerciseFeedback != null) exerciseFeedback.setText("Нажмите «Начать распевку», чтобы петь по полосам на графике.");
+            }
         });
         Button listen = new Button("Прослушать пример");
-        listen.setOnAction(e -> TonePlayer.playAsync(exercises.getValue()));
+        listen.setOnAction(e -> TonePlayer.playAsync(exercises.getValue().exercise()));
         exerciseButton = primaryButton("Начать распевку");
         exerciseButton.setOnAction(e -> startExercise());
         cancelExerciseButton = new Button("Прервать");
@@ -199,6 +204,10 @@ public final class IntonationApp extends Application {
         summary.setAlignment(Pos.CENTER_LEFT);
         exerciseDetails = new VBox(7, summary, exerciseProgress, recentResults);
         exerciseDetails.getStyleClass().add("exercise-summary");
+    }
+
+    private static ExerciseChartState chartState(ExerciseCatalog.Option choice) {
+        return new ExerciseChartState(choice.exercise(), choice.starts());
     }
 
     private void refreshDevices() {
@@ -274,7 +283,7 @@ public final class IntonationApp extends Application {
             exerciseFeedback.setText("Сначала включите микрофон в верхней части окна.");
             return;
         }
-        session = new ExerciseSession(exercises.getValue(), System.nanoTime());
+        session = new ExerciseSession(exercises.getValue().exercise(), System.nanoTime());
         exerciseChart.start(session.startNanos());
         exerciseButton.setDisable(true);
         cancelExerciseButton.setDisable(false);
@@ -285,7 +294,7 @@ public final class IntonationApp extends Application {
 
     private void cancelExercise(String message) {
         session = null;
-        exerciseChart = new ExerciseChartState(exercises.getValue());
+        exerciseChart = chartState(exercises.getValue());
         exerciseButton.setDisable(false);
         cancelExerciseButton.setDisable(true);
         exercises.setDisable(false);
@@ -321,8 +330,11 @@ public final class IntonationApp extends Application {
         double hz = 440 * Math.pow(2, (midi - 69) / 12.0);
         Note expected = Note.fromFrequency(hz);
         target.setText(expected.display());
-        exerciseFeedback.setText("Нота " + (index + 1) + " из " + session.exercise().notes().size()
-                + " · пойте её до смены подсказки");
+        ExerciseCatalog.Option choice = exercises.getValue();
+        String part = choice.kind() == ExerciseCatalog.Kind.SET
+                ? "Паттерн " + choice.partNumber(index) + "/" + choice.partCount() + " · " : "";
+        exerciseFeedback.setText(part + "нота " + choice.noteNumberInPart(index) + "/"
+                + choice.notesInPart(index) + " · пойте до смены подсказки");
         exerciseProgress.setProgress((now - session.startNanos()) /
                 (session.exercise().durationSeconds() * 1e9));
     }
@@ -331,8 +343,8 @@ public final class IntonationApp extends Application {
         try {
             List<String> rows = history.recent(5);
             if (rows.isEmpty()) return;
-            Map<String, String> titles = Exercise.beginners().stream()
-                    .collect(Collectors.toMap(Exercise::id, Exercise::title));
+            Map<String, String> titles = ExerciseCatalog.beginners().stream()
+                    .collect(Collectors.toMap(choice -> choice.exercise().id(), ExerciseCatalog.Option::toString));
             DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM");
             StringBuilder text = new StringBuilder();
             for (String row : rows) {

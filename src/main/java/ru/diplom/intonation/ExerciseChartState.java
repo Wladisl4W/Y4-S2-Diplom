@@ -8,13 +8,19 @@ import java.util.List;
 /** Pitch samples and timing for one exercise attempt, independent of the live rolling history. */
 public final class ExerciseChartState {
     private final Exercise exercise;
+    private final List<Integer> patternStarts;
     private final List<PitchTimeline.Point> points = new ArrayList<>();
     private long startNanos;
     private long displayNanos;
     private boolean running;
 
-    public ExerciseChartState(Exercise exercise) { this.exercise = exercise; }
+    public ExerciseChartState(Exercise exercise) { this(exercise, List.of(0)); }
+    public ExerciseChartState(Exercise exercise, List<Integer> patternStarts) {
+        this.exercise = exercise;
+        this.patternStarts = List.copyOf(patternStarts);
+    }
     public Exercise exercise() { return exercise; }
+    public List<Integer> patternStarts() { return patternStarts; }
     public List<PitchTimeline.Point> points() { return List.copyOf(points); }
     public long startNanos() { return startNanos; }
     public long displayNanos() { return displayNanos; }

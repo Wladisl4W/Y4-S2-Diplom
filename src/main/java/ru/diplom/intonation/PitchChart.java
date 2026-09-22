@@ -12,7 +12,9 @@ import java.util.List;
 /** Shared pitch graph with a rolling live view and a timed exercise view. */
 public final class PitchChart {
     private static final Color BACKGROUND = Color.web("#101a2b");
-    private static final Color GRID = Color.web("#27354a");
+    private static final Color GRID = Color.web("#34445b");
+    private static final Color NATURAL_ROW = Color.web("#111d2e");
+    private static final Color SHARP_ROW = Color.web("#1a2940");
     private static final Color LABEL = Color.web("#aab8cb");
     private static final Color TRACE = Color.web("#51d6b7");
     private static final Color TARGET = Color.web("#5d7799");
@@ -77,6 +79,15 @@ public final class PitchChart {
             g.setFill(Color.WHITE);
             g.fillText(noteName(exercise.notes().get(i)), x + 9, y + 4);
         }
+        for (int part = 1; part < state.patternStarts().size(); part++) {
+            double boundarySeconds = state.patternStarts().get(part) * secondsPerNote;
+            double x = viewport.x(boundarySeconds, LEFT, plotWidth);
+            g.setStroke(Color.web("#f4cf70"));
+            g.setLineWidth(1.5);
+            g.strokeLine(x, TOP, x, h - BOTTOM);
+            g.setFill(Color.web("#f4cf70"));
+            g.fillText("Паттерн " + (part + 1), x + 5, TOP + 12);
+        }
         if (state.startNanos() != 0) {
             trace(g, state.points(), w, h, center, halfRange,
                     time -> viewport.x((time - state.startNanos()) / 1e9, LEFT, plotWidth),
@@ -102,18 +113,30 @@ public final class PitchChart {
     }
 
     private void grid(GraphicsContext g, double w, double h, double center, double halfRange) {
-        int low = (int) Math.ceil(center - halfRange);
-        int high = (int) Math.floor(center + halfRange);
+        int low = (int) Math.ceil(center - halfRange - 0.5);
+        int high = (int) Math.floor(center + halfRange + 0.5);
+        double plotHeight = h - TOP - BOTTOM;
+        double plotBottom = h - BOTTOM;
         for (int midi = low; midi <= high; midi++) {
-            double y = y(midi, center, halfRange, h - TOP - BOTTOM);
+            double top = Math.max(TOP, y(midi + 0.5, center, halfRange, plotHeight));
+            double bottom = Math.min(plotBottom, y(midi - 0.5, center, halfRange, plotHeight));
+            if (bottom <= top) continue;
+            int pitchClass = Math.floorMod(midi, 12);
+            boolean sharp = pitchClass == 1 || pitchClass == 3 || pitchClass == 6
+                    || pitchClass == 8 || pitchClass == 10;
+            g.setFill(sharp ? SHARP_ROW : NATURAL_ROW);
+            g.fillRect(LEFT, top, w - LEFT - RIGHT, bottom - top);
             g.setStroke(GRID);
             g.setLineWidth(1);
-            g.strokeLine(LEFT, y, w - RIGHT, y);
-            if (Math.floorMod(midi, 2) == 0) {
+            g.strokeLine(LEFT, bottom, w - RIGHT, bottom);
+            double middle = y(midi, center, halfRange, plotHeight);
+            if (middle >= TOP + 5 && middle <= plotBottom - 5) {
                 g.setFill(LABEL);
-                g.fillText(noteName(midi), 8, y + 4);
+                g.fillText(noteName(midi), 8, middle + 4);
             }
         }
+        g.setStroke(GRID);
+        g.strokeLine(LEFT, TOP, w - RIGHT, TOP);
     }
 
     private static String noteName(int midi) {
