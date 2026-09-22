@@ -29,7 +29,7 @@ def events_for(path):
             for a, b, note, confidence, *_ in events], time.monotonic() - start
 
 
-def evaluate(events, f0_path):
+def evaluate(events, f0_path, min_confidence=0.0):
     with open(f0_path, newline="") as handle:
         reference = [(float(t), float(hz)) for t, hz in csv.reader(handle)]
     voiced = 0
@@ -38,7 +38,8 @@ def evaluate(events, f0_path):
     silence = 0
     false_voiced = 0
     for t, hz in reference[::17]:  # approximately 100 ms between checks
-        active = [event for event in events if event[0] <= t < event[1]]
+        active = [event for event in events if event[0] <= t < event[1]
+                  and event[3] >= min_confidence]
         selected = max(active, key=lambda event: event[3]) if active else None
         if hz > 0:
             voiced += 1
@@ -51,7 +52,10 @@ def evaluate(events, f0_path):
             silence += 1
             if selected:
                 false_voiced += 1
-    return {"voiced_frames": voiced, "coverage": round(detected / voiced, 3) if voiced else 0,
+    return {"voiced_frames": voiced, "correct_frames": correct,
+            "detected_frames": detected, "silence_frames": silence,
+            "false_voiced_frames": false_voiced,
+            "coverage": round(detected / voiced, 3) if voiced else 0,
             "correct_of_voiced": round(correct / voiced, 3) if voiced else 0,
             "false_voiced_on_silence": round(false_voiced / silence, 3) if silence else 0,
             "note_events": len(events)}

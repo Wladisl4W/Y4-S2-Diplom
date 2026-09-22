@@ -49,7 +49,7 @@ public final class IntonationApp extends Application {
     private VBox exerciseControls;
     private VBox exerciseDetails;
     private Label graphTitle;
-    private ExerciseSession session;
+    private volatile ExerciseSession session;
     private AnimationTimer timer;
     private double smoothedMidi = Double.NaN;
 
@@ -116,15 +116,15 @@ public final class IntonationApp extends Application {
         StackPane graphBox = new StackPane(canvas);
         canvas.setManaged(false);
         graphBox.getStyleClass().add("graph-card");
-        graphBox.setMinHeight(260);
+        graphBox.setMinHeight(250);
         graphBox.setPrefHeight(460);
         canvas.widthProperty().bind(graphBox.widthProperty());
         canvas.heightProperty().bind(graphBox.heightProperty());
         VBox.setVgrow(graphBox, Priority.ALWAYS);
-        VBox workspace = new VBox(8, modeBar, exerciseControls, pitchHeader, graphBox, exerciseDetails);
+        VBox workspace = new VBox(6, modeBar, exerciseControls, pitchHeader, graphBox, exerciseDetails);
         VBox.setVgrow(workspace, Priority.ALWAYS);
         status = label("Выберите микрофон и нажмите «Начать микрофон»", "muted");
-        VBox root = new VBox(8, heading, controls, workspace, status);
+        VBox root = new VBox(6, heading, controls, workspace, status);
         root.setPadding(new Insets(14));
         Scene scene = new Scene(root, 980, 740);
         scene.getStylesheets().add(getClass().getResource("theme.css").toExternalForm());
@@ -157,7 +157,7 @@ public final class IntonationApp extends Application {
     private void exerciseView() {
         List<ExerciseCatalog.Option> presets = ExerciseCatalog.beginners();
         exercises = new ComboBox<>(FXCollections.observableArrayList(presets));
-        exercises.setPrefWidth(230);
+        exercises.setPrefWidth(250);
         exercises.setCellFactory(list -> new ListCell<>() {
             @Override protected void updateItem(ExerciseCatalog.Option item, boolean empty) {
                 super.updateItem(item, empty);
@@ -180,9 +180,11 @@ public final class IntonationApp extends Application {
                 if (exerciseFeedback != null) exerciseFeedback.setText("Нажмите «Начать распевку», чтобы петь по полосам на графике.");
             }
         });
-        Button listen = new Button("Прослушать пример");
+        Button listen = new Button("Пример");
+        listen.setTooltip(new Tooltip("Прослушать выбранный паттерн или набор"));
         listen.setOnAction(e -> TonePlayer.playAsync(exercises.getValue().exercise()));
-        exerciseButton = primaryButton("Начать распевку");
+        exerciseButton = primaryButton("Начать");
+        exerciseButton.setTooltip(new Tooltip("Начать выбранную распевку"));
         exerciseButton.setOnAction(e -> startExercise());
         cancelExerciseButton = new Button("Прервать");
         cancelExerciseButton.setDisable(true);
@@ -200,9 +202,13 @@ public final class IntonationApp extends Application {
         exerciseControls = new VBox(10, actions);
         exerciseControls.getStyleClass().add("exercise-toolbar");
         recentResults = label("Пока нет завершённых занятий", "muted");
+        Button historyButton = new Button("История");
+        historyButton.setOnAction(e -> showHistory());
+        HBox historyRow = new HBox(10, recentResults, historyButton);
+        historyRow.setAlignment(Pos.CENTER_LEFT);
         HBox summary = new HBox(16, target, exerciseFeedback);
         summary.setAlignment(Pos.CENTER_LEFT);
-        exerciseDetails = new VBox(7, summary, exerciseProgress, recentResults);
+        exerciseDetails = new VBox(5, summary, exerciseProgress, historyRow);
         exerciseDetails.getStyleClass().add("exercise-summary");
     }
 
@@ -238,7 +244,8 @@ public final class IntonationApp extends Application {
             timeline.clear();
             smoothedMidi = Double.NaN;
             capture.start(device, pitch -> {
-                while (samples.size() >= 8) samples.poll();
+                // Keep every exercise frame for scoring; stale live-only frames may be dropped.
+                while (session == null && samples.size() >= 8) samples.poll();
                 samples.add(new PitchSample(System.nanoTime(), pitch));
             }, error -> Platform.runLater(() -> {
                 microphoneButton.setText("Начать микрофон");
@@ -341,25 +348,44 @@ public final class IntonationApp extends Application {
 
     private void refreshHistory() {
         try {
-            List<String> rows = history.recent(5);
-            if (rows.isEmpty()) return;
-            Map<String, String> titles = ExerciseCatalog.beginners().stream()
-                    .collect(Collectors.toMap(choice -> choice.exercise().id(), ExerciseCatalog.Option::toString));
-            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM");
-            StringBuilder text = new StringBuilder();
-            for (String row : rows) {
-                String[] fields = row.split(",");
-                if (fields.length != 5) continue;
-                String date;
-                try { date = Instant.parse(fields[0]).atZone(ZoneId.systemDefault()).format(dateFormat); }
-                catch (RuntimeException e) { date = fields[0].substring(0, Math.min(10, fields[0].length())); }
-                text.append(date).append(" · ").append(titles.getOrDefault(fields[1], fields[1]))
-                        .append(" · ").append(fields[2]).append("%\n");
-            }
-            recentResults.setText(text.toString().stripTrailing());
+            List<String> rows = history.recent(1);
+            recentResults.setText(rows.isEmpty() ? "Пока нет завершённых занятий" :
+                    "Последнее: " + formatHistoryRow(rows.getFirst(), false));
         } catch (IOException e) {
             recentResults.setText("История недоступна: " + e.getMessage());
         }
+    }
+
+    private void showHistory() {
+        try {
+            List<String> rows = history.recent(30);
+            ListView<String> list = new ListView<>(FXCollections.observableArrayList(
+                    rows.stream().map(row -> formatHistoryRow(row, true)).toList()));
+            list.setPrefSize(560, 300);
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.initOwner(exerciseButton.getScene().getWindow());
+            dialog.setTitle("История занятий");
+            dialog.setHeaderText("Последние занятия хранятся только на этом компьютере");
+            dialog.getDialogPane().setContent(rows.isEmpty()
+                    ? label("Пока нет завершённых занятий", "muted") : list);
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+            dialog.showAndWait();
+        } catch (IOException e) {
+            status.setText("Не удалось открыть историю: " + e.getMessage());
+        }
+    }
+
+    private static String formatHistoryRow(String row, boolean detailed) {
+        String[] fields = row.split(",");
+        if (fields.length != 5) return "Повреждённая запись истории";
+        String date;
+        try { date = Instant.parse(fields[0]).atZone(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")); }
+        catch (RuntimeException e) { date = fields[0].substring(0, Math.min(10, fields[0].length())); }
+        Map<String, String> titles = ExerciseCatalog.beginners().stream()
+                .collect(Collectors.toMap(choice -> choice.exercise().id(), ExerciseCatalog.Option::toString));
+        String summary = date + " · " + titles.getOrDefault(fields[1], fields[1]) + " · " + fields[2] + "%";
+        return detailed ? summary + " · голос: " + fields[3] + "% · ошибка: " + fields[4] + " центов" : summary;
     }
 
     private static Label label(String text, String styleClass) {

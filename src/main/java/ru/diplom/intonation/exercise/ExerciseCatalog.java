@@ -45,19 +45,26 @@ public final class ExerciseCatalog {
     public static List<Option> beginners() {
         List<Exercise> patterns = Exercise.beginners();
         List<Option> choices = new ArrayList<>();
-        for (Exercise pattern : patterns)
-            choices.add(new Option(Kind.PATTERN, pattern.title(), pattern, List.of(0)));
-        List<Integer> combined = new ArrayList<>();
-        List<Integer> starts = new ArrayList<>();
-        double secondsPerNote = patterns.getFirst().secondsPerNote();
-        for (Exercise pattern : patterns) {
-            if (pattern.secondsPerNote() != secondsPerNote)
-                throw new IllegalStateException("Set patterns must use the same tempo");
-            starts.add(combined.size());
-            combined.addAll(pattern.notes());
+        for (int octaveShift : new int[]{0, -12, 12}) {
+            String root = octaveShift == 0 ? "C4" : (octaveShift < 0 ? "C3" : "C5");
+            String suffix = octaveShift == 0 ? "" : "_" + root.toLowerCase();
+            List<Integer> combined = new ArrayList<>();
+            List<Integer> starts = new ArrayList<>();
+            double secondsPerNote = patterns.getFirst().secondsPerNote();
+            for (Exercise pattern : patterns) {
+                if (pattern.secondsPerNote() != secondsPerNote)
+                    throw new IllegalStateException("Set patterns must use the same tempo");
+                List<Integer> shifted = pattern.notes().stream().map(note -> note + octaveShift).toList();
+                Exercise variant = new Exercise(pattern.id() + suffix,
+                        pattern.title() + " · " + root, shifted, secondsPerNote);
+                choices.add(new Option(Kind.PATTERN, variant.title(), variant, List.of(0)));
+                starts.add(combined.size());
+                combined.addAll(shifted);
+            }
+            Exercise set = new Exercise("basic_set" + suffix,
+                    "Основной набор · " + root, combined, secondsPerNote);
+            choices.add(new Option(Kind.SET, set.title(), set, starts));
         }
-        Exercise set = new Exercise("basic_set", "Вверх и вниз", combined, secondsPerNote);
-        choices.add(new Option(Kind.SET, "Вверх и вниз", set, starts));
         return List.copyOf(choices);
     }
 }
