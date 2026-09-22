@@ -11,14 +11,14 @@ import java.util.List;
 
 /** The single live microphone canvas; exercise targets are an optional overlay. */
 public final class PitchChart {
-    private static final Color BACKGROUND = Color.web("#101a2b");
-    private static final Color GRID = Color.web("#34445b");
-    private static final Color NATURAL_ROW = Color.web("#111d2e");
-    private static final Color SHARP_ROW = Color.web("#1a2940");
-    private static final Color LABEL = Color.web("#aab8cb");
-    private static final Color TRACE = Color.web("#51d6b7");
-    private static final Color TARGET = Color.web("#5d7799");
-    private static final Color MISS = Color.web("#ff947f");
+    private static final Color BACKGROUND = Color.web("#202427");
+    private static final Color GRID = Color.web("#434a4d");
+    private static final Color NATURAL_ROW = Color.web("#252b2d");
+    private static final Color SHARP_ROW = Color.web("#2e3538");
+    private static final Color LABEL = Color.web("#c8cecc");
+    private static final Color TRACE = Color.web("#77d4b4");
+    private static final Color TARGET = Color.web("#706756");
+    private static final Color MISS = Color.web("#f59a74");
     private static final double LEFT = 48, RIGHT = 16, TOP = 18, BOTTOM = 28;
     private final Canvas canvas;
 

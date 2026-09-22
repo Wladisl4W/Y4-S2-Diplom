@@ -4,7 +4,7 @@ import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.StackPane;
-import javafx.scene.control.ComboBox;
+
 import ru.diplom.intonation.exercise.ExerciseCatalog;
 import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
@@ -30,24 +30,20 @@ public final class UiPreview {
                     stage.setHeight(Double.parseDouble(args[3]));
                 }
                 StackPane sharedGraph = (StackPane) stage.getScene().getRoot().lookup(".graph-card");
-                if (args.length > 1) {
-                    if (Integer.parseInt(args[1]) >= 1) {
-                        ToggleButton exercise = (ToggleButton) stage.getScene().getRoot().lookupAll(".mode-button")
-                                .stream().filter(node -> ((ToggleButton) node).getText().equals("Распевки"))
+                if (args.length > 1 && Integer.parseInt(args[1]) >= 1) {
+                    ToggleButton exercise = (ToggleButton) stage.getScene().getRoot().lookupAll(".mode-button")
+                            .stream().filter(node -> ((ToggleButton) node).getText().equals("Распевки"))
+                            .findFirst().orElseThrow();
+                    exercise.setSelected(true);
+                    if (Integer.parseInt(args[1]) == 2) {
+                        ToggleButton sets = (ToggleButton) stage.getScene().getRoot().lookupAll(".library-filter")
+                                .stream().filter(node -> ((ToggleButton) node).getText().equals("Наборы"))
                                 .findFirst().orElseThrow();
-                        exercise.setSelected(true);
-                        if (Integer.parseInt(args[1]) == 2) {
-                            @SuppressWarnings("unchecked")
-                            ComboBox<ExerciseCatalog.Kind> kind = (ComboBox<ExerciseCatalog.Kind>)
-                                    stage.getScene().getRoot().lookup("#exercise-kind");
-                            kind.setValue(ExerciseCatalog.Kind.SET);
-                            ComboBox<?> choices = (ComboBox<?>) stage.getScene().getRoot().lookup("#exercise-choice");
-                            choices.getSelectionModel().selectLast();
-                        }
+                        sets.setSelected(true);
                     }
                 }
                 if (sharedGraph != stage.getScene().getRoot().lookup(".graph-card"))
-                    throw new IllegalStateException("Exercise navigation replaced the live graph");
+                    throw new IllegalStateException("Main graph instance changed");
                 PauseTransition delay = new PauseTransition(Duration.seconds(1));
                 delay.setOnFinished(event -> {
                     try {

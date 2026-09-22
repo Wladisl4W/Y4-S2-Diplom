@@ -55,3 +55,26 @@
 .exercise-summary .muted { -fx-font-size: 12px; }
 
 .card { -fx-padding: 12 16; }
+
+/* Compact studio workspace */
+.root { -app-background: #d6d9d8; -app-accent: #b76a42; -fx-background-color: -app-background; }
+.brand { -fx-font-size: 18px; -fx-text-fill: #202527; }
+.card { -fx-background-color: #eef0ee; -fx-border-color: #bfc5c4; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 8 10; }
+.graph-card { -fx-background-color: #202427; -fx-background-radius: 5; }
+.button { -fx-background-color: #e9ece9; -fx-background-radius: 4; -fx-text-fill: #293032; -fx-padding: 8 12; }
+.button:hover { -fx-background-color: #dce2df; }
+.primary-button { -fx-background-color: #b76a42; -fx-text-fill: white; }
+.primary-button:hover { -fx-background-color: #995433; }
+.mode-button { -fx-background-color: transparent; -fx-border-color: transparent transparent #a8b0ae transparent; -fx-border-width: 0 0 2 0; -fx-background-radius: 0; }
+.mode-button:selected { -fx-background-color: transparent; -fx-text-fill: #9c512d; -fx-border-color: transparent transparent #b76a42 transparent; }
+.combo-box { -fx-background-radius: 4; -fx-border-radius: 4; }
+.library-title { -fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: #202527; }
+.library-filter { -fx-background-color: #e8ebea; }
+.library-filter:selected { -fx-background-color: #30383a; -fx-text-fill: white; }
+.pattern-card { -fx-background-color: #eff1ef; -fx-border-color: #b8bfbd; -fx-border-width: 1; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 8; -fx-alignment: top-left; }
+.pattern-card:hover { -fx-background-color: #ffffff; -fx-border-color: #8b9693; }
+.selected-card { -fx-border-color: #b76a42; -fx-border-width: 2; -fx-background-color: #fff7f0; }
+.pattern-name { -fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #202527; }
+.pattern-meta { -fx-font-size: 11px; -fx-text-fill: #66706e; }
+.selection-bar { -fx-background-color: #eef0ee; -fx-padding: 11; -fx-border-color: #bfc5c4; -fx-border-radius: 5; -fx-background-radius: 5; }
+.selection-title { -fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #202527; }
