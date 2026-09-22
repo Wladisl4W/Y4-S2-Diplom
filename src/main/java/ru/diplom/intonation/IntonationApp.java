@@ -16,6 +16,11 @@ import ru.diplom.intonation.exercise.*;
 
 import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -29,6 +34,7 @@ public final class IntonationApp extends Application {
     private ComboBox<Exercise> exercises;
     private Button microphoneButton;
     private Button exerciseButton;
+    private Button cancelExerciseButton;
     private Label note;
     private Label cents;
     private Label status;
@@ -173,7 +179,10 @@ public final class IntonationApp extends Application {
         listen.setOnAction(e -> TonePlayer.playAsync(exercises.getValue()));
         exerciseButton = primaryButton("Начать распевку");
         exerciseButton.setOnAction(e -> startExercise());
-        HBox actions = new HBox(10, exercises, listen, exerciseButton);
+        cancelExerciseButton = new Button("Прервать");
+        cancelExerciseButton.setDisable(true);
+        cancelExerciseButton.setOnAction(e -> cancelExercise("Распевка прервана. Можно начать заново."));
+        HBox actions = new HBox(10, exercises, listen, exerciseButton, cancelExerciseButton);
         actions.setAlignment(Pos.CENTER_LEFT);
 
         target = label("Целевая нота: —", "target-note");
@@ -209,10 +218,7 @@ public final class IntonationApp extends Application {
             updatePitch(new PitchSample(System.nanoTime(), Optional.empty()));
             microphoneButton.setText("Начать микрофон");
             devices.setDisable(false);
-            session = null;
-            if (exerciseChart != null) exerciseChart.finish();
-            exerciseButton.setDisable(false);
-            exercises.setDisable(false);
+            if (session != null) cancelExercise("Микрофон остановлен во время распевки.");
             status.setText("Микрофон остановлен");
             return;
         }
@@ -222,13 +228,13 @@ public final class IntonationApp extends Application {
             samples.clear();
             timeline.clear();
             smoothedMidi = Double.NaN;
-            capture.start(device, pitch -> samples.add(new PitchSample(System.nanoTime(), pitch)), error -> Platform.runLater(() -> {
+            capture.start(device, pitch -> {
+                while (samples.size() >= 8) samples.poll();
+                samples.add(new PitchSample(System.nanoTime(), pitch));
+            }, error -> Platform.runLater(() -> {
                 microphoneButton.setText("Начать микрофон");
                 devices.setDisable(false);
-                session = null;
-                if (exerciseChart != null) exerciseChart.finish();
-                exerciseButton.setDisable(false);
-                exercises.setDisable(false);
+                if (session != null) cancelExercise("Распевка прервана из-за ошибки микрофона.");
                 status.setText("Ошибка микрофона: " + error);
             }));
             microphoneButton.setText("Остановить микрофон");
@@ -271,9 +277,21 @@ public final class IntonationApp extends Application {
         session = new ExerciseSession(exercises.getValue(), System.nanoTime());
         exerciseChart.start(session.startNanos());
         exerciseButton.setDisable(true);
+        cancelExerciseButton.setDisable(false);
         exercises.setDisable(true);
         exerciseProgress.setProgress(0);
         exerciseFeedback.setText("Приготовьтесь. Через 2 секунды начнётся первая нота.");
+    }
+
+    private void cancelExercise(String message) {
+        session = null;
+        exerciseChart = new ExerciseChartState(exercises.getValue());
+        exerciseButton.setDisable(false);
+        cancelExerciseButton.setDisable(true);
+        exercises.setDisable(false);
+        exerciseProgress.setProgress(0);
+        target.setText("Целевая нота: —");
+        exerciseFeedback.setText(message);
     }
 
     private void updateExercise(long now) {
@@ -284,6 +302,7 @@ public final class IntonationApp extends Application {
             exerciseChart.advance(now);
             exerciseChart.finish();
             exerciseButton.setDisable(false);
+            cancelExerciseButton.setDisable(true);
             exercises.setDisable(false);
             target.setText("Готово");
             exerciseProgress.setProgress(1);
@@ -312,11 +331,18 @@ public final class IntonationApp extends Application {
         try {
             List<String> rows = history.recent(5);
             if (rows.isEmpty()) return;
+            Map<String, String> titles = Exercise.beginners().stream()
+                    .collect(Collectors.toMap(Exercise::id, Exercise::title));
+            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM");
             StringBuilder text = new StringBuilder();
             for (String row : rows) {
                 String[] fields = row.split(",");
-                if (fields.length == 5) text.append(fields[0], 0, Math.min(10, fields[0].length()))
-                        .append(" · ").append(fields[1]).append(" · ").append(fields[2]).append("%\n");
+                if (fields.length != 5) continue;
+                String date;
+                try { date = Instant.parse(fields[0]).atZone(ZoneId.systemDefault()).format(dateFormat); }
+                catch (RuntimeException e) { date = fields[0].substring(0, Math.min(10, fields[0].length())); }
+                text.append(date).append(" · ").append(titles.getOrDefault(fields[1], fields[1]))
+                        .append(" · ").append(fields[2]).append("%\n");
             }
             recentResults.setText(text.toString().stripTrailing());
         } catch (IOException e) {

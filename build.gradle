@@ -30,7 +30,7 @@ jlink {
     jpackage {
         imageName = 'Intonation Trainer'
         installerName = 'IntonationTrainer'
-        appVersion = '1.1.2'
+        appVersion = '1.2.0'
         def osName = System.getProperty('os.name').toLowerCase(java.util.Locale.ROOT)
         installerType = osName.contains('linux') ? 'deb' : (osName.contains('mac') ? 'dmg' : 'exe')
     }
