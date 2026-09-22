@@ -51,3 +51,10 @@ tasks.register('uiPreview', JavaExec) {
         args project.property('previewWidth'), project.property('previewHeight')
     }
 }
+
+tasks.register('pitchQualityReport', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'ru.diplom.intonation.audio.PitchQualityReport'
+    args layout.buildDirectory.file('reports/pitch-quality.md').get().asFile.absolutePath
+}
