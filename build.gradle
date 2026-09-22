@@ -74,3 +74,11 @@ tasks.register('pitchQualityReport', JavaExec) {
 // Build the current platform's installer only after the tests pass.
 tasks.named('jpackage') { mustRunAfter tasks.named('test') }
 tasks.register('localRelease') { dependsOn tasks.named('test'), tasks.named('jpackage') }
+
+tasks.register('vocaditoYinReport', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'ru.diplom.intonation.audio.VocaditoYinReport'
+    args project.findProperty('datasetPath') ?: '/tmp/vocadito',
+            layout.buildDirectory.file('reports/vocadito-yin.md').get().asFile.absolutePath
+}
