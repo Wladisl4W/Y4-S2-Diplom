@@ -56,7 +56,7 @@ public final class IntonationApp extends Application {
     private record PitchSample(long timeNanos, Optional<PitchResult> pitch) {}
 
     @Override public void start(Stage stage) {
-        Label brand = label("Тренировка интонации", "brand");
+        Label brand = label(AppVersion.displayName(), "brand");
         VBox heading = new VBox(brand);
 
         devices = new ComboBox<>();
@@ -129,7 +129,7 @@ public final class IntonationApp extends Application {
         Scene scene = new Scene(root, 980, 740);
         scene.getStylesheets().add(getClass().getResource("theme.css").toExternalForm());
         stage.setScene(scene);
-        stage.setTitle("Тренировка интонации");
+        stage.setTitle(AppVersion.displayName());
         stage.setMinWidth(720);
         stage.setMinHeight(650);
         stage.setOnCloseRequest(e -> capture.stop());

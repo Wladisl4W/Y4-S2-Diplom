@@ -20,6 +20,8 @@ public final class UiPreview {
                 IntonationApp app = new IntonationApp();
                 Stage stage = new Stage();
                 app.start(stage);
+                if (!stage.getTitle().equals(AppVersion.displayName()))
+                    throw new IllegalStateException("Window title does not show current version");
                 if (args.length > 3) {
                     stage.setWidth(Double.parseDouble(args[2]));
                     stage.setHeight(Double.parseDouble(args[3]));

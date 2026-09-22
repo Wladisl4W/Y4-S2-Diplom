@@ -4,6 +4,8 @@ plugins {
     id 'org.beryx.jlink' version '3.1.5'
 }
 
+version = '1.2.1'
+
 repositories { mavenCentral() }
 
 dependencies {
@@ -30,13 +32,19 @@ jlink {
     jpackage {
         imageName = 'Intonation Trainer'
         installerName = 'IntonationTrainer'
-        appVersion = '1.2.0'
+        appVersion = project.version.toString()
         def osName = System.getProperty('os.name').toLowerCase(java.util.Locale.ROOT)
         installerType = osName.contains('linux') ? 'deb' : (osName.contains('mac') ? 'dmg' : 'exe')
     }
 }
 
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+
+tasks.named('processResources') {
+    filesMatching('**/version.properties') {
+        expand(appVersion: project.version.toString())
+    }
+}
 
 tasks.withType(Test).configureEach { useJUnitPlatform() }
 
@@ -58,3 +66,7 @@ tasks.register('pitchQualityReport', JavaExec) {
     mainClass = 'ru.diplom.intonation.audio.PitchQualityReport'
     args layout.buildDirectory.file('reports/pitch-quality.md').get().asFile.absolutePath
 }
+
+// Build the current platform's installer only after the tests pass.
+tasks.named('jpackage') { mustRunAfter tasks.named('test') }
+tasks.register('localRelease') { dependsOn tasks.named('test'), tasks.named('jpackage') }
