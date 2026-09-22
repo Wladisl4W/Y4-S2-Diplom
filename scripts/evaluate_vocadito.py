@@ -75,6 +75,8 @@ def main():
     parser.add_argument("dataset", type=Path, help="Extracted Vocadito directory")
     parser.add_argument("--ids", nargs="+", type=int, default=[1, 2, 3])
     parser.add_argument("--mix", action="store_true", help="Also compare a synthetic accompaniment")
+    parser.add_argument("--model", default="UVR_MDXNET_KARA_2.onnx",
+                        help="Audio Separator model filename")
     args = parser.parse_args()
     output = []
     for number in args.ids:
@@ -93,11 +95,11 @@ def main():
                 start = time.monotonic()
                 separator = Separator(output_dir=str(work), output_format="WAV", log_level=40,
                                       model_file_dir=str(Path.home() / ".local/share/intonation-trainer/models"))
-                separator.load_model(model_filename="UVR_MDXNET_KARA_2.onnx")
+                separator.load_model(model_filename=args.model)
                 files = separator.separate(str(mp3))
                 vocals = next(work / filename for filename in files if "Vocals" in filename)
                 events, _ = events_for(vocals)
-                item["mix_separated"] = {**evaluate(events, f0),
+                item["mix_separated"] = {**evaluate(events, f0), "model": args.model,
                                          "seconds": round(time.monotonic() - start, 2)}
         output.append(item)
     print(json.dumps(output, ensure_ascii=False, indent=2))
