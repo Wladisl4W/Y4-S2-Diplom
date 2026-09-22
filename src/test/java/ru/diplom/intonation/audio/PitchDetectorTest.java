@@ -2,6 +2,7 @@ package ru.diplom.intonation.audio;
 
 import org.junit.jupiter.api.Test;
 import ru.diplom.intonation.PitchTimeline;
+import ru.diplom.intonation.PitchViewport;
 
 import java.util.Random;
 
@@ -48,7 +49,8 @@ class PitchDetectorTest {
         assertEquals(69, timeline.centerMidi());
         timeline.add(start + 4_000_000_000L, 80);
         assertEquals(74, timeline.centerMidi());
-        assertEquals(500, PitchTimeline.x(start + 4_000_000_000L, start + 5_000_000_000L, 50, 500), 0.001);
+        assertEquals(500, PitchViewport.live(start + 5_000_000_000L)
+                .x(start + 4_000_000_000L, 50, 500), 0.001);
         timeline.prune(start + 15_000_000_000L);
         assertTrue(timeline.points().isEmpty());
     }

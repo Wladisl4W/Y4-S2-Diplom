@@ -7,7 +7,12 @@ import java.util.List;
 public final class ExerciseCatalog {
     private ExerciseCatalog() {}
 
-    public enum Kind { PATTERN, SET }
+    public enum Kind {
+        PATTERN("Паттерн распевки"), SET("Целый набор");
+        private final String label;
+        Kind(String label) { this.label = label; }
+        @Override public String toString() { return label; }
+    }
 
     public record Option(Kind kind, String title, Exercise exercise, List<Integer> starts) {
         public Option {

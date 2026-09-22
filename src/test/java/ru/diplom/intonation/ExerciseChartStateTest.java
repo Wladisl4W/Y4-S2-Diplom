@@ -8,23 +8,18 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ExerciseChartStateTest {
-    @Test void previewAndAttemptKeepAlignedSamplesAndFreezeAtEnd() {
-        Exercise exercise = new Exercise("test", "test", List.of(60, 62, 64), 2);
-        ExerciseChartState state = new ExerciseChartState(exercise);
-        assertEquals(0, state.startNanos());
-        state.start(10_000_000_000L);
-        state.add(9_000_000_000L, 60);
-        state.add(10_000_000_000L, 60);
-        state.add(12_000_000_000L, Double.NaN);
-        state.add(16_000_000_001L, 64);
-        assertEquals(2, state.points().size());
-        assertFalse(state.points().get(1).voiced());
-        state.advance(20_000_000_000L);
-        assertEquals(state.endNanos(), state.displayNanos());
+    @Test void previewAndAttemptUseStableTargetTimes() {
+        ExerciseChartState state = new ExerciseChartState(
+                new Exercise("test", "test", List.of(60, 62, 64), 2), List.of(0, 2));
+        long now = 10_000_000_000L;
+        assertEquals(now + 2_000_000_000L, state.targetStartNanos(now));
+        state.start(12_000_000_000L);
+        assertTrue(state.running());
+        assertEquals(12_000_000_000L, state.targetStartNanos(now));
+        assertEquals(18_000_000_000L, state.endNanos());
+        assertEquals(List.of(0, 2), state.patternStarts());
         state.finish();
-        state.advance(25_000_000_000L);
-        assertEquals(state.endNanos(), state.displayNanos());
-        state.start(30_000_000_000L);
-        assertTrue(state.points().isEmpty());
+        assertEquals(12_000_000_000L, state.targetStartNanos(20_000_000_000L));
+        assertEquals(30_000_000_000L, state.targetStartNanos(28_000_000_000L));
     }
 }

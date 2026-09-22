@@ -45,7 +45,4 @@ public final class PitchTimeline {
     public double centerMidi() { return centerMidi; }
     public boolean hasPitch() { return hasPitch; }
 
-    public static double x(long timeNanos, long nowNanos, double left, double width) {
-        return left + width * (1 - (nowNanos - timeNanos) / (double) WINDOW_NANOS);
-    }
 }

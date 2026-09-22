@@ -3,7 +3,9 @@ package ru.diplom.intonation;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.StackPane;
 import javafx.scene.control.ComboBox;
+import ru.diplom.intonation.exercise.ExerciseCatalog;
 import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -27,6 +29,7 @@ public final class UiPreview {
                     stage.setWidth(Double.parseDouble(args[2]));
                     stage.setHeight(Double.parseDouble(args[3]));
                 }
+                StackPane sharedGraph = (StackPane) stage.getScene().getRoot().lookup(".graph-card");
                 if (args.length > 1) {
                     if (Integer.parseInt(args[1]) >= 1) {
                         ToggleButton exercise = (ToggleButton) stage.getScene().getRoot().lookupAll(".mode-button")
@@ -34,11 +37,17 @@ public final class UiPreview {
                                 .findFirst().orElseThrow();
                         exercise.setSelected(true);
                         if (Integer.parseInt(args[1]) == 2) {
-                            ComboBox<?> choices = (ComboBox<?>) stage.getScene().getRoot().lookup(".exercise-toolbar .combo-box");
+                            @SuppressWarnings("unchecked")
+                            ComboBox<ExerciseCatalog.Kind> kind = (ComboBox<ExerciseCatalog.Kind>)
+                                    stage.getScene().getRoot().lookup("#exercise-kind");
+                            kind.setValue(ExerciseCatalog.Kind.SET);
+                            ComboBox<?> choices = (ComboBox<?>) stage.getScene().getRoot().lookup("#exercise-choice");
                             choices.getSelectionModel().selectLast();
                         }
                     }
                 }
+                if (sharedGraph != stage.getScene().getRoot().lookup(".graph-card"))
+                    throw new IllegalStateException("Exercise navigation replaced the live graph");
                 PauseTransition delay = new PauseTransition(Duration.seconds(1));
                 delay.setOnFinished(event -> {
                     try {
