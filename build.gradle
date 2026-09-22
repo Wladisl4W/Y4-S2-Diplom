@@ -30,7 +30,7 @@ jlink {
     jpackage {
         imageName = 'Intonation Trainer'
         installerName = 'IntonationTrainer'
-        appVersion = '1.1.1'
+        appVersion = '1.1.2'
         def osName = System.getProperty('os.name').toLowerCase(java.util.Locale.ROOT)
         installerType = osName.contains('linux') ? 'deb' : (osName.contains('mac') ? 'dmg' : 'exe')
     }
@@ -46,4 +46,8 @@ tasks.register('uiPreview', JavaExec) {
     mainClass = 'ru.diplom.intonation.UiPreview'
     args project.findProperty('previewPath') ?: '/tmp/intonation-preview.png'
     if (project.hasProperty('previewTab')) args project.property('previewTab')
+    if (project.hasProperty('previewWidth') && project.hasProperty('previewHeight')) {
+        if (!project.hasProperty('previewTab')) args '0'
+        args project.property('previewWidth'), project.property('previewHeight')
+    }
 }

@@ -43,3 +43,4 @@
 .tab-pane .tab-label { -fx-font-size: 14px; -fx-text-fill: #385461; }
 .progress-bar > .bar { -fx-background-color: -app-accent; -fx-background-radius: 8; }
 .progress-bar > .track { -fx-background-color: #e8efee; -fx-background-radius: 8; }
+.content-scroll, .content-scroll > .viewport { -fx-background-color: transparent; }

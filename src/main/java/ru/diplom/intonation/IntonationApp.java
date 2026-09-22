@@ -65,9 +65,9 @@ public final class IntonationApp extends Application {
         TabPane tabs = new TabPane();
         tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         tabs.getTabs().addAll(
-                new Tab("Живой голос", liveView()),
-                new Tab("Распевки", exerciseView()),
-                new Tab("Песни", songView())
+                new Tab("Живой голос", scrollable(liveView())),
+                new Tab("Распевки", scrollable(exerciseView())),
+                new Tab("Песни", scrollable(songView()))
         );
         VBox.setVgrow(tabs, Priority.ALWAYS);
 
@@ -302,6 +302,14 @@ public final class IntonationApp extends Application {
         Button button = new Button(text);
         button.getStyleClass().add("primary-button");
         return button;
+    }
+
+    private static ScrollPane scrollable(VBox content) {
+        ScrollPane pane = new ScrollPane(content);
+        pane.setFitToWidth(true);
+        pane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        pane.getStyleClass().add("content-scroll");
+        return pane;
     }
 
     @Override public void stop() {

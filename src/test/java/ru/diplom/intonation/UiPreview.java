@@ -14,12 +14,16 @@ import java.io.File;
 /** Local visual QA helper: gradle uiPreview -PpreviewPath=/tmp/preview.png */
 public final class UiPreview {
     public static void main(String[] args) {
-        if (args.length < 1 || args.length > 2) throw new IllegalArgumentException("Output PNG path required");
+        if (args.length < 1 || args.length > 4) throw new IllegalArgumentException("Output PNG path required");
         Platform.startup(() -> {
             try {
                 IntonationApp app = new IntonationApp();
                 Stage stage = new Stage();
                 app.start(stage);
+                if (args.length > 3) {
+                    stage.setWidth(Double.parseDouble(args[2]));
+                    stage.setHeight(Double.parseDouble(args[3]));
+                }
                 if (args.length > 1) {
                     TabPane tabs = (TabPane) stage.getScene().getRoot().lookup(".tab-pane");
                     tabs.getSelectionModel().select(Integer.parseInt(args[1]));
