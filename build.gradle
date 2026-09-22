@@ -1,0 +1,41 @@
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'org.beryx.jlink' version '3.1.5'
+}
+
+repositories { mavenCentral() }
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+javafx {
+    version = '21.0.9'
+    modules = ['javafx.controls']
+}
+
+application {
+    mainModule = 'ru.diplom.intonation'
+    mainClass = 'ru.diplom.intonation.IntonationApp'
+}
+
+jlink {
+    launcher { name = 'intonation-trainer' }
+    jpackage {
+        imageName = 'Intonation Trainer'
+        installerName = 'IntonationTrainer'
+        appVersion = '1.0.0'
+        def osName = System.getProperty('os.name').toLowerCase(java.util.Locale.ROOT)
+        installerType = osName.contains('linux') ? 'deb' : (osName.contains('mac') ? 'dmg' : 'exe')
+    }
+}
+
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+
+tasks.withType(Test).configureEach { useJUnitPlatform() }
