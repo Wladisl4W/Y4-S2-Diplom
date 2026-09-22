@@ -12,7 +12,7 @@
 
 `./gradlew test` выполняет тесты детектора, нотной шкалы, графика и упражнений. `./gradlew build` собирает приложение и запускает тесты. Пользовательские аудиофайлы и локальные результаты исключены из репозитория.
 
-Документы: [архитектура](docs/architecture.md), [методика качества](docs/quality.md), [этапы](docs/roadmap.md), [решения](docs/decisions/0001-java-local-processing.md).
+Документы: [архитектура](docs/architecture.md), [дизайн](docs/design.md), [методика качества](docs/quality.md), [этапы](docs/roadmap.md), [эксперимент MP3](docs/mp3-experiment.md), [решения](docs/decisions/0001-java-local-processing.md).
 
 ## Пакеты
 

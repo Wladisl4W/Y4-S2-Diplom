@@ -52,8 +52,10 @@ public final class IntonationApp extends Application {
         devices.setMaxWidth(Double.MAX_VALUE);
         devices.setPromptText("Выберите микрофон");
         Button refresh = new Button("Обновить");
+        refresh.setMinWidth(105);
         refresh.setOnAction(e -> refreshDevices());
         microphoneButton = primaryButton("Начать микрофон");
+        microphoneButton.setMinWidth(175);
         microphoneButton.setOnAction(e -> toggleCapture());
         HBox controls = new HBox(10, devices, refresh, microphoneButton);
         controls.setAlignment(Pos.CENTER_LEFT);
@@ -72,12 +74,12 @@ public final class IntonationApp extends Application {
         status = label("Выберите микрофон и нажмите «Начать микрофон»", "muted");
         VBox root = new VBox(15, heading, controls, tabs, status);
         root.setPadding(new Insets(22));
-        Scene scene = new Scene(root, 980, 700);
+        Scene scene = new Scene(root, 980, 740);
         scene.getStylesheets().add(getClass().getResource("theme.css").toExternalForm());
         stage.setScene(scene);
         stage.setTitle("Тренировка интонации");
         stage.setMinWidth(720);
-        stage.setMinHeight(580);
+        stage.setMinHeight(650);
         stage.setOnCloseRequest(e -> capture.stop());
 
         refreshDevices();
@@ -104,10 +106,12 @@ public final class IntonationApp extends Application {
         current.setAlignment(Pos.CENTER_LEFT);
         current.getStyleClass().add("card");
 
-        Canvas canvas = new Canvas(900, 310);
+        Canvas canvas = new Canvas();
         chart = new PitchChart(canvas);
         StackPane graphBox = new StackPane(canvas);
         graphBox.getStyleClass().add("graph-card");
+        graphBox.setMinHeight(180);
+        graphBox.setPrefHeight(260);
         canvas.widthProperty().bind(graphBox.widthProperty());
         canvas.heightProperty().bind(graphBox.heightProperty());
         VBox.setVgrow(graphBox, Priority.ALWAYS);
@@ -119,6 +123,7 @@ public final class IntonationApp extends Application {
     private VBox exerciseView() {
         List<Exercise> presets = Exercise.beginners();
         exercises = new ComboBox<>(FXCollections.observableArrayList(presets));
+        exercises.setPrefWidth(190);
         exercises.setCellFactory(list -> new ListCell<>() {
             @Override protected void updateItem(Exercise item, boolean empty) {
                 super.updateItem(item, empty);
@@ -139,7 +144,7 @@ public final class IntonationApp extends Application {
         HBox actions = new HBox(10, exercises, listen, exerciseButton);
         actions.setAlignment(Pos.CENTER_LEFT);
 
-        target = label("Целевая нота: —", "note-value");
+        target = label("Целевая нота: —", "target-note");
         exerciseFeedback = label("Сначала прослушайте пример. Для занятия включите микрофон.", "muted");
         exerciseProgress = new ProgressBar(0);
         exerciseProgress.setMaxWidth(Double.MAX_VALUE);

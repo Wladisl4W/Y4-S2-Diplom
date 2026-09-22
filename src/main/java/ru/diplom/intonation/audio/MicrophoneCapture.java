@@ -16,7 +16,7 @@ public final class MicrophoneCapture {
     private Thread worker;
 
     public record Device(Mixer.Info info) {
-        @Override public String toString() { return info.getName() + " — " + info.getDescription(); }
+        @Override public String toString() { return info.getName(); }
     }
 
     public static List<Device> devices() {
