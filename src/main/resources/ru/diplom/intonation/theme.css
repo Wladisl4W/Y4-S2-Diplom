@@ -10,7 +10,7 @@
     -fx-text-fill: -app-ink;
 }
 
-.brand { -fx-font-size: 23px; -fx-font-weight: bold; -fx-text-fill: -app-ink; }
+.brand { -fx-font-size: 21px; -fx-font-weight: bold; -fx-text-fill: -app-ink; }
 .subtitle { -fx-font-size: 13px; -fx-text-fill: -app-muted; }
 .section-title { -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -app-ink; }
 .note-value { -fx-font-size: 54px; -fx-font-weight: bold; -fx-text-fill: #102c3a; }
@@ -44,3 +44,14 @@
 .progress-bar > .bar { -fx-background-color: -app-accent; -fx-background-radius: 8; }
 .progress-bar > .track { -fx-background-color: #e8efee; -fx-background-radius: 8; }
 .content-scroll, .content-scroll > .viewport { -fx-background-color: transparent; }
+
+.mode-button { -fx-background-color: #e6eeef; -fx-font-weight: bold; }
+.mode-button:selected { -fx-background-color: #dcece9; -fx-text-fill: #0f7166; }
+.compact-note { -fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: #102c3a; }
+.compact-metric { -fx-font-size: 13px; -fx-text-fill: -app-accent; }
+.exercise-toolbar { -fx-padding: 0 0 3 0; }
+.exercise-summary { -fx-padding: 8 0 0 0; }
+.exercise-summary .target-note { -fx-font-size: 18px; }
+.exercise-summary .muted { -fx-font-size: 12px; }
+
+.card { -fx-padding: 12 16; }

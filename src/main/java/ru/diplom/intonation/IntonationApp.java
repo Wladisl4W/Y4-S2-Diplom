@@ -37,6 +37,12 @@ public final class IntonationApp extends Application {
     private Label recentResults;
     private ProgressBar exerciseProgress;
     private PitchChart chart;
+    private ExerciseChartState exerciseChart;
+    private ToggleButton liveMode;
+    private ToggleButton exerciseMode;
+    private VBox exerciseControls;
+    private VBox exerciseDetails;
+    private Label graphTitle;
     private ExerciseSession session;
     private AnimationTimer timer;
     private double smoothedMidi = Double.NaN;
@@ -45,8 +51,7 @@ public final class IntonationApp extends Application {
 
     @Override public void start(Stage stage) {
         Label brand = label("Тренировка интонации", "brand");
-        Label subtitle = label("Пойте точнее. Видьте свой прогресс.", "subtitle");
-        VBox heading = new VBox(3, brand, subtitle);
+        VBox heading = new VBox(brand);
 
         devices = new ComboBox<>();
         devices.setMaxWidth(Double.MAX_VALUE);
@@ -62,18 +67,59 @@ public final class IntonationApp extends Application {
         HBox.setHgrow(devices, Priority.ALWAYS);
         controls.getStyleClass().add("card");
 
-        TabPane tabs = new TabPane();
-        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        tabs.getTabs().addAll(
-                new Tab("Живой голос", scrollable(liveView())),
-                new Tab("Распевки", scrollable(exerciseView())),
-                new Tab("Песни", scrollable(songView()))
-        );
-        VBox.setVgrow(tabs, Priority.ALWAYS);
+        ToggleGroup mode = new ToggleGroup();
+        liveMode = new ToggleButton("Живой голос");
+        exerciseMode = new ToggleButton("Распевки");
+        liveMode.setToggleGroup(mode);
+        exerciseMode.setToggleGroup(mode);
+        liveMode.setSelected(true);
+        liveMode.getStyleClass().add("mode-button");
+        exerciseMode.getStyleClass().add("mode-button");
+        Button songsLater = new Button("Песни · позже");
+        songsLater.setDisable(true);
+        songsLater.setTooltip(new Tooltip("Импорт песен появится после проверки качества распознавания нот"));
+        HBox modeBar = new HBox(8, liveMode, exerciseMode, songsLater);
+        modeBar.setAlignment(Pos.CENTER_LEFT);
 
+        exerciseView();
+        exerciseControls.setVisible(false);
+        exerciseControls.setManaged(false);
+        exerciseDetails.setVisible(false);
+        exerciseDetails.setManaged(false);
+        mode.selectedToggleProperty().addListener((obs, old, selected) -> {
+            if (selected == null) { old.setSelected(true); return; }
+            boolean active = selected == exerciseMode;
+            exerciseControls.setVisible(active);
+            exerciseControls.setManaged(active);
+            exerciseDetails.setVisible(active);
+            exerciseDetails.setManaged(active);
+            graphTitle.setText(active ? "Высота голоса · целевые ноты распевки" : "Высота голоса · последние 10 секунд");
+        });
+
+        HBox pitchHeader = new HBox(16);
+        pitchHeader.setAlignment(Pos.CENTER_LEFT);
+        graphTitle = label("Высота голоса · последние 10 секунд", "section-title");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        note = label("—", "compact-note");
+        cents = label("Спойте ноту", "compact-metric");
+        pitchHeader.getChildren().addAll(graphTitle, spacer, note, cents);
+
+        Canvas canvas = new Canvas();
+        chart = new PitchChart(canvas);
+        StackPane graphBox = new StackPane(canvas);
+        canvas.setManaged(false);
+        graphBox.getStyleClass().add("graph-card");
+        graphBox.setMinHeight(260);
+        graphBox.setPrefHeight(460);
+        canvas.widthProperty().bind(graphBox.widthProperty());
+        canvas.heightProperty().bind(graphBox.heightProperty());
+        VBox.setVgrow(graphBox, Priority.ALWAYS);
+        VBox workspace = new VBox(8, modeBar, exerciseControls, pitchHeader, graphBox, exerciseDetails);
+        VBox.setVgrow(workspace, Priority.ALWAYS);
         status = label("Выберите микрофон и нажмите «Начать микрофон»", "muted");
-        VBox root = new VBox(15, heading, controls, tabs, status);
-        root.setPadding(new Insets(22));
+        VBox root = new VBox(8, heading, controls, workspace, status);
+        root.setPadding(new Insets(14));
         Scene scene = new Scene(root, 980, 740);
         scene.getStylesheets().add(getClass().getResource("theme.css").toExternalForm());
         stage.setScene(scene);
@@ -91,36 +137,18 @@ public final class IntonationApp extends Application {
                 previous = now;
                 PitchSample sample;
                 while ((sample = samples.poll()) != null) updatePitch(sample);
-                chart.draw(timeline, now);
                 updateExercise(now);
+                if (exerciseMode.isSelected()) {
+                    exerciseChart.advance(now);
+                    chart.drawExercise(exerciseChart);
+                } else chart.drawLive(timeline, now);
             }
         };
         timer.start();
         stage.show();
     }
 
-    private VBox liveView() {
-        note = label("—", "note-value");
-        cents = label("Спойте ноту", "metric");
-        VBox current = new VBox(4, label("СЕЙЧАС", "muted"), note, cents);
-        current.setAlignment(Pos.CENTER_LEFT);
-        current.getStyleClass().add("card");
-
-        Canvas canvas = new Canvas();
-        chart = new PitchChart(canvas);
-        StackPane graphBox = new StackPane(canvas);
-        graphBox.getStyleClass().add("graph-card");
-        graphBox.setMinHeight(180);
-        graphBox.setPrefHeight(260);
-        canvas.widthProperty().bind(graphBox.widthProperty());
-        canvas.heightProperty().bind(graphBox.heightProperty());
-        VBox.setVgrow(graphBox, Priority.ALWAYS);
-        VBox view = new VBox(15, current, label("Высота голоса · последние 10 секунд", "section-title"), graphBox);
-        view.setPadding(new Insets(12, 0, 0, 0));
-        return view;
-    }
-
-    private VBox exerciseView() {
+    private void exerciseView() {
         List<Exercise> presets = Exercise.beginners();
         exercises = new ComboBox<>(FXCollections.observableArrayList(presets));
         exercises.setPrefWidth(190);
@@ -137,6 +165,10 @@ public final class IntonationApp extends Application {
             }
         });
         exercises.setValue(presets.get(0));
+        exerciseChart = new ExerciseChartState(presets.get(0));
+        exercises.valueProperty().addListener((obs, old, selected) -> {
+            if (selected != null) exerciseChart = new ExerciseChartState(selected);
+        });
         Button listen = new Button("Прослушать пример");
         listen.setOnAction(e -> TonePlayer.playAsync(exercises.getValue()));
         exerciseButton = primaryButton("Начать распевку");
@@ -146,28 +178,18 @@ public final class IntonationApp extends Application {
 
         target = label("Целевая нота: —", "target-note");
         exerciseFeedback = label("Сначала прослушайте пример. Для занятия включите микрофон.", "muted");
+        exerciseFeedback.setWrapText(true);
+        exerciseFeedback.setPrefWidth(450);
+        HBox.setHgrow(exerciseFeedback, Priority.ALWAYS);
         exerciseProgress = new ProgressBar(0);
         exerciseProgress.setMaxWidth(Double.MAX_VALUE);
-        VBox card = new VBox(16, label("Распевка", "section-title"), actions, target,
-                exerciseFeedback, exerciseProgress);
-        card.getStyleClass().add("card");
+        exerciseControls = new VBox(10, actions);
+        exerciseControls.getStyleClass().add("exercise-toolbar");
         recentResults = label("Пока нет завершённых занятий", "muted");
-        VBox historyCard = new VBox(10, label("Последние занятия", "section-title"), recentResults);
-        historyCard.getStyleClass().add("card");
-        VBox view = new VBox(15, card, historyCard);
-        view.setPadding(new Insets(12, 0, 0, 0));
-        return view;
-    }
-
-    private VBox songView() {
-        Label text = label("Разбор MP3 находится на этапе проверки точности моделей.\n"
-                + "После проверки здесь появятся загрузка песни и пение по нотной линии.", "muted");
-        text.setWrapText(true);
-        VBox card = new VBox(12, label("Песни", "section-title"), text);
-        card.getStyleClass().add("card");
-        VBox view = new VBox(card);
-        view.setPadding(new Insets(12, 0, 0, 0));
-        return view;
+        HBox summary = new HBox(16, target, exerciseFeedback);
+        summary.setAlignment(Pos.CENTER_LEFT);
+        exerciseDetails = new VBox(7, summary, exerciseProgress, recentResults);
+        exerciseDetails.getStyleClass().add("exercise-summary");
     }
 
     private void refreshDevices() {
@@ -188,7 +210,9 @@ public final class IntonationApp extends Application {
             microphoneButton.setText("Начать микрофон");
             devices.setDisable(false);
             session = null;
+            if (exerciseChart != null) exerciseChart.finish();
             exerciseButton.setDisable(false);
+            exercises.setDisable(false);
             status.setText("Микрофон остановлен");
             return;
         }
@@ -202,7 +226,9 @@ public final class IntonationApp extends Application {
                 microphoneButton.setText("Начать микрофон");
                 devices.setDisable(false);
                 session = null;
+                if (exerciseChart != null) exerciseChart.finish();
                 exerciseButton.setDisable(false);
+                exercises.setDisable(false);
                 status.setText("Ошибка микрофона: " + error);
             }));
             microphoneButton.setText("Остановить микрофон");
@@ -231,7 +257,10 @@ public final class IntonationApp extends Application {
             cents.setText(String.format("%+.0f центов · %.1f Гц", pitch.cents(), smoothHz));
             timeline.add(sample.timeNanos(), smoothedMidi);
         }
-        if (session != null) session.accept(sample.timeNanos(), smoothedMidi);
+        if (session != null) {
+            session.accept(sample.timeNanos(), smoothedMidi);
+            exerciseChart.add(sample.timeNanos(), smoothedMidi);
+        }
     }
 
     private void startExercise() {
@@ -240,6 +269,7 @@ public final class IntonationApp extends Application {
             return;
         }
         session = new ExerciseSession(exercises.getValue(), System.nanoTime());
+        exerciseChart.start(session.startNanos());
         exerciseButton.setDisable(true);
         exercises.setDisable(true);
         exerciseProgress.setProgress(0);
@@ -251,6 +281,8 @@ public final class IntonationApp extends Application {
         if (session.finished(now)) {
             ExerciseSession.Result result = session.result();
             session = null;
+            exerciseChart.advance(now);
+            exerciseChart.finish();
             exerciseButton.setDisable(false);
             exercises.setDisable(false);
             target.setText("Готово");
@@ -302,14 +334,6 @@ public final class IntonationApp extends Application {
         Button button = new Button(text);
         button.getStyleClass().add("primary-button");
         return button;
-    }
-
-    private static ScrollPane scrollable(VBox content) {
-        ScrollPane pane = new ScrollPane(content);
-        pane.setFitToWidth(true);
-        pane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        pane.getStyleClass().add("content-scroll");
-        return pane;
     }
 
     @Override public void stop() {
