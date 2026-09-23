@@ -448,7 +448,10 @@ public final class IntonationApp extends Application {
     }
 
     private void updateExercise(long now) {
-        if (session == null) return;
+        if (session == null) {
+            if (exerciseChart != null && exerciseChart.expired(now)) exerciseChart = null;
+            return;
+        }
         if (session.finished(now)) {
             ExerciseSession.Result result = session.result();
             session = null;

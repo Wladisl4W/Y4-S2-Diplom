@@ -80,7 +80,7 @@ public final class PitchChart {
                              PitchViewport viewport, double w, double h,
                              double center, double halfRange) {
         Exercise exercise = targets.exercise();
-        long targetStart = targets.targetStartNanos(nowNanos);
+        long targetStart = targets.targetStartNanos();
         double plotWidth = w - LEFT - RIGHT;
         double plotHeight = h - TOP - BOTTOM;
         double toleranceHeight = plotHeight / (2 * halfRange); // ±50 cents

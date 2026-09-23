@@ -31,10 +31,12 @@ public final class ExerciseChartState {
 
     public long endNanos() { return startNanos + (long) (exercise.durationSeconds() * 1e9); }
 
-    /** Preview stays ahead of now; a finished attempt stays visible while its notes remain on screen. */
-    public long targetStartNanos(long nowNanos) {
-        if (startNanos == 0 || (!running && nowNanos > endNanos() + 7_000_000_000L))
-            return nowNanos + 2_000_000_000L;
-        return startNanos;
+    /** Keep targets at their actual attempt times after completion. */
+    public long targetStartNanos() { return startNanos; }
+
+    /** The last target has left the centered ten-second viewport. */
+    public boolean expired(long nowNanos) {
+        return startNanos != 0 && !running
+                && nowNanos >= endNanos() + PitchTimeline.WINDOW_NANOS / 2;
     }
 }
