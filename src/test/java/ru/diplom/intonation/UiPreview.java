@@ -8,6 +8,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.layout.StackPane;
 
 import ru.diplom.intonation.exercise.ExerciseCatalog;
+import ru.diplom.intonation.song.SongAnalyzer;
+import java.util.List;
 import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -33,6 +35,15 @@ public final class UiPreview {
                     stage.setHeight(Double.parseDouble(args[3]));
                 }
                 StackPane sharedGraph = (StackPane) stage.getScene().getRoot().lookup(".graph-card");
+                if (args.length > 1 && Integer.parseInt(args[1]) == 7) {
+                    var field = IntonationApp.class.getDeclaredField("songChart");
+                    field.setAccessible(true);
+                    field.set(app, new SongChartState(List.of(
+                            new SongAnalyzer.NoteEvent(0, 1.2, 60),
+                            new SongAnalyzer.NoteEvent(1.4, 1.2, 62),
+                            new SongAnalyzer.NoteEvent(2.8, 1.2, 64)),
+                            System.nanoTime() + 1_000_000_000L, 4.0));
+                }
                 if (args.length > 1 && Integer.parseInt(args[1]) == 6) {
                     ToggleButton songs = (ToggleButton) stage.getScene().getRoot().lookupAll(".mode-button")
                             .stream().filter(node -> ((ToggleButton) node).getText().startsWith("Песни"))

@@ -25,6 +25,11 @@ public final class PitchChart {
     public PitchChart(Canvas canvas) { this.canvas = canvas; }
 
     public void draw(PitchTimeline timeline, long nowNanos, ExerciseChartState targets) {
+        draw(timeline, nowNanos, targets, null);
+    }
+
+    public void draw(PitchTimeline timeline, long nowNanos, ExerciseChartState targets,
+                     SongChartState song) {
         timeline.prune(nowNanos);
         double w = canvas.getWidth(), h = canvas.getHeight();
         if (w <= LEFT + RIGHT || h <= TOP + BOTTOM) return;
@@ -42,6 +47,18 @@ public final class PitchChart {
                     .filter(note -> note != Exercise.REST).max().orElse(60);
             center = (min + max) / 2.0;
             halfRange = Math.max(5, (max - min) / 2.0 + 2);
+        } else if (song != null && !song.notes().isEmpty()) {
+            double at = (nowNanos - song.startNanos()) / 1e9;
+            List<Integer> nearby = song.notes().stream()
+                    .filter(item -> item.startSeconds() < at + 6
+                            && item.startSeconds() + item.durationSeconds() > at - 4)
+                    .map(item -> item.midi()).toList();
+            if (!nearby.isEmpty()) {
+                int min = nearby.stream().mapToInt(Integer::intValue).min().orElse(60);
+                int max = nearby.stream().mapToInt(Integer::intValue).max().orElse(72);
+                center = (min + max) / 2.0;
+                halfRange = Math.max(7, (max - min) / 2.0 + 2);
+            }
         }
 
         GraphicsContext g = canvas.getGraphicsContext2D();
@@ -57,7 +74,7 @@ public final class PitchChart {
             if (x >= LEFT && x <= w - RIGHT)
                 vertical(g, x, h, String.format("%+.0f с", (time - nowNanos) / 1_000_000_000.0));
         }
-        if (targets != null) {
+        if (targets != null || song != null) {
             g.setFill(TRACE);
             g.fillText("● в цели", w - 167, 13);
             g.setFill(MISS);
@@ -70,12 +87,35 @@ public final class PitchChart {
         g.closePath();
         g.clip();
         if (targets != null) drawTargets(g, targets, nowNanos, viewport, w, h, center, halfRange);
-        trace(g, timeline.points(), viewport, w, h, center, halfRange, targets);
+        if (song != null) drawSongTargets(g, song, viewport, w, h, center, halfRange);
+        trace(g, timeline.points(), viewport, w, h, center, halfRange, targets, song);
         double cursor = viewport.x(nowNanos, LEFT, plotWidth);
         g.setStroke(Color.web("#ffad57"));
         g.setLineWidth(2);
         g.strokeLine(cursor, TOP, cursor, h - BOTTOM);
         g.restore();
+    }
+
+    private void drawSongTargets(GraphicsContext g, SongChartState song, PitchViewport viewport,
+                                 double w, double h, double center, double halfRange) {
+        double plotWidth = w - LEFT - RIGHT;
+        double plotHeight = h - TOP - BOTTOM;
+        double bandHeight = plotHeight / (2 * halfRange);
+        for (var note : song.notes()) {
+            long from = song.startNanos() + (long) (note.startSeconds() * 1e9);
+            long to = from + (long) (note.durationSeconds() * 1e9);
+            double x = viewport.x(from, LEFT, plotWidth);
+            double end = viewport.x(to, LEFT, plotWidth);
+            if (end < LEFT || x > w - RIGHT) continue;
+            double y = y(note.midi(), center, halfRange, plotHeight);
+            g.setFill(TARGET);
+            g.fillRoundRect(x + 1, y - bandHeight / 2, Math.max(2, end - x - 2),
+                    bandHeight, 4, 4);
+            if (end - x > 38) {
+                g.setFill(Color.WHITE);
+                g.fillText(noteName(note.midi()), Math.max(LEFT + 5, x + 5), y + 4);
+            }
+        }
     }
 
     private void drawTargets(GraphicsContext g, ExerciseChartState targets, long nowNanos,
@@ -157,7 +197,7 @@ public final class PitchChart {
 
     private void trace(GraphicsContext g, List<PitchTimeline.Point> points, PitchViewport viewport,
                        double w, double h, double center, double halfRange,
-                       ExerciseChartState targets) {
+                       ExerciseChartState targets, SongChartState song) {
         g.setStroke(TRACE);
         g.setLineWidth(2.5);
         boolean connected = false;
@@ -178,6 +218,10 @@ public final class PitchChart {
                                     (exercise.secondsPerNote() * 1e9)));
                     int expected = exercise.notes().get(index);
                     g.setStroke(expected == Exercise.REST ? LABEL :
+                            Math.abs(point.midi() - expected) <= 0.5 ? TRACE : MISS);
+                } else if (song != null) {
+                    int expected = song.targetAt(point.timeNanos());
+                    g.setStroke(expected < 0 ? LABEL :
                             Math.abs(point.midi() - expected) <= 0.5 ? TRACE : MISS);
                 } else g.setStroke(TRACE);
                 g.strokeLine(previousX, previousY, x, y);

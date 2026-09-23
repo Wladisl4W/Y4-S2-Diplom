@@ -75,11 +75,18 @@ public final class SongAnalyzer {
 
     /** Group stable pitch frames into candidate notes; isolated detections are ignored. */
     static List<NoteEvent> groupFrames(List<Integer> frames) {
+        if (frames.isEmpty()) return List.of();
+        int[] stable = frames.stream().mapToInt(Integer::intValue).toArray();
+        // A single uncertain frame must not split one sustained note.
+        for (int i = 1; i < stable.length - 1; i++) {
+            if (frames.get(i - 1).equals(frames.get(i + 1)) && frames.get(i - 1) >= 0)
+                stable[i] = frames.get(i - 1);
+        }
         List<NoteEvent> notes = new ArrayList<>();
         int runStart = 0;
-        for (int i = 1; i <= frames.size(); i++) {
-            if (i < frames.size() && frames.get(i).equals(frames.get(runStart))) continue;
-            int midi = frames.get(runStart);
+        for (int i = 1; i <= stable.length; i++) {
+            if (i < stable.length && stable[i] == stable[runStart]) continue;
+            int midi = stable[runStart];
             if (midi >= 0 && i - runStart >= 3) {
                 double start = Math.max(0, (runStart * HOP + FRAME / 2.0) / RATE);
                 double duration = (i - runStart) * HOP / (double) RATE;
