@@ -47,17 +47,15 @@ public final class PitchChart {
         g.fillRect(0, 0, w, h);
         g.setFont(Font.font(11));
         grid(g, w, h, center, halfRange);
-        if (targets == null) {
-            for (int ago = 10; ago >= 0; ago -= 2) {
-                double x = viewport.x(nowNanos - ago * 1_000_000_000L, LEFT, plotWidth);
-                vertical(g, x, h, ago == 0 ? "сейчас" : "−" + ago + " с");
-            }
-        } else {
-            for (int offset = -2; offset <= 6; offset += 2) {
-                double x = viewport.x(nowNanos + offset * 1_000_000_000L, LEFT, plotWidth);
-                vertical(g, x, h, offset == 0 ? "сейчас" :
-                        (offset > 0 ? "+" : "") + offset + " с");
-            }
+        // Fixed two-second ticks move across the stationary playhead.
+        long tick = 2_000_000_000L;
+        long firstTick = Math.floorDiv(viewport.startNanos(), tick) * tick;
+        for (long time = firstTick; time <= viewport.startNanos() + viewport.durationNanos(); time += tick) {
+            double x = viewport.x(time, LEFT, plotWidth);
+            if (x >= LEFT && x <= w - RIGHT)
+                vertical(g, x, h, String.format("%+.0f с", (time - nowNanos) / 1_000_000_000.0));
+        }
+        if (targets != null) {
             g.setFill(TRACE);
             g.fillText("● в цели", w - 167, 13);
             g.setFill(MISS);
@@ -71,12 +69,10 @@ public final class PitchChart {
         g.clip();
         if (targets != null) drawTargets(g, targets, nowNanos, viewport, w, h, center, halfRange);
         trace(g, timeline.points(), viewport, w, h, center, halfRange, targets);
-        if (targets != null) {
-            double cursor = viewport.x(nowNanos, LEFT, plotWidth);
-            g.setStroke(Color.web("#f4cf70"));
-            g.setLineWidth(1.5);
-            g.strokeLine(cursor, TOP, cursor, h - BOTTOM);
-        }
+        double cursor = viewport.x(nowNanos, LEFT, plotWidth);
+        g.setStroke(Color.web("#f4cf70"));
+        g.setLineWidth(2);
+        g.strokeLine(cursor, TOP, cursor, h - BOTTOM);
         g.restore();
     }
 

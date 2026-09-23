@@ -49,7 +49,7 @@ public final class MicrophoneCapture {
         byte[] bytes = new byte[HOP_SIZE * 2];
         int filled = 0;
         try {
-            while (running) {
+            while (running && line == source) {
                 int read = source.read(bytes, 0, bytes.length);
                 if (read <= 0) throw new IllegalStateException("Микрофон перестал передавать звук");
                 int samples = read / 2;
@@ -65,9 +65,12 @@ public final class MicrophoneCapture {
                 if (filled == FRAME_SIZE) onPitch.accept(detector.detect(frame));
             }
         } catch (Exception e) {
-            if (running) onError.accept(e.getMessage() == null ? "Ошибка чтения микрофона" : e.getMessage());
+            if (running && line == source) onError.accept(e.getMessage() == null ? "Ошибка чтения микрофона" : e.getMessage());
         } finally {
-            running = false;
+            if (line == source) {
+                running = false;
+                line = null;
+            }
             source.stop();
             source.close();
         }

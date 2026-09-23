@@ -3,11 +3,11 @@ package ru.diplom.intonation;
 /** One time axis for microphone pitch and optional future exercise targets. */
 public record PitchViewport(long startNanos, long durationNanos) {
     public static PitchViewport live(long nowNanos) {
-        return new PitchViewport(nowNanos - PitchTimeline.WINDOW_NANOS, PitchTimeline.WINDOW_NANOS);
+        return new PitchViewport(nowNanos - PitchTimeline.WINDOW_NANOS / 2, PitchTimeline.WINDOW_NANOS);
     }
 
     public static PitchViewport withTargets(long nowNanos) {
-        return new PitchViewport(nowNanos - PitchTimeline.WINDOW_NANOS / 3,
+        return new PitchViewport(nowNanos - PitchTimeline.WINDOW_NANOS / 2,
                 PitchTimeline.WINDOW_NANOS);
     }
 

@@ -3,6 +3,7 @@ package ru.diplom.intonation;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 
 import ru.diplom.intonation.exercise.ExerciseCatalog;
@@ -18,6 +19,7 @@ import java.io.File;
 public final class UiPreview {
     public static void main(String[] args) {
         if (args.length < 1 || args.length > 4) throw new IllegalArgumentException("Output PNG path required");
+        System.setProperty("intonation.skipMicrophoneSetup", "true");
         Platform.startup(() -> {
             try {
                 IntonationApp app = new IntonationApp();
@@ -35,6 +37,14 @@ public final class UiPreview {
                             .stream().filter(node -> ((ToggleButton) node).getText().equals("Распевки"))
                             .findFirst().orElseThrow();
                     exercise.setSelected(true);
+                    if (Integer.parseInt(args[1]) == 3) {
+                        Button card = (Button) stage.getScene().getRoot().lookup(".pattern-card");
+                        card.fire();
+                        if (!((ToggleButton) stage.getScene().getRoot().lookupAll(".mode-button").stream()
+                                .filter(node -> ((ToggleButton) node).getText().equals("Живой голос"))
+                                .findFirst().orElseThrow()).isSelected())
+                            throw new IllegalStateException("Card did not return to the live canvas");
+                    }
                     if (Integer.parseInt(args[1]) == 2) {
                         ToggleButton sets = (ToggleButton) stage.getScene().getRoot().lookupAll(".library-filter")
                                 .stream().filter(node -> ((ToggleButton) node).getText().equals("Наборы"))

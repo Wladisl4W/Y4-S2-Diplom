@@ -24,20 +24,24 @@ import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.prefs.Preferences;
 
 public final class IntonationApp extends Application {
     private final MicrophoneCapture capture = new MicrophoneCapture();
     private final ConcurrentLinkedQueue<PitchSample> samples = new ConcurrentLinkedQueue<>();
     private final PitchTimeline timeline = new PitchTimeline();
     private final ExerciseHistory history = new ExerciseHistory();
-    private ComboBox<MicrophoneCapture.Device> devices;
+    private final PlaybackClock clock = new PlaybackClock();
+    private final Preferences preferences = Preferences.userNodeForPackage(IntonationApp.class);
+    private static final String MICROPHONE_KEY = "microphone";
     private ExerciseCatalog.Option selectedExercise;
     private ComboBox<String> exercisePitch;
     private FlowPane patternCards;
     private Label selectionTitle;
     private VBox livePage;
     private VBox libraryPage;
-    private Button microphoneButton;
+    private Button transportButton;
+    private MicrophoneCapture.Device selectedDevice;
     private Button exerciseButton;
     private Button cancelExerciseButton;
     private Label note;
@@ -60,21 +64,17 @@ public final class IntonationApp extends Application {
 
     @Override public void start(Stage stage) {
         Label brand = label(AppVersion.displayName(), "brand");
-        VBox heading = new VBox(brand);
 
-        devices = new ComboBox<>();
-        devices.setMaxWidth(Double.MAX_VALUE);
-        devices.setPromptText("Выберите микрофон");
-        Button refresh = new Button("Обновить");
-        refresh.setMinWidth(105);
-        refresh.setOnAction(e -> refreshDevices());
-        microphoneButton = primaryButton("Начать микрофон");
-        microphoneButton.setMinWidth(175);
-        microphoneButton.setOnAction(e -> toggleCapture());
-        HBox controls = new HBox(10, devices, refresh, microphoneButton);
-        controls.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(devices, Priority.ALWAYS);
-        controls.getStyleClass().add("card");
+        Region headingSpacer = new Region();
+        HBox.setHgrow(headingSpacer, Priority.ALWAYS);
+        transportButton = primaryButton("⏸ Пауза");
+        transportButton.setId("transport-button");
+        transportButton.setOnAction(e -> toggleTransport());
+        Button settings = new Button("⚙ Настройки");
+        settings.setId("settings-button");
+        settings.setOnAction(e -> showMicrophoneSettings(stage, false));
+        HBox topBar = new HBox(10, brand, headingSpacer, transportButton, settings);
+        topBar.setAlignment(Pos.CENTER_LEFT);
 
         ToggleGroup mode = new ToggleGroup();
         liveMode = new ToggleButton("Живой голос");
@@ -121,8 +121,8 @@ public final class IntonationApp extends Application {
         showPage(false);
         VBox workspace = new VBox(9, modeBar, livePage, libraryPage);
         VBox.setVgrow(workspace, Priority.ALWAYS);
-        status = label("Выберите микрофон и нажмите «Начать микрофон»", "muted");
-        VBox root = new VBox(6, heading, controls, workspace, status);
+        status = label("Подготовка микрофона…", "muted");
+        VBox root = new VBox(6, topBar, workspace, status);
         root.setPadding(new Insets(14));
         Scene scene = new Scene(root, 980, 740);
         scene.getStylesheets().add(getClass().getResource("theme.css").toExternalForm());
@@ -132,21 +132,28 @@ public final class IntonationApp extends Application {
         stage.setMinHeight(650);
         stage.setOnCloseRequest(e -> capture.stop());
 
-        refreshDevices();
         refreshHistory();
         timer = new AnimationTimer() {
             private long previous;
             @Override public void handle(long now) {
                 if (now - previous < 33_000_000) return;
                 previous = now;
+                if (clock.isPaused()) {
+                    samples.clear();
+                    chart.draw(timeline, clock.time(now), exerciseChart);
+                    return;
+                }
                 PitchSample sample;
                 while ((sample = samples.poll()) != null) updatePitch(sample);
-                updateExercise(now);
-                chart.draw(timeline, now, exerciseChart);
+                long time = clock.time(now);
+                updateExercise(time);
+                chart.draw(timeline, time, exerciseChart);
             }
         };
         timer.start();
         stage.show();
+        if (!Boolean.getBoolean("intonation.skipMicrophoneSetup"))
+            Platform.runLater(() -> initializeMicrophone(stage));
     }
 
     private void exerciseView() {
@@ -183,10 +190,9 @@ public final class IntonationApp extends Application {
         selectionTitle = label("", "selection-title");
         Button listen = new Button("▶ Прослушать пример");
         listen.setOnAction(e -> TonePlayer.playAsync(selectedExercise.exercise()));
-        exerciseButton = primaryButton("Начать на полотне →");
+        exerciseButton = primaryButton("Повторить на полотне →");
         exerciseButton.setOnAction(e -> {
-            liveMode.setSelected(true);
-            startExercise();
+            launchExercise();
         });
         HBox selectionActions = new HBox(10, label("Высота", "muted"), exercisePitch,
                 selectionTitle, listen, exerciseButton);
@@ -240,7 +246,7 @@ public final class IntonationApp extends Application {
             card.setOnAction(e -> {
                 selectedExercise = option;
                 populateCards(kind);
-                exerciseFeedback.setText("Выбрана распевка «" + title + "». Нажмите «Начать на полотне».");
+                launchExercise();
             });
             patternCards.getChildren().add(card);
         }
@@ -276,48 +282,114 @@ public final class IntonationApp extends Application {
         return new ExerciseChartState(choice.exercise(), choice.starts());
     }
 
-    private void refreshDevices() {
-        MicrophoneCapture.Device selected = devices.getValue();
-        List<MicrophoneCapture.Device> found = MicrophoneCapture.devices();
-        devices.setItems(FXCollections.observableArrayList(found));
-        if (selected != null) found.stream().filter(d -> d.info().equals(selected.info())).findFirst()
-                .ifPresent(devices::setValue);
-        if (devices.getValue() == null && !found.isEmpty()) devices.setValue(found.get(0));
-        if (found.isEmpty() && status != null) status.setText("Микрофон не найден. Подключите устройство и обновите список.");
+    private static String deviceKey(MicrophoneCapture.Device device) {
+        var info = device.info();
+        return info.getName() + "|" + info.getVendor() + "|" + info.getDescription();
     }
 
-    private void toggleCapture() {
-        if (capture.isRunning()) {
+    private void initializeMicrophone(Stage owner) {
+        String saved = preferences.get(MICROPHONE_KEY, "");
+        List<MicrophoneCapture.Device> available = MicrophoneCapture.devices();
+        selectedDevice = available.stream().filter(device -> deviceKey(device).equals(saved))
+                .findFirst().orElse(null);
+        if (selectedDevice == null) showMicrophoneSettings(owner, true);
+        else startCapture();
+    }
+
+    private void showMicrophoneSettings(Stage owner, boolean required) {
+        if (session != null) cancelExercise("Распевка прервана для смены микрофона.");
+        boolean wasRunning = capture.isRunning();
+        if (wasRunning) capture.stop();
+        samples.clear();
+        Dialog<MicrophoneCapture.Device> dialog = new Dialog<>();
+        dialog.initOwner(owner);
+        dialog.setTitle(required ? "Первый запуск · микрофон" : "Настройки · микрофон");
+        dialog.setHeaderText(required ? "Выберите микрофон и проверьте его" : "Микрофон для живого голоса");
+        ComboBox<MicrophoneCapture.Device> choices = new ComboBox<>();
+        choices.setPrefWidth(390);
+        choices.setItems(FXCollections.observableArrayList(MicrophoneCapture.devices()));
+        if (selectedDevice != null) choices.getItems().stream()
+                .filter(device -> deviceKey(device).equals(deviceKey(selectedDevice)))
+                .findFirst().ifPresent(choices::setValue);
+        if (choices.getValue() == null && !choices.getItems().isEmpty()) choices.setValue(choices.getItems().getFirst());
+        Label testResult = label("Спойте ноту после нажатия «Проверить».", "muted");
+        Button test = new Button("Проверить микрофон");
+        Button refresh = new Button("Обновить список");
+        refresh.setOnAction(e -> {
             capture.stop();
-            samples.clear();
-            updatePitch(new PitchSample(System.nanoTime(), Optional.empty()));
-            microphoneButton.setText("Начать микрофон");
-            devices.setDisable(false);
-            if (session != null) cancelExercise("Микрофон остановлен во время распевки.");
-            status.setText("Микрофон остановлен");
-            return;
-        }
-        MicrophoneCapture.Device device = devices.getValue();
-        if (device == null) { status.setText("Сначала выберите микрофон"); return; }
+            choices.setItems(FXCollections.observableArrayList(MicrophoneCapture.devices()));
+            if (choices.getValue() == null && !choices.getItems().isEmpty()) choices.setValue(choices.getItems().getFirst());
+            testResult.setText(choices.getItems().isEmpty() ? "Устройства не найдены" : "Выберите устройство для проверки");
+        });
+        test.setOnAction(e -> {
+            capture.stop();
+            MicrophoneCapture.Device chosen = choices.getValue();
+            if (chosen == null) { testResult.setText("Микрофон не выбран"); return; }
+            try {
+                capture.start(chosen, pitch -> Platform.runLater(() ->
+                        testResult.setText(pitch.map(result -> "Сигнал есть · " +
+                                Note.fromFrequency(result.frequencyHz()).display())
+                                .orElse("Слушаю… спойте протяжную ноту"))),
+                        error -> Platform.runLater(() -> testResult.setText("Ошибка: " + error)));
+            } catch (LineUnavailableException | IllegalArgumentException error) {
+                testResult.setText("Не удалось открыть: " + error.getMessage());
+            }
+        });
+        choices.valueProperty().addListener((obs, old, value) -> {
+            capture.stop();
+            testResult.setText("Нажмите «Проверить микрофон»");
+        });
+        dialog.getDialogPane().setContent(new VBox(12,
+                label("Устройство ввода", "muted"), choices, new HBox(8, test, refresh), testResult));
+        ButtonType save = new ButtonType("Сохранить и начать", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(save, ButtonType.CANCEL);
+        dialog.getDialogPane().lookupButton(save).disableProperty().bind(choices.valueProperty().isNull());
+        dialog.setResultConverter(button -> button == save ? choices.getValue() : null);
+        Optional<MicrophoneCapture.Device> chosen = dialog.showAndWait();
+        capture.stop();
+        if (chosen.isPresent()) {
+            selectedDevice = chosen.get();
+            preferences.put(MICROPHONE_KEY, deviceKey(selectedDevice));
+            try { preferences.flush(); }
+            catch (java.util.prefs.BackingStoreException error) {
+                status.setText("Не удалось сохранить выбор микрофона: " + error.getMessage());
+            }
+            startCapture();
+        } else if (wasRunning && selectedDevice != null) startCapture();
+        else status.setText("Микрофон не выбран · откройте настройки");
+    }
+
+    private void startCapture() {
+        if (selectedDevice == null || capture.isRunning()) return;
         try {
             samples.clear();
-            timeline.clear();
             smoothedMidi = Double.NaN;
-            capture.start(device, pitch -> {
-                // Keep every exercise frame for scoring; stale live-only frames may be dropped.
+            capture.start(selectedDevice, pitch -> {
+                if (clock.isPaused()) return;
                 while (session == null && samples.size() >= 8) samples.poll();
-                samples.add(new PitchSample(System.nanoTime(), pitch));
+                samples.add(new PitchSample(clock.time(System.nanoTime()), pitch));
             }, error -> Platform.runLater(() -> {
-                microphoneButton.setText("Начать микрофон");
-                devices.setDisable(false);
                 if (session != null) cancelExercise("Распевка прервана из-за ошибки микрофона.");
-                status.setText("Ошибка микрофона: " + error);
+                status.setText("Ошибка микрофона: " + error + " · откройте настройки");
             }));
-            microphoneButton.setText("Остановить микрофон");
-            devices.setDisable(true);
-            status.setText("Слушаю микрофон · звук остаётся на этом устройстве");
-        } catch (LineUnavailableException | IllegalArgumentException e) {
-            status.setText("Не удалось открыть микрофон: " + e.getMessage());
+            status.setText("Микрофон: " + selectedDevice + " · звук остаётся на этом устройстве");
+        } catch (LineUnavailableException | IllegalArgumentException error) {
+            status.setText("Не удалось открыть микрофон: " + error.getMessage() + " · откройте настройки");
+        }
+    }
+
+    private void toggleTransport() {
+        long now = System.nanoTime();
+        if (clock.isPaused()) {
+            clock.resume(now);
+            transportButton.setText("⏸ Пауза");
+            status.setText(capture.isRunning() ? "Полотно движется · микрофон активен" :
+                    "Полотно движется · выберите микрофон в настройках");
+        } else {
+            clock.pause(now);
+            samples.clear();
+            transportButton.setText("▶ Продолжить");
+            status.setText("Пауза · график и распевка остановлены");
         }
     }
 
@@ -344,19 +416,24 @@ public final class IntonationApp extends Application {
         }
     }
 
+    private void launchExercise() {
+        liveMode.setSelected(true);
+        if (clock.isPaused()) toggleTransport();
+        startExercise();
+    }
+
     private void startExercise() {
-        if (!capture.isRunning()) {
-            exerciseFeedback.setText("Сначала включите микрофон в верхней части окна.");
-            return;
-        }
-        session = new ExerciseSession(selectedExercise.exercise(), System.nanoTime());
+        if (!capture.isRunning()) startCapture();
+        session = new ExerciseSession(selectedExercise.exercise(), clock.time(System.nanoTime()));
         exerciseChart = chartState(selectedExercise);
         exerciseChart.start(session.startNanos());
         exerciseButton.setDisable(true);
         cancelExerciseButton.setDisable(false);
         exerciseMode.setDisable(true);
         exerciseProgress.setProgress(0);
-        exerciseFeedback.setText("Приготовьтесь. Через 2 секунды начнётся первая нота.");
+        exerciseFeedback.setText(capture.isRunning()
+                ? "Приготовьтесь. Через 2 секунды начнётся первая нота."
+                : "Микрофон недоступен. Ноты видны, но оценка голоса не будет получена.");
     }
 
     private void cancelExercise(String message) {
