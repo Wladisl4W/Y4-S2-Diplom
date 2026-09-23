@@ -39,6 +39,10 @@ public final class IntonationApp extends Application {
     private static final String MICROPHONE_KEY = "microphone";
     private ExerciseCatalog.Option selectedExercise;
     private ComboBox<Integer> exercisePitch;
+    private ComboBox<Integer> climbChoice;
+    private CheckBox notePiano;
+    private CheckBox transitionPiano;
+    private HBox pianoControls;
     private FlowPane patternCards;
     private Label selectionTitle;
     private VBox livePage;
@@ -50,6 +54,7 @@ public final class IntonationApp extends Application {
     private Label note;
     private Label cents;
     private Label status;
+    private final PianoGuide piano = new PianoGuide(message -> Platform.runLater(() -> status.setText(message)));
     private Label target;
     private Label exerciseFeedback;
     private Label recentResults;
@@ -60,6 +65,8 @@ public final class IntonationApp extends Application {
     private ToggleButton exerciseMode;
     private VBox exerciseDetails;
     private volatile ExerciseSession session;
+    private WarmupRoute activeRoute;
+    private ExerciseCatalog.Option activeOption;
     private AnimationTimer timer;
     private double smoothedMidi = Double.NaN;
 
@@ -136,7 +143,7 @@ public final class IntonationApp extends Application {
         stage.setTitle(AppVersion.displayName());
         stage.setMinWidth(720);
         stage.setMinHeight(650);
-        stage.setOnCloseRequest(e -> capture.stop());
+        stage.setOnCloseRequest(e -> { capture.stop(); piano.close(); TonePlayer.stop(); });
 
         refreshHistory();
         timer = new AnimationTimer() {
@@ -186,7 +193,7 @@ public final class IntonationApp extends Application {
         scroll.getStyleClass().add("content-scroll");
         VBox.setVgrow(scroll, Priority.ALWAYS);
         exercisePitch = new ComboBox<>(FXCollections.observableArrayList(
-                IntStream.rangeClosed(48, 72).boxed().toList()));
+                IntStream.rangeClosed(36, 72).boxed().toList()));
         exercisePitch.setConverter(new StringConverter<>() {
             @Override public String toString(Integer midi) {
                 return midi == null ? "" : ExerciseCatalog.noteName(midi);
@@ -195,11 +202,25 @@ public final class IntonationApp extends Application {
         });
         exercisePitch.setId("exercise-pitch");
         exercisePitch.setValue(60);
+        climbChoice = new ComboBox<>(FXCollections.observableArrayList(0, 2, 4));
+        climbChoice.setId("climb-choice");
+        climbChoice.setValue(2);
+        climbChoice.setConverter(new StringConverter<>() {
+            @Override public String toString(Integer semitones) {
+                return semitones == null ? "" : semitones == 0 ? "Один раз" :
+                        "+" + semitones + " и обратно";
+            }
+            @Override public Integer fromString(String text) { throw new UnsupportedOperationException(); }
+        });
+        climbChoice.valueProperty().addListener((obs, old, value) -> {
+            if (value != null) populateCards(sets.isSelected() ? ExerciseCatalog.Kind.SET : ExerciseCatalog.Kind.PATTERN);
+        });
         exercisePitch.valueProperty().addListener((obs, old, value) -> {
             if (value != null) populateCards(sets.isSelected() ? ExerciseCatalog.Kind.SET : ExerciseCatalog.Kind.PATTERN);
         });
         kinds.selectedToggleProperty().addListener((obs, old, value) -> {
             if (value == null) { old.setSelected(true); return; }
+            climbChoice.setDisable(sets.isSelected());
             populateCards(sets.isSelected() ? ExerciseCatalog.Kind.SET : ExerciseCatalog.Kind.PATTERN);
         });
         selectionTitle = label("", "selection-title");
@@ -209,7 +230,8 @@ public final class IntonationApp extends Application {
         exerciseButton.setOnAction(e -> {
             launchExercise();
         });
-        HBox selectionSummary = new HBox(10, label("Опорная нота", "muted"), exercisePitch, selectionTitle);
+        HBox selectionSummary = new HBox(10, label("Опора", "muted"), exercisePitch,
+                label("Маршрут", "muted"), climbChoice, selectionTitle);
         selectionSummary.setAlignment(Pos.CENTER_LEFT);
         HBox selectionButtons = new HBox(10, listen, exerciseButton);
         VBox selectionActions = new VBox(8, selectionSummary, selectionButtons);
@@ -219,6 +241,19 @@ public final class IntonationApp extends Application {
         populateCards(ExerciseCatalog.Kind.PATTERN);
 
         target = label("Цель: —", "target-note");
+        notePiano = new CheckBox("Пианино · ноты");
+        transitionPiano = new CheckBox("Пианино · переходы");
+        notePiano.setSelected(true);
+        transitionPiano.setSelected(true);
+        notePiano.setTooltip(new Tooltip("Тихий фортепианный ориентир для каждой целевой ноты"));
+        transitionPiano.setTooltip(new Tooltip("Два аккорда между высотами: прежняя → следующая"));
+        pianoControls = new HBox(18, notePiano, transitionPiano,
+                label("Для точной оценки используйте наушники", "muted"));
+        pianoControls.setAlignment(Pos.CENTER_LEFT);
+        pianoControls.setVisible(false);
+        pianoControls.setManaged(false);
+        notePiano.selectedProperty().addListener((obs, old, value) -> refreshPiano());
+        transitionPiano.selectedProperty().addListener((obs, old, value) -> refreshPiano());
         exerciseFeedback = label("Выберите распевку в библиотеке или просто пойте в микрофон.", "muted");
         exerciseFeedback.setWrapText(true);
         HBox.setHgrow(exerciseFeedback, Priority.ALWAYS);
@@ -234,7 +269,7 @@ public final class IntonationApp extends Application {
         historyRow.setAlignment(Pos.CENTER_LEFT);
         HBox summary = new HBox(14, target, exerciseFeedback, cancelExerciseButton);
         summary.setAlignment(Pos.CENTER_LEFT);
-        exerciseDetails = new VBox(5, summary, exerciseProgress, historyRow);
+        exerciseDetails = new VBox(5, summary, pianoControls, exerciseProgress, historyRow);
         exerciseDetails.getStyleClass().add("exercise-summary");
     }
 
@@ -261,10 +296,14 @@ public final class IntonationApp extends Application {
             Label category = label(info.category(), "pattern-kicker");
             Label name = label(title, "pattern-name");
             Label formula = label(info.formula(), "pattern-formula");
-            int low = option.exercise().notes().stream().mapToInt(Integer::intValue).min().orElse(60);
-            int high = option.exercise().notes().stream().mapToInt(Integer::intValue).max().orElse(60);
+            WarmupRoute route = WarmupRoute.create(option, exercisePitch.getValue(),
+                    kind == ExerciseCatalog.Kind.SET ? 0 : climbChoice.getValue());
+            int low = route.option().exercise().notes().stream().mapToInt(Integer::intValue)
+                    .filter(value -> value != Exercise.REST).min().orElse(60);
+            int high = route.option().exercise().notes().stream().mapToInt(Integer::intValue)
+                    .filter(value -> value != Exercise.REST).max().orElse(60);
             Label meta = label(ExerciseCatalog.noteName(low) + "–" + ExerciseCatalog.noteName(high)
-                    + " · " + (int) option.exercise().durationSeconds() + " с", "pattern-meta");
+                    + " · " + Math.round(route.option().exercise().durationSeconds()) + " с", "pattern-meta");
             Label goal = label(info.goal(), "pattern-goal");
             goal.setWrapText(true);
             goal.setPrefWidth(184);
@@ -439,6 +478,7 @@ public final class IntonationApp extends Application {
         } else {
             clock.pause(now);
             samples.clear();
+            piano.silence();
             transportButton.setText("▶ Продолжить");
             status.setText("Пауза · график и распевка остановлены");
         }
@@ -475,9 +515,17 @@ public final class IntonationApp extends Application {
 
     private void startExercise() {
         if (!capture.isRunning()) startCapture();
-        session = new ExerciseSession(selectedExercise.exercise(), clock.time(System.nanoTime()));
-        exerciseChart = chartState(selectedExercise);
+        TonePlayer.stop();
+        piano.silence();
+        activeRoute = WarmupRoute.create(selectedExercise, exercisePitch.getValue(),
+                selectedExercise.kind() == ExerciseCatalog.Kind.SET ? 0 : climbChoice.getValue());
+        activeOption = activeRoute.option();
+        transitionPiano.setDisable(activeRoute.transitions().isEmpty());
+        session = new ExerciseSession(activeOption.exercise(), clock.time(System.nanoTime()));
+        exerciseChart = chartState(activeOption);
         exerciseChart.start(session.startNanos());
+        pianoControls.setVisible(true);
+        pianoControls.setManaged(true);
         exerciseButton.setDisable(true);
         cancelExerciseButton.setDisable(false);
         exerciseMode.setDisable(true);
@@ -489,7 +537,12 @@ public final class IntonationApp extends Application {
 
     private void cancelExercise(String message) {
         session = null;
+        piano.silence();
+        activeRoute = null;
+        activeOption = null;
         exerciseChart = null;
+        pianoControls.setVisible(false);
+        pianoControls.setManaged(false);
         exerciseButton.setDisable(false);
         cancelExerciseButton.setDisable(true);
         exerciseMode.setDisable(false);
@@ -506,6 +559,11 @@ public final class IntonationApp extends Application {
         if (session.finished(now)) {
             ExerciseSession.Result result = session.result();
             session = null;
+            piano.silence();
+            activeRoute = null;
+            activeOption = null;
+            pianoControls.setVisible(false);
+            pianoControls.setManaged(false);
             exerciseChart.finish();
             exerciseButton.setDisable(false);
             cancelExerciseButton.setDisable(true);
@@ -523,17 +581,40 @@ public final class IntonationApp extends Application {
             target.setText("Старт через " + session.countdown(now));
             return;
         }
+        refreshPiano(now);
         int midi = session.exercise().notes().get(index);
+        if (midi == Exercise.REST) {
+            WarmupRoute.Transition transition = activeRoute.transitionAt(index);
+            String direction = transition != null && transition.toRoot() > transition.fromRoot()
+                    ? "↑" : "↓";
+            target.setText("Переход " + direction);
+            exerciseFeedback.setText("Слушайте два аккорда и приготовьтесь к следующей высоте");
+            exerciseProgress.setProgress((now - session.startNanos()) /
+                    (session.exercise().durationSeconds() * 1e9));
+            return;
+        }
         double hz = 440 * Math.pow(2, (midi - 69) / 12.0);
         Note expected = Note.fromFrequency(hz);
         target.setText(expected.display());
-        ExerciseCatalog.Option choice = selectedExercise;
-        String part = choice.kind() == ExerciseCatalog.Kind.SET
-                ? "Паттерн " + choice.partNumber(index) + "/" + choice.partCount() + " · " : "";
+        ExerciseCatalog.Option choice = activeOption;
+        String part = choice.partCount() > 1
+                ? (activeRoute.climbSemitones() > 0 ? "Высота " : "Паттерн ")
+                  + choice.partNumber(index) + "/" + choice.partCount() + " · " : "";
         exerciseFeedback.setText(part + "нота " + choice.noteNumberInPart(index) + "/"
                 + choice.notesInPart(index) + " · пойте до смены подсказки");
         exerciseProgress.setProgress((now - session.startNanos()) /
                 (session.exercise().durationSeconds() * 1e9));
+    }
+
+    private void refreshPiano() {
+        if (session != null && !clock.isPaused()) refreshPiano(clock.time(System.nanoTime()));
+        else piano.silence();
+    }
+
+    private void refreshPiano(long now) {
+        if (session == null || activeRoute == null) return;
+        piano.update(activeRoute, now, session.startNanos(),
+                notePiano.isSelected(), transitionPiano.isSelected());
     }
 
     private void refreshHistory() {
@@ -573,10 +654,15 @@ public final class IntonationApp extends Application {
         try { date = Instant.parse(fields[0]).atZone(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")); }
         catch (RuntimeException e) { date = fields[0].substring(0, Math.min(10, fields[0].length())); }
-        Map<String, String> titles = IntStream.rangeClosed(48, 72).boxed()
+        Map<String, String> titles = IntStream.rangeClosed(36, 72).boxed()
                 .flatMap(root -> ExerciseCatalog.forRoot(root).stream())
                 .collect(Collectors.toMap(choice -> choice.exercise().id(), ExerciseCatalog.Option::toString));
-        String summary = date + " · " + titles.getOrDefault(fields[1], fields[1]) + " · " + fields[2] + "%";
+        String id = fields[1];
+        int routeAt = id.lastIndexOf("_route");
+        String title = routeAt < 0 ? titles.getOrDefault(id, id)
+                : titles.getOrDefault(id.substring(0, routeAt), id.substring(0, routeAt))
+                  + " · +" + id.substring(routeAt + 6) + " и обратно";
+        String summary = date + " · " + title + " · " + fields[2] + "%";
         return detailed ? summary + " · голос: " + fields[3] + "% · ошибка: " + fields[4] + " центов" : summary;
     }
 
@@ -595,6 +681,8 @@ public final class IntonationApp extends Application {
     @Override public void stop() {
         timer.stop();
         capture.stop();
+        piano.close();
+        TonePlayer.stop();
     }
 
     public static void main(String[] args) { launch(args); }

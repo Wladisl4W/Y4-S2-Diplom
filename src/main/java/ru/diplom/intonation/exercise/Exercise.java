@@ -3,6 +3,9 @@ package ru.diplom.intonation.exercise;
 import java.util.List;
 
 public record Exercise(String id, String title, List<Integer> notes, double secondsPerNote) {
+    /** A short transition interval with no vocal target. */
+    public static final int REST = -1;
+
     public Exercise {
         notes = List.copyOf(notes);
         if (notes.isEmpty() || secondsPerNote <= 0) throw new IllegalArgumentException("Empty exercise");

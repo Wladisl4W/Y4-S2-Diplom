@@ -57,7 +57,7 @@ public final class ExerciseCatalog {
 
     /** Transpose the same interval patterns to a comfortable reference pitch. */
     public static List<Option> forRoot(int rootMidi) {
-        if (rootMidi < 48 || rootMidi > 72) throw new IllegalArgumentException("Root outside selectable range");
+        if (rootMidi < 36 || rootMidi > 72) throw new IllegalArgumentException("Root outside selectable range");
         List<Exercise> patterns = Exercise.beginners();
         List<Option> choices = new ArrayList<>();
             int shift = rootMidi - 60;

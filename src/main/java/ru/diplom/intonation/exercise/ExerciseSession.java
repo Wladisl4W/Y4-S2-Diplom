@@ -30,6 +30,7 @@ public final class ExerciseSession {
     public void accept(long nowNanos, double detectedMidi) {
         int index = noteIndex(nowNanos);
         if (index < 0) return;
+        if (exercise.notes().get(index) == Exercise.REST) return;
         frames++;
         if (Double.isFinite(detectedMidi)) {
             voicedFrames++;

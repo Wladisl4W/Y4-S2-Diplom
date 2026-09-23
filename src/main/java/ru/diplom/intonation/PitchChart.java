@@ -36,8 +36,10 @@ public final class PitchChart {
         double halfRange = 7;
         if (targets != null) {
             Exercise exercise = targets.exercise();
-            int min = exercise.notes().stream().mapToInt(Integer::intValue).min().orElse(60);
-            int max = exercise.notes().stream().mapToInt(Integer::intValue).max().orElse(60);
+            int min = exercise.notes().stream().mapToInt(Integer::intValue)
+                    .filter(note -> note != Exercise.REST).min().orElse(60);
+            int max = exercise.notes().stream().mapToInt(Integer::intValue)
+                    .filter(note -> note != Exercise.REST).max().orElse(60);
             center = (min + max) / 2.0;
             halfRange = Math.max(5, (max - min) / 2.0 + 2);
         }
@@ -90,6 +92,23 @@ public final class PitchChart {
             double x = viewport.x(from, LEFT, plotWidth);
             double nextX = viewport.x(from + noteNanos, LEFT, plotWidth);
             if (nextX < LEFT || x > w - RIGHT) continue;
+            if (exercise.notes().get(i) == Exercise.REST) {
+                g.setFill(Color.web("#3e3932"));
+                g.fillRect(x, TOP, nextX - x, plotHeight);
+                g.setFill(Color.web("#ffad57"));
+                if (nextX - x > 50) {
+                    int next = Math.min(i + 1, exercise.notes().size() - 1);
+                    int previousStart = 0;
+                    for (int start : targets.patternStarts()) {
+                        if (start >= next) break;
+                        previousStart = start;
+                    }
+                    String direction = exercise.notes().get(next) >= exercise.notes().get(previousStart)
+                            ? "↑" : "↓";
+                    g.fillText(direction + " переход", x + 5, TOP + 14);
+                }
+                continue;
+            }
             double y = y(exercise.notes().get(i), center, halfRange, plotHeight);
             g.setFill(TARGET);
             g.fillRoundRect(x + 2, y - toleranceHeight / 2, nextX - x - 4,
@@ -105,7 +124,7 @@ public final class PitchChart {
             g.setLineWidth(1.5);
             g.strokeLine(x, TOP, x, h - BOTTOM);
             g.setFill(Color.web("#ffad57"));
-            g.fillText("Паттерн " + (part + 1), x + 5, TOP + 12);
+            g.fillText("Этап " + (part + 1), x + 5, TOP + 12);
         }
     }
 
@@ -157,7 +176,9 @@ public final class PitchChart {
                     int index = Math.min(exercise.notes().size() - 1,
                             (int) ((point.timeNanos() - targets.startNanos()) /
                                     (exercise.secondsPerNote() * 1e9)));
-                    g.setStroke(Math.abs(point.midi() - exercise.notes().get(index)) <= 0.5 ? TRACE : MISS);
+                    int expected = exercise.notes().get(index);
+                    g.setStroke(expected == Exercise.REST ? LABEL :
+                            Math.abs(point.midi() - expected) <= 0.5 ? TRACE : MISS);
                 } else g.setStroke(TRACE);
                 g.strokeLine(previousX, previousY, x, y);
             }

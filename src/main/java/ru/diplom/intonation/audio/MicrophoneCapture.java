@@ -44,7 +44,7 @@ public final class MicrophoneCapture {
 
     private void captureLoop(TargetDataLine source, Consumer<Optional<PitchResult>> onPitch,
                              Consumer<String> onError) {
-        YinPitchDetector detector = new YinPitchDetector(SAMPLE_RATE, FRAME_SIZE, 80, 1000);
+        YinPitchDetector detector = new YinPitchDetector(SAMPLE_RATE, FRAME_SIZE, 60, 1000);
         float[] frame = new float[FRAME_SIZE];
         byte[] bytes = new byte[HOP_SIZE * 2];
         int filled = 0;

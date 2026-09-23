@@ -1,37 +1,49 @@
 package ru.diplom.intonation.exercise;
 
-import javax.sound.sampled.*;
+import javax.sound.midi.MidiChannel;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Synthesizer;
 
+/** Plays a separate acoustic-grand-piano preview of a selected exercise. */
 public final class TonePlayer {
+    private static volatile Thread previewThread;
     private TonePlayer() {}
 
-    public static void playAsync(Exercise exercise) {
-        Thread worker = new Thread(() -> play(exercise), "reference-tones");
+    public static synchronized void playAsync(Exercise exercise) {
+        stop();
+        Thread worker = new Thread(() -> play(exercise), "piano-preview");
         worker.setDaemon(true);
+        previewThread = worker;
         worker.start();
     }
 
+    public static synchronized void stop() {
+        if (previewThread != null) previewThread.interrupt();
+        previewThread = null;
+    }
+
     private static void play(Exercise exercise) {
-        AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
-        try (SourceDataLine line = AudioSystem.getSourceDataLine(format)) {
-            line.open(format);
-            line.start();
-            int rate = (int) format.getSampleRate();
-            int samplesPerNote = (int) (Math.min(1.0, exercise.secondsPerNote() * 0.6) * rate);
-            byte[] bytes = new byte[samplesPerNote * 2];
+        Synthesizer synth = null;
+        try {
+            synth = MidiSystem.getSynthesizer();
+            synth.open();
+            MidiChannel piano = synth.getChannels()[0];
+            piano.programChange(0); // General MIDI Acoustic Grand Piano
             for (int midi : exercise.notes()) {
-                double hz = 440 * Math.pow(2, (midi - 69) / 12.0);
-                for (int i = 0; i < samplesPerNote; i++) {
-                    double envelope = Math.min(1, Math.min(i / 900.0, (samplesPerNote - i) / 900.0));
-                    short value = (short) (Math.sin(2 * Math.PI * hz * i / rate) * 7000 * envelope);
-                    bytes[2 * i] = (byte) value;
-                    bytes[2 * i + 1] = (byte) (value >>> 8);
-                }
-                line.write(bytes, 0, bytes.length);
+                if (Thread.currentThread().isInterrupted()) break;
+                if (midi != Exercise.REST) piano.noteOn(midi, 70);
+                Thread.sleep((long) (Math.min(0.9, exercise.secondsPerNote() * 0.65) * 1000));
+                if (midi != Exercise.REST) piano.noteOff(midi);
+                Thread.sleep(110);
             }
-            line.drain();
-        } catch (LineUnavailableException ignored) {
-            // The UI remains usable when an output device is unavailable.
+            piano.allNotesOff();
+        } catch (MidiUnavailableException ignored) {
+            // Preview is optional when the operating system has no audio output.
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+        } finally {
+            if (synth != null) synth.close();
         }
     }
 }

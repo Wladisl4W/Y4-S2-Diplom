@@ -9,6 +9,13 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PitchDetectorTest {
+    @Test void detectsLowC2WithMicrophoneRange() {
+        YinPitchDetector lowDetector = new YinPitchDetector(44100, 4096, 60, 1000);
+        double hz = 440 * Math.pow(2, (36 - 69) / 12.0);
+        PitchResult result = lowDetector.detect(sine(hz, 0.4)).orElseThrow();
+        assertEquals(36, Note.fromFrequency(result.frequencyHz()).midi());
+    }
+
     private static final int RATE = 44100;
     private static final int SIZE = 4096;
     private final YinPitchDetector detector = new YinPitchDetector(RATE, SIZE, 80, 1000);
