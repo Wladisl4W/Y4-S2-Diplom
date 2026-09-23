@@ -13,10 +13,22 @@ public record WarmupRoute(ExerciseCatalog.Option option, List<Transition> transi
     }
 
     public static WarmupRoute create(ExerciseCatalog.Option choice, int rootMidi, int climbSemitones) {
+        return create(choice, rootMidi, climbSemitones, 1.5);
+    }
+
+    public static WarmupRoute create(ExerciseCatalog.Option choice, int rootMidi, int climbSemitones,
+                                     double secondsPerNote) {
+        if (!Double.isFinite(secondsPerNote) || secondsPerNote <= 0)
+            throw new IllegalArgumentException("Invalid note duration");
         if (climbSemitones != 0 && climbSemitones != 2 && climbSemitones != 4)
             throw new IllegalArgumentException("Unsupported climb");
-        if (choice.kind() == ExerciseCatalog.Kind.SET || climbSemitones == 0)
-            return new WarmupRoute(choice, List.of(), rootMidi, 0);
+        if (choice.kind() == ExerciseCatalog.Kind.SET || climbSemitones == 0) {
+            Exercise base = choice.exercise();
+            Exercise timed = new Exercise(base.id(), base.title(), base.notes(), secondsPerNote);
+            ExerciseCatalog.Option option = new ExerciseCatalog.Option(choice.kind(), choice.title(),
+                    timed, choice.starts());
+            return new WarmupRoute(option, List.of(), rootMidi, 0);
+        }
         if (choice.exercise().notes().stream().mapToInt(Integer::intValue).max().orElse(0)
                 + climbSemitones > 83)
             throw new IllegalArgumentException("Pattern exceeds microphone pitch range");
@@ -40,7 +52,7 @@ public record WarmupRoute(ExerciseCatalog.Option option, List<Transition> transi
         }
         Exercise base = choice.exercise();
         Exercise expanded = new Exercise(base.id() + "_route" + climbSemitones,
-                base.title() + " · вверх и вниз", notes, 1.5);
+                base.title() + " · вверх и вниз", notes, secondsPerNote);
         ExerciseCatalog.Option option = new ExerciseCatalog.Option(choice.kind(), expanded.title(),
                 expanded, starts);
         return new WarmupRoute(option, transitions, rootMidi, climbSemitones);

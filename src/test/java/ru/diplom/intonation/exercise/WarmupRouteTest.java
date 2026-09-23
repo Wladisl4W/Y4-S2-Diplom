@@ -5,6 +5,18 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class WarmupRouteTest {
+    @Test void selectedPaceControlsSingleAndRoutedExercises() {
+        ExerciseCatalog.Option base = ExerciseCatalog.forRoot(36).getFirst();
+        WarmupRoute single = WarmupRoute.create(base, 36, 0, 2.5);
+        WarmupRoute routed = WarmupRoute.create(base, 36, 2, 1.0);
+        assertEquals(2.5, single.option().exercise().secondsPerNote());
+        assertEquals(12.5, single.option().exercise().durationSeconds());
+        assertEquals(1.0, routed.option().exercise().secondsPerNote());
+        assertEquals(29.0, routed.option().exercise().durationSeconds());
+        assertEquals(1, new ExerciseSession(routed.option().exercise(), 0)
+                .noteIndex(2_000_000_000L + 1_000_000_000L));
+    }
+
     @Test void fourSemitoneRouteReturnsToItsStartingPitch() {
         ExerciseCatalog.Option base = ExerciseCatalog.forRoot(36).getFirst();
         WarmupRoute route = WarmupRoute.create(base, 36, 4);

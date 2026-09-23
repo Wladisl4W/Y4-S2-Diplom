@@ -40,6 +40,7 @@ public final class IntonationApp extends Application {
     private ExerciseCatalog.Option selectedExercise;
     private ComboBox<Integer> exercisePitch;
     private ComboBox<Integer> climbChoice;
+    private ComboBox<Double> paceChoice;
     private CheckBox notePiano;
     private CheckBox transitionPiano;
     private HBox pianoControls;
@@ -215,6 +216,23 @@ public final class IntonationApp extends Application {
         climbChoice.valueProperty().addListener((obs, old, value) -> {
             if (value != null) populateCards(sets.isSelected() ? ExerciseCatalog.Kind.SET : ExerciseCatalog.Kind.PATTERN);
         });
+        paceChoice = new ComboBox<>(FXCollections.observableArrayList(2.5, 2.0, 1.5, 1.0));
+        paceChoice.setId("pace-choice");
+        paceChoice.setValue(1.5);
+        paceChoice.setConverter(new StringConverter<>() {
+            @Override public String toString(Double seconds) {
+                return seconds == null ? "" : switch (seconds.toString()) {
+                    case "2.5" -> "Медленно";
+                    case "2.0" -> "Спокойно";
+                    case "1.5" -> "Обычно";
+                    default -> "Быстро";
+                };
+            }
+            @Override public Double fromString(String text) { throw new UnsupportedOperationException(); }
+        });
+        paceChoice.valueProperty().addListener((obs, old, value) -> {
+            if (value != null) populateCards(sets.isSelected() ? ExerciseCatalog.Kind.SET : ExerciseCatalog.Kind.PATTERN);
+        });
         exercisePitch.valueProperty().addListener((obs, old, value) -> {
             if (value != null) populateCards(sets.isSelected() ? ExerciseCatalog.Kind.SET : ExerciseCatalog.Kind.PATTERN);
         });
@@ -225,13 +243,17 @@ public final class IntonationApp extends Application {
         });
         selectionTitle = label("", "selection-title");
         Button listen = new Button("▶ Прослушать пример");
-        listen.setOnAction(e -> TonePlayer.playAsync(selectedExercise.exercise()));
+        listen.setOnAction(e -> {
+            Exercise base = selectedExercise.exercise();
+            TonePlayer.playAsync(new Exercise(base.id(), base.title(), base.notes(), paceChoice.getValue()));
+        });
         exerciseButton = primaryButton("Начать выбранное →");
         exerciseButton.setOnAction(e -> {
             launchExercise();
         });
         HBox selectionSummary = new HBox(10, label("Опора", "muted"), exercisePitch,
-                label("Маршрут", "muted"), climbChoice, selectionTitle);
+                label("Маршрут", "muted"), climbChoice,
+                label("Темп", "muted"), paceChoice, selectionTitle);
         selectionSummary.setAlignment(Pos.CENTER_LEFT);
         HBox selectionButtons = new HBox(10, listen, exerciseButton);
         VBox selectionActions = new VBox(8, selectionSummary, selectionButtons);
@@ -297,7 +319,7 @@ public final class IntonationApp extends Application {
             Label name = label(title, "pattern-name");
             Label formula = label(info.formula(), "pattern-formula");
             WarmupRoute route = WarmupRoute.create(option, exercisePitch.getValue(),
-                    kind == ExerciseCatalog.Kind.SET ? 0 : climbChoice.getValue());
+                    kind == ExerciseCatalog.Kind.SET ? 0 : climbChoice.getValue(), paceChoice.getValue());
             int low = route.option().exercise().notes().stream().mapToInt(Integer::intValue)
                     .filter(value -> value != Exercise.REST).min().orElse(60);
             int high = route.option().exercise().notes().stream().mapToInt(Integer::intValue)
@@ -518,7 +540,8 @@ public final class IntonationApp extends Application {
         TonePlayer.stop();
         piano.silence();
         activeRoute = WarmupRoute.create(selectedExercise, exercisePitch.getValue(),
-                selectedExercise.kind() == ExerciseCatalog.Kind.SET ? 0 : climbChoice.getValue());
+                selectedExercise.kind() == ExerciseCatalog.Kind.SET ? 0 : climbChoice.getValue(),
+                paceChoice.getValue());
         activeOption = activeRoute.option();
         transitionPiano.setDisable(activeRoute.transitions().isEmpty());
         session = new ExerciseSession(activeOption.exercise(), clock.time(System.nanoTime()));
