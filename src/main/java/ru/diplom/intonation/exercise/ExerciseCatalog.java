@@ -1,5 +1,7 @@
 package ru.diplom.intonation.exercise;
 
+import ru.diplom.intonation.audio.Note;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,18 +50,27 @@ public final class ExerciseCatalog {
     }
 
     public static List<Option> beginners() {
+        List<Option> choices = new ArrayList<>();
+        for (int root : new int[]{60, 48, 72}) choices.addAll(forRoot(root));
+        return List.copyOf(choices);
+    }
+
+    /** Transpose the same interval patterns to a comfortable reference pitch. */
+    public static List<Option> forRoot(int rootMidi) {
+        if (rootMidi < 48 || rootMidi > 72) throw new IllegalArgumentException("Root outside selectable range");
         List<Exercise> patterns = Exercise.beginners();
         List<Option> choices = new ArrayList<>();
-        for (int octaveShift : new int[]{0, -12, 12}) {
-            String root = octaveShift == 0 ? "C4" : (octaveShift < 0 ? "C3" : "C5");
-            String suffix = octaveShift == 0 ? "" : "_" + root.toLowerCase();
+            int shift = rootMidi - 60;
+            String root = noteName(rootMidi);
+            String suffix = rootMidi == 60 ? "" :
+                    (rootMidi == 48 || rootMidi == 72 ? "_" + root.toLowerCase() : "_m" + rootMidi);
             List<Integer> combined = new ArrayList<>();
             List<Integer> starts = new ArrayList<>();
             double secondsPerNote = patterns.getFirst().secondsPerNote();
             for (Exercise pattern : patterns) {
                 if (pattern.secondsPerNote() != secondsPerNote)
                     throw new IllegalStateException("Set patterns must use the same tempo");
-                List<Integer> shifted = pattern.notes().stream().map(note -> note + octaveShift).toList();
+                List<Integer> shifted = pattern.notes().stream().map(note -> note + shift).toList();
                 Exercise variant = new Exercise(pattern.id() + suffix,
                         pattern.title() + " · " + root, shifted, secondsPerNote);
                 choices.add(new Option(Kind.PATTERN, variant.title(), variant, List.of(0)));
@@ -69,7 +80,12 @@ public final class ExerciseCatalog {
             Exercise set = new Exercise("basic_set" + suffix,
                     "Основной набор · " + root, combined, secondsPerNote);
             choices.add(new Option(Kind.SET, set.title(), set, starts));
-        }
         return List.copyOf(choices);
+    }
+
+    public static String noteName(int midi) {
+        double hz = 440 * Math.pow(2, (midi - 69) / 12.0);
+        Note note = Note.fromFrequency(hz);
+        return note.letter() + note.octave();
     }
 }

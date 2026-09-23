@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
@@ -25,6 +26,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.prefs.Preferences;
+import java.util.stream.IntStream;
+import javafx.util.StringConverter;
 
 public final class IntonationApp extends Application {
     private final MicrophoneCapture capture = new MicrophoneCapture();
@@ -35,7 +38,7 @@ public final class IntonationApp extends Application {
     private final Preferences preferences = Preferences.userNodeForPackage(IntonationApp.class);
     private static final String MICROPHONE_KEY = "microphone";
     private ExerciseCatalog.Option selectedExercise;
-    private ComboBox<String> exercisePitch;
+    private ComboBox<Integer> exercisePitch;
     private FlowPane patternCards;
     private Label selectionTitle;
     private VBox livePage;
@@ -160,11 +163,11 @@ public final class IntonationApp extends Application {
     }
 
     private void exerciseView() {
-        List<ExerciseCatalog.Option> presets = ExerciseCatalog.beginners();
+        List<ExerciseCatalog.Option> presets = ExerciseCatalog.forRoot(60);
         selectedExercise = presets.getFirst();
 
         Label libraryTitle = label("Библиотека распевок", "library-title");
-        Label description = label("Выберите форму и высоту. Целевые ноты появятся на главном полотне.", "muted");
+        Label description = label("Начните с комфортной опорной ноты. Нажмите карточку, чтобы петь на главном полотне.", "muted");
         ToggleGroup kinds = new ToggleGroup();
         ToggleButton patterns = new ToggleButton("Паттерны");
         ToggleButton sets = new ToggleButton("Наборы");
@@ -176,13 +179,22 @@ public final class IntonationApp extends Application {
         HBox filters = new HBox(7, patterns, sets);
         patternCards = new FlowPane(12, 12);
         patternCards.setPrefWrapLength(720);
+        patternCards.setAlignment(Pos.TOP_LEFT);
+        patternCards.setRowValignment(VPos.TOP);
         ScrollPane scroll = new ScrollPane(patternCards);
         scroll.setFitToWidth(true);
         scroll.getStyleClass().add("content-scroll");
         VBox.setVgrow(scroll, Priority.ALWAYS);
-        exercisePitch = new ComboBox<>(FXCollections.observableArrayList("C3", "C4", "C5"));
+        exercisePitch = new ComboBox<>(FXCollections.observableArrayList(
+                IntStream.rangeClosed(48, 72).boxed().toList()));
+        exercisePitch.setConverter(new StringConverter<>() {
+            @Override public String toString(Integer midi) {
+                return midi == null ? "" : ExerciseCatalog.noteName(midi);
+            }
+            @Override public Integer fromString(String text) { throw new UnsupportedOperationException(); }
+        });
         exercisePitch.setId("exercise-pitch");
-        exercisePitch.setValue("C4");
+        exercisePitch.setValue(60);
         exercisePitch.valueProperty().addListener((obs, old, value) -> {
             if (value != null) populateCards(sets.isSelected() ? ExerciseCatalog.Kind.SET : ExerciseCatalog.Kind.PATTERN);
         });
@@ -193,14 +205,14 @@ public final class IntonationApp extends Application {
         selectionTitle = label("", "selection-title");
         Button listen = new Button("▶ Прослушать пример");
         listen.setOnAction(e -> TonePlayer.playAsync(selectedExercise.exercise()));
-        exerciseButton = primaryButton("Повторить на полотне →");
+        exerciseButton = primaryButton("Начать выбранное →");
         exerciseButton.setOnAction(e -> {
             launchExercise();
         });
-        HBox selectionActions = new HBox(10, label("Высота", "muted"), exercisePitch,
-                selectionTitle, listen, exerciseButton);
-        selectionActions.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(selectionTitle, Priority.ALWAYS);
+        HBox selectionSummary = new HBox(10, label("Опорная нота", "muted"), exercisePitch, selectionTitle);
+        selectionSummary.setAlignment(Pos.CENTER_LEFT);
+        HBox selectionButtons = new HBox(10, listen, exerciseButton);
+        VBox selectionActions = new VBox(8, selectionSummary, selectionButtons);
         selectionActions.getStyleClass().add("selection-bar");
         libraryPage = new VBox(12, libraryTitle, description, filters, scroll, selectionActions);
         VBox.setVgrow(libraryPage, Priority.ALWAYS);
@@ -228,24 +240,36 @@ public final class IntonationApp extends Application {
 
     private void populateCards(ExerciseCatalog.Kind kind) {
         patternCards.getChildren().clear();
-        String root = exercisePitch.getValue();
-        List<ExerciseCatalog.Option> options = ExerciseCatalog.beginners().stream()
-                .filter(option -> option.kind() == kind && option.title().endsWith(" · " + root)).toList();
+        String root = ExerciseCatalog.noteName(exercisePitch.getValue());
+        List<ExerciseCatalog.Option> options = ExerciseCatalog.forRoot(exercisePitch.getValue()).stream()
+                .filter(option -> option.kind() == kind).toList();
         if (options.isEmpty()) return;
-        if (selectedExercise.kind() != kind || !selectedExercise.title().endsWith(" · " + root)) {
-            selectedExercise = options.getFirst();
-        }
+        String priorId = basePatternId(selectedExercise.exercise().id());
+        selectedExercise = options.stream().filter(option ->
+                basePatternId(option.exercise().id()).equals(priorId)).findFirst().orElse(options.getFirst());
         for (ExerciseCatalog.Option option : options) {
             Button card = new Button();
             card.getStyleClass().add("pattern-card");
+            card.setPrefSize(204, 224);
+            card.setMinSize(204, 224);
+            card.setMaxSize(204, 224);
             if (option.equals(selectedExercise)) card.getStyleClass().add("selected-card");
             Canvas preview = new Canvas(184, 84);
             drawPatternPreview(preview, option);
             String title = option.title().replace(" · " + root, "");
+            PatternInfo info = patternInfo(option);
+            Label category = label(info.category(), "pattern-kicker");
             Label name = label(title, "pattern-name");
-            Label meta = label(option.exercise().notes().size() + " нот · " +
-                    (int) option.exercise().durationSeconds() + " с", "pattern-meta");
-            card.setGraphic(new VBox(9, preview, name, meta));
+            Label formula = label(info.formula(), "pattern-formula");
+            int low = option.exercise().notes().stream().mapToInt(Integer::intValue).min().orElse(60);
+            int high = option.exercise().notes().stream().mapToInt(Integer::intValue).max().orElse(60);
+            Label meta = label(ExerciseCatalog.noteName(low) + "–" + ExerciseCatalog.noteName(high)
+                    + " · " + (int) option.exercise().durationSeconds() + " с", "pattern-meta");
+            Label goal = label(info.goal(), "pattern-goal");
+            goal.setWrapText(true);
+            goal.setPrefWidth(184);
+            card.setGraphic(new VBox(6, category, preview, name, formula, meta, goal));
+            card.setTooltip(new Tooltip("Нажмите, чтобы начать после двухсекундного отсчёта"));
             card.setOnAction(e -> {
                 selectedExercise = option;
                 populateCards(kind);
@@ -254,6 +278,22 @@ public final class IntonationApp extends Application {
             patternCards.getChildren().add(card);
         }
         selectionTitle.setText(selectedExercise.title().replace(" · " + root, ""));
+    }
+
+    private record PatternInfo(String category, String formula, String goal) {}
+
+    private static String basePatternId(String id) {
+        return id.replaceFirst("(_c[35]|_m\\d+)$", "");
+    }
+
+    private static PatternInfo patternInfo(ExerciseCatalog.Option option) {
+        return switch (basePatternId(option.exercise().id())) {
+            case "ascending" -> new PatternInfo("01 · СТУПЕНИ", "1–2–3–4–5", "Плавный подъём");
+            case "descending" -> new PatternInfo("02 · СТУПЕНИ", "5–4–3–2–1", "Плавный спуск");
+            case "three_notes" -> new PatternInfo("03 · ФРАЗА", "1–2–3–2–1", "Возврат к опоре");
+            case "triad" -> new PatternInfo("04 · ИНТЕРВАЛЫ", "1–3–5–3–1", "Скачки по трезвучию");
+            default -> new PatternInfo("НАБОР · 4 ФОРМЫ", "Ступени → фраза → аккорд", "Полный цикл распевки");
+        };
     }
 
     private static void drawPatternPreview(Canvas canvas, ExerciseCatalog.Option option) {
@@ -533,7 +573,8 @@ public final class IntonationApp extends Application {
         try { date = Instant.parse(fields[0]).atZone(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")); }
         catch (RuntimeException e) { date = fields[0].substring(0, Math.min(10, fields[0].length())); }
-        Map<String, String> titles = ExerciseCatalog.beginners().stream()
+        Map<String, String> titles = IntStream.rangeClosed(48, 72).boxed()
+                .flatMap(root -> ExerciseCatalog.forRoot(root).stream())
                 .collect(Collectors.toMap(choice -> choice.exercise().id(), ExerciseCatalog.Option::toString));
         String summary = date + " · " + titles.getOrDefault(fields[1], fields[1]) + " · " + fields[2] + "%";
         return detailed ? summary + " · голос: " + fields[3] + "% · ошибка: " + fields[4] + " центов" : summary;

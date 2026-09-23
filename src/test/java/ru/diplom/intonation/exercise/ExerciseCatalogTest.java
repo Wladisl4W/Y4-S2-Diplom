@@ -7,6 +7,18 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ExerciseCatalogTest {
+    @Test void chromaticRootKeepsTheSameIntervalPatterns() {
+        List<ExerciseCatalog.Option> c = ExerciseCatalog.forRoot(60);
+        List<ExerciseCatalog.Option> sharp = ExerciseCatalog.forRoot(61);
+        assertEquals("C♯4", ExerciseCatalog.noteName(61));
+        assertEquals(5, sharp.size());
+        for (int choice = 0; choice < c.size(); choice++) {
+            assertEquals(c.get(choice).exercise().notes().stream().map(note -> note + 1).toList(),
+                    sharp.get(choice).exercise().notes());
+            assertEquals(c.get(choice).starts(), sharp.get(choice).starts());
+        }
+    }
+
     @Test void setCombinesPatternsInOrderWithVisibleBoundary() {
         List<ExerciseCatalog.Option> options = ExerciseCatalog.beginners();
         assertEquals(15, options.size());
