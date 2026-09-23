@@ -33,7 +33,14 @@ public final class UiPreview {
                     stage.setHeight(Double.parseDouble(args[3]));
                 }
                 StackPane sharedGraph = (StackPane) stage.getScene().getRoot().lookup(".graph-card");
-                if (args.length > 1 && Integer.parseInt(args[1]) >= 1) {
+                if (args.length > 1 && Integer.parseInt(args[1]) == 6) {
+                    ToggleButton songs = (ToggleButton) stage.getScene().getRoot().lookupAll(".mode-button")
+                            .stream().filter(node -> ((ToggleButton) node).getText().startsWith("Песни"))
+                            .findFirst().orElseThrow();
+                    songs.setSelected(true);
+                }
+                if (args.length > 1 && Integer.parseInt(args[1]) >= 1
+                        && Integer.parseInt(args[1]) <= 5) {
                     ToggleButton exercise = (ToggleButton) stage.getScene().getRoot().lookupAll(".mode-button")
                             .stream().filter(node -> ((ToggleButton) node).getText().equals("Распевки"))
                             .findFirst().orElseThrow();

@@ -3,6 +3,7 @@ package ru.diplom.intonation;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,11 +13,15 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser;
 import ru.diplom.intonation.audio.*;
 import ru.diplom.intonation.exercise.*;
+import ru.diplom.intonation.song.SongAnalyzer;
 
 import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
+import java.io.File;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -48,6 +53,14 @@ public final class IntonationApp extends Application {
     private Label selectionTitle;
     private VBox livePage;
     private VBox libraryPage;
+    private VBox songPage;
+    private ToggleButton songMode;
+    private Task<SongAnalyzer.Result> songTask;
+    private SongAnalyzer songAnalyzer;
+    private Label songStatus;
+    private ListView<String> songNotes;
+    private Canvas songOverview;
+    private SongAnalyzer.Result songResult;
     private Button transportButton;
     private MicrophoneCapture.Device selectedDevice;
     private Button exerciseButton;
@@ -96,17 +109,18 @@ public final class IntonationApp extends Application {
         liveMode.setSelected(true);
         liveMode.getStyleClass().add("mode-button");
         exerciseMode.getStyleClass().add("mode-button");
-        Button songsLater = new Button("Песни · позже");
-        songsLater.setDisable(true);
-        songsLater.setTooltip(new Tooltip("Импорт песен появится после проверки качества распознавания нот"));
-        HBox modeBar = new HBox(8, liveMode, exerciseMode, songsLater);
+        songMode = new ToggleButton("Песни · эксперимент");
+        songMode.setToggleGroup(mode);
+        songMode.getStyleClass().add("mode-button");
+        HBox modeBar = new HBox(8, liveMode, exerciseMode, songMode);
         modeBar.setAlignment(Pos.CENTER_LEFT);
         modeBar.getStyleClass().add("mode-bar");
 
         exerciseView();
+        songView(stage);
         mode.selectedToggleProperty().addListener((obs, old, selected) -> {
             if (selected == null) { old.setSelected(true); return; }
-            showPage(selected == exerciseMode);
+            showPage(selected == exerciseMode, selected == songMode);
         });
 
         HBox pitchHeader = new HBox(16);
@@ -131,8 +145,8 @@ public final class IntonationApp extends Application {
         livePage = new VBox(7, pitchHeader, graphBox, exerciseDetails);
         VBox.setVgrow(graphBox, Priority.ALWAYS);
         VBox.setVgrow(livePage, Priority.ALWAYS);
-        showPage(false);
-        VBox workspace = new VBox(9, modeBar, livePage, libraryPage);
+        showPage(false, false);
+        VBox workspace = new VBox(9, modeBar, livePage, libraryPage, songPage);
         VBox.setVgrow(workspace, Priority.ALWAYS);
         status = label("Подготовка микрофона…", "muted");
         status.getStyleClass().add("status-line");
@@ -144,7 +158,8 @@ public final class IntonationApp extends Application {
         stage.setTitle(AppVersion.displayName());
         stage.setMinWidth(720);
         stage.setMinHeight(650);
-        stage.setOnCloseRequest(e -> { capture.stop(); piano.close(); TonePlayer.stop(); });
+        stage.setOnCloseRequest(e -> { cancelSongAnalysis();
+            capture.stop(); piano.close(); TonePlayer.stop(); });
 
         refreshHistory();
         timer = new AnimationTimer() {
@@ -381,12 +396,122 @@ public final class IntonationApp extends Application {
         g.strokeLine(0, 76, canvas.getWidth(), 76);
     }
 
-    private void showPage(boolean library) {
-        if (livePage == null || libraryPage == null) return;
-        livePage.setVisible(!library);
-        livePage.setManaged(!library);
+    private void songView(Stage owner) {
+        Label heading = label("Разбор песни · исследовательский режим", "library-title");
+        Label explanation = label("MP3 анализируется локально через FFmpeg. Ноты извлекаются из всей смеси.\nИнструменты могут попадать в результат; оценка пения пока отключена.", "muted");
+        explanation.setWrapText(true);
+        explanation.setMinHeight(36);
+        songStatus = label("Выберите MP3 для просмотра черновой нотной линии.", "muted");
+        songStatus.setWrapText(true);
+        Button open = primaryButton("Открыть MP3…");
+        Button cancel = new Button("Отменить анализ");
+        cancel.setDisable(true);
+        open.setOnAction(e -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Выбрать песню");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Аудиофайлы", "*.mp3", "*.wav"));
+            File file = chooser.showOpenDialog(owner);
+            if (file == null) return;
+            cancelSongAnalysis();
+            songNotes.getItems().clear();
+            songResult = null;
+            drawSongOverview(null);
+            songStatus.setText("Анализ: " + file.getName() + "…");
+            open.setDisable(true);
+            cancel.setDisable(false);
+            songAnalyzer = new SongAnalyzer();
+            SongAnalyzer analyzer = songAnalyzer;
+            songTask = new Task<>() {
+                @Override protected SongAnalyzer.Result call() throws Exception {
+                    return analyzer.analyze(file.toPath());
+                }
+            };
+            songTask.setOnSucceeded(event -> {
+                SongAnalyzer.Result result = songTask.getValue();
+                songResult = result;
+                songStatus.setText(file.getName() + " · " + Math.round(result.durationSeconds())
+                        + " с · найдено " + result.notes().size() + " кандидатов в ноты"
+                        + (result.durationSeconds() >= 599 ? " · показаны первые 10 минут" : ""));
+                songNotes.getItems().setAll(result.notes().stream().limit(500).map(note ->
+                        String.format("%6.1f с   %4.1f с   %s", note.startSeconds(),
+                                note.durationSeconds(), ExerciseCatalog.noteName(note.midi()))).toList());
+                drawSongOverview(result);
+                open.setDisable(false);
+                cancel.setDisable(true);
+            });
+            songTask.setOnFailed(event -> {
+                Throwable error = songTask.getException();
+                songStatus.setText("Не удалось обработать файл: " + error.getMessage()
+                        + ". Для этого режима нужен локальный FFmpeg.");
+                open.setDisable(false);
+                cancel.setDisable(true);
+            });
+            songTask.setOnCancelled(event -> {
+                songStatus.setText("Анализ отменён");
+                open.setDisable(false);
+                cancel.setDisable(true);
+            });
+            Thread worker = new Thread(songTask, "song-analysis");
+            worker.setDaemon(true);
+            worker.start();
+        });
+        cancel.setOnAction(e -> cancelSongAnalysis());
+        HBox actions = new HBox(10, open, cancel);
+        songOverview = new Canvas(800, 170);
+        songNotes = new ListView<>();
+        songNotes.setPrefHeight(250);
+        songNotes.setMinHeight(100);
+        VBox.setVgrow(songNotes, Priority.ALWAYS);
+        Label columns = label("Время       Длительность       Предполагаемая нота", "muted");
+        songPage = new VBox(12, heading, explanation, actions, songStatus, songOverview, columns, songNotes);
+        VBox.setVgrow(songPage, Priority.ALWAYS);
+        explanation.prefWidthProperty().bind(songPage.widthProperty().subtract(4));
+        songStatus.prefWidthProperty().bind(songPage.widthProperty().subtract(4));
+        songOverview.widthProperty().bind(songPage.widthProperty().subtract(2));
+        songOverview.widthProperty().addListener((obs, old, value) -> drawSongOverview(songResult));
+        drawSongOverview(null);
+    }
+
+    private void cancelSongAnalysis() {
+        if (songAnalyzer != null) songAnalyzer.cancel();
+        if (songTask != null) songTask.cancel(true);
+    }
+
+    private void drawSongOverview(SongAnalyzer.Result result) {
+        if (songOverview == null) return;
+        var g = songOverview.getGraphicsContext2D();
+        double width = songOverview.getWidth(), height = songOverview.getHeight();
+        g.setFill(javafx.scene.paint.Color.web("#282828"));
+        g.fillRect(0, 0, width, height);
+        g.setFill(javafx.scene.paint.Color.web("#b8b8b5"));
+        if (result == null || result.notes().isEmpty()) {
+            g.fillText("Нотная линия появится после анализа", 16, 25);
+            return;
+        }
+        int min = result.notes().stream().mapToInt(SongAnalyzer.NoteEvent::midi).min().orElse(60);
+        int max = result.notes().stream().mapToInt(SongAnalyzer.NoteEvent::midi).max().orElse(72);
+        double seconds = Math.max(1, result.durationSeconds());
+        for (SongAnalyzer.NoteEvent note : result.notes()) {
+            double x = 12 + (width - 24) * note.startSeconds() / seconds;
+            double w = Math.max(2, (width - 24) * note.durationSeconds() / seconds);
+            double y = 28 + (height - 52) * (max - note.midi()) / Math.max(1, max - min);
+            g.setFill(javafx.scene.paint.Color.web("#ffad57"));
+            g.fillRect(x, y, w, 5);
+        }
+        g.setFill(javafx.scene.paint.Color.web("#b8b8b5"));
+        g.fillText(ExerciseCatalog.noteName(max), 8, 17);
+        g.fillText(ExerciseCatalog.noteName(min), 8, height - 8);
+        g.fillText(Math.round(seconds) + " с", width - 46, height - 8);
+    }
+
+    private void showPage(boolean library, boolean songs) {
+        if (livePage == null || libraryPage == null || songPage == null) return;
+        livePage.setVisible(!library && !songs);
+        livePage.setManaged(!library && !songs);
         libraryPage.setVisible(library);
         libraryPage.setManaged(library);
+        songPage.setVisible(songs);
+        songPage.setManaged(songs);
     }
 
     private static ExerciseChartState chartState(ExerciseCatalog.Option choice) {
