@@ -11,14 +11,14 @@ import java.util.List;
 
 /** The single live microphone canvas; exercise targets are an optional overlay. */
 public final class PitchChart {
-    private static final Color BACKGROUND = Color.web("#202427");
-    private static final Color GRID = Color.web("#434a4d");
-    private static final Color NATURAL_ROW = Color.web("#252b2d");
-    private static final Color SHARP_ROW = Color.web("#2e3538");
-    private static final Color LABEL = Color.web("#c8cecc");
-    private static final Color TRACE = Color.web("#77d4b4");
-    private static final Color TARGET = Color.web("#706756");
-    private static final Color MISS = Color.web("#f59a74");
+    private static final Color BACKGROUND = Color.web("#282828");
+    private static final Color GRID = Color.web("#4b4b4b");
+    private static final Color NATURAL_ROW = Color.web("#303030");
+    private static final Color SHARP_ROW = Color.web("#363636");
+    private static final Color LABEL = Color.web("#b8b8b5");
+    private static final Color TRACE = Color.web("#6de1d5");
+    private static final Color TARGET = Color.web("#c49050");
+    private static final Color MISS = Color.web("#ff8a91");
     private static final double LEFT = 48, RIGHT = 16, TOP = 18, BOTTOM = 28;
     private final Canvas canvas;
 
@@ -70,7 +70,7 @@ public final class PitchChart {
         if (targets != null) drawTargets(g, targets, nowNanos, viewport, w, h, center, halfRange);
         trace(g, timeline.points(), viewport, w, h, center, halfRange, targets);
         double cursor = viewport.x(nowNanos, LEFT, plotWidth);
-        g.setStroke(Color.web("#f4cf70"));
+        g.setStroke(Color.web("#ffad57"));
         g.setLineWidth(2);
         g.strokeLine(cursor, TOP, cursor, h - BOTTOM);
         g.restore();
@@ -101,10 +101,10 @@ public final class PitchChart {
             long from = targetStart + targets.patternStarts().get(part) * noteNanos;
             double x = viewport.x(from, LEFT, plotWidth);
             if (x < LEFT || x > w - RIGHT) continue;
-            g.setStroke(Color.web("#f4cf70"));
+            g.setStroke(Color.web("#ffad57"));
             g.setLineWidth(1.5);
             g.strokeLine(x, TOP, x, h - BOTTOM);
-            g.setFill(Color.web("#f4cf70"));
+            g.setFill(Color.web("#ffad57"));
             g.fillText("Паттерн " + (part + 1), x + 5, TOP + 12);
         }
     }

@@ -75,6 +75,7 @@ public final class IntonationApp extends Application {
         settings.setOnAction(e -> showMicrophoneSettings(stage, false));
         HBox topBar = new HBox(10, brand, headingSpacer, transportButton, settings);
         topBar.setAlignment(Pos.CENTER_LEFT);
+        topBar.getStyleClass().add("top-bar");
 
         ToggleGroup mode = new ToggleGroup();
         liveMode = new ToggleButton("Живой голос");
@@ -89,6 +90,7 @@ public final class IntonationApp extends Application {
         songsLater.setTooltip(new Tooltip("Импорт песен появится после проверки качества распознавания нот"));
         HBox modeBar = new HBox(8, liveMode, exerciseMode, songsLater);
         modeBar.setAlignment(Pos.CENTER_LEFT);
+        modeBar.getStyleClass().add("mode-bar");
 
         exerciseView();
         mode.selectedToggleProperty().addListener((obs, old, selected) -> {
@@ -122,6 +124,7 @@ public final class IntonationApp extends Application {
         VBox workspace = new VBox(9, modeBar, livePage, libraryPage);
         VBox.setVgrow(workspace, Priority.ALWAYS);
         status = label("Подготовка микрофона…", "muted");
+        status.getStyleClass().add("status-line");
         VBox root = new VBox(6, topBar, workspace, status);
         root.setPadding(new Insets(14));
         Scene scene = new Scene(root, 980, 740);
@@ -255,18 +258,25 @@ public final class IntonationApp extends Application {
 
     private static void drawPatternPreview(Canvas canvas, ExerciseCatalog.Option option) {
         var g = canvas.getGraphicsContext2D();
-        g.setFill(javafx.scene.paint.Color.web("#202327"));
+        g.setFill(javafx.scene.paint.Color.web("#292929"));
         g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         List<Integer> notes = option.exercise().notes();
         int min = notes.stream().mapToInt(Integer::intValue).min().orElse(60);
         int max = notes.stream().mapToInt(Integer::intValue).max().orElse(67);
         double width = canvas.getWidth() / notes.size();
+        String clipColor = switch (option.exercise().id().split("_")[0]) {
+            case "ascending" -> "#66dcd3";
+            case "descending" -> "#a8b9ff";
+            case "three" -> "#e8d978";
+            case "triad" -> "#f9a6ae";
+            default -> "#ffad57";
+        };
         for (int i = 0; i < notes.size(); i++) {
             double y = 66 - (notes.get(i) - min) * 46.0 / Math.max(5, max - min);
-            g.setFill(javafx.scene.paint.Color.web("#778187"));
+            g.setFill(javafx.scene.paint.Color.web(clipColor));
             g.fillRoundRect(i * width + 2, y, Math.max(3, width - 4), 8, 3, 3);
         }
-        g.setStroke(javafx.scene.paint.Color.web("#353b40"));
+        g.setStroke(javafx.scene.paint.Color.web("#555555"));
         g.strokeLine(0, 76, canvas.getWidth(), 76);
     }
 
@@ -339,6 +349,7 @@ public final class IntonationApp extends Application {
             capture.stop();
             testResult.setText("Нажмите «Проверить микрофон»");
         });
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("theme.css").toExternalForm());
         dialog.getDialogPane().setContent(new VBox(12,
                 label("Устройство ввода", "muted"), choices, new HBox(8, test, refresh), testResult));
         ButtonType save = new ButtonType("Сохранить и начать", ButtonBar.ButtonData.OK_DONE);
@@ -505,6 +516,7 @@ public final class IntonationApp extends Application {
             dialog.initOwner(exerciseButton.getScene().getWindow());
             dialog.setTitle("История занятий");
             dialog.setHeaderText("Последние занятия хранятся только на этом компьютере");
+            dialog.getDialogPane().getStylesheets().add(getClass().getResource("theme.css").toExternalForm());
             dialog.getDialogPane().setContent(rows.isEmpty()
                     ? label("Пока нет завершённых занятий", "muted") : list);
             dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
