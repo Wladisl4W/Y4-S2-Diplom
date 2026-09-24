@@ -18,3 +18,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Build and test
         run: ./gradlew build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Test lead tracker
+        run: python -m unittest discover -s scripts -p 'test_*.py'

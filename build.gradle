@@ -4,7 +4,7 @@ plugins {
     id 'org.beryx.jlink' version '3.1.5'
 }
 
-version = '1.13.0'
+version = '1.14.0'
 
 repositories { mavenCentral() }
 
@@ -81,4 +81,11 @@ tasks.register('vocaditoYinReport', JavaExec) {
     mainClass = 'ru.diplom.intonation.audio.VocaditoYinReport'
     args project.findProperty('datasetPath') ?: '/tmp/vocadito',
             layout.buildDirectory.file('reports/vocadito-yin.md').get().asFile.absolutePath
+}
+
+tasks.register('songYinReport', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'ru.diplom.intonation.song.SongYinReport'
+    args project.findProperty('audioPath') ?: '/tmp/intonation-poly-smoke.wav'
 }

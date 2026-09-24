@@ -19,6 +19,7 @@ import ru.diplom.intonation.exercise.*;
 import ru.diplom.intonation.song.SongAnalyzer;
 import ru.diplom.intonation.song.SongPipeline;
 import ru.diplom.intonation.song.SongPlayback;
+import ru.diplom.intonation.song.SongEditStore;
 
 import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
@@ -44,6 +45,7 @@ public final class IntonationApp extends Application {
     private final PlaybackClock clock = new PlaybackClock();
     private final Preferences preferences = Preferences.userNodeForPackage(IntonationApp.class);
     private static final String MICROPHONE_KEY = "microphone";
+    private static final String SONG_MODEL_KEY = "song_separator_model";
     private ExerciseCatalog.Option selectedExercise;
     private ComboBox<Integer> exercisePitch;
     private ComboBox<Integer> climbChoice;
@@ -71,6 +73,9 @@ public final class IntonationApp extends Application {
     private ListView<String> songNotes;
     private Canvas songOverview;
     private SongAnalyzer.Result songResult;
+    private Path currentSongFile;
+    private final SongEditStore songEditStore = new SongEditStore(Path.of(System.getProperty("user.home"),
+            ".local/share/intonation-trainer/song-edits"));
     private Button transportButton;
     private MicrophoneCapture.Device selectedDevice;
     private Button exerciseButton;
@@ -424,7 +429,7 @@ public final class IntonationApp extends Application {
 
     private void songView(Stage owner) {
         Label heading = label("Разбор песни · исследовательский режим", "library-title");
-        Label explanation = label("MP3 локально делится на вокал и инструментал. Ноты ищутся только в вокале.\nПроверьте их перед занятием: модель и детектор иногда ошибаются.", "muted");
+        Label explanation = label("MP3 локально делится на вокал и инструментал. Модель предлагает ведущую линию и варианты при наложении голосов.\nПроверьте ноты перед занятием: автоматический разбор может ошибаться.", "muted");
         explanation.setWrapText(true);
         explanation.setMinHeight(36);
         songStatus = label("Выберите MP3 для просмотра черновой нотной линии.", "muted");
@@ -432,6 +437,26 @@ public final class IntonationApp extends Application {
         Button open = primaryButton("Открыть MP3…");
         Button cancel = new Button("Отменить анализ");
         cancel.setDisable(true);
+        ComboBox<String> songModel = new ComboBox<>(FXCollections.observableArrayList(
+                "vocals_mel_band_roformer.ckpt", "htdemucs_ft.yaml", "UVR-MDX-NET_Main_406.onnx"));
+        songModel.setPrefWidth(210);
+        songModel.setTooltip(new Tooltip("Тщательные модели лучше сохраняют вокал, "
+                + "но 30 с аудио могут обрабатываться несколько минут."));
+        songModel.setConverter(new StringConverter<>() {
+            @Override public String toString(String model) {
+                if (model == null) return "";
+                return switch (model) {
+                    case "vocals_mel_band_roformer.ckpt" -> "Максимум · MelBand";
+                    case "htdemucs_ft.yaml" -> "Точно · Demucs";
+                    default -> "Быстро · UVR-MDX";
+                };
+            }
+            @Override public String fromString(String text) { throw new UnsupportedOperationException(); }
+        });
+        String savedModel = preferences.get(SONG_MODEL_KEY, "vocals_mel_band_roformer.ckpt");
+        songModel.setValue(songModel.getItems().contains(savedModel)
+                ? savedModel : "vocals_mel_band_roformer.ckpt");
+        songModel.valueProperty().addListener((obs, old, value) -> preferences.put(SONG_MODEL_KEY, value));
         practiceSong = primaryButton("Петь на главном полотне →");
         practiceSong.setDisable(true);
         practiceSong.setOnAction(e -> startSongPractice());
@@ -441,6 +466,7 @@ public final class IntonationApp extends Application {
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Аудиофайлы", "*.mp3", "*.wav"));
             File file = chooser.showOpenDialog(owner);
             if (file == null) return;
+            currentSongFile = file.toPath();
             stopSongPractice();
             if (songPipeline != null) songPipeline.close();
             readySong = null;
@@ -451,7 +477,7 @@ public final class IntonationApp extends Application {
             songStatus.setText("Анализ: " + file.getName() + "…");
             open.setDisable(true);
             cancel.setDisable(false);
-            songPipeline = new SongPipeline();
+            songPipeline = new SongPipeline(songModel.getValue());
             SongPipeline pipeline = songPipeline;
             Task<SongPipeline.Result> task = new Task<>() {
                 @Override protected SongPipeline.Result call() throws Exception {
@@ -465,9 +491,21 @@ public final class IntonationApp extends Application {
             task.setOnSucceeded(event -> {
                 readySong = task.getValue();
                 songResult = readySong.transcription();
+                boolean restoredEdits = false;
+                String editWarning = "";
+                try {
+                    SongAnalyzer.Result generated = songResult;
+                    songResult = songEditStore.load(file.toPath(), songResult);
+                    readySong = new SongPipeline.Result(readySong.vocals(), readySong.instrumental(), songResult);
+                    restoredEdits = songResult != generated;
+                } catch (IOException error) {
+                    editWarning = " · исправления не прочитаны: " + error.getMessage();
+                }
                 songStatus.setText(file.getName() + " · вокал отделён · "
                         + songResult.notes().size() + " кандидатов в ноты"
-                        + (songResult.durationSeconds() >= 599 ? " · первые 10 минут" : ""));
+                        + (restoredEdits ? " · восстановлены ручные исправления" : "")
+                        + (songResult.durationSeconds() >= 599 ? " · первые 10 минут" : "")
+                        + editWarning);
                 refreshSongNotes();
                 practiceSong.setDisable(songResult.notes().isEmpty());
                 open.setDisable(false);
@@ -490,20 +528,25 @@ public final class IntonationApp extends Application {
             worker.start();
         });
         cancel.setOnAction(e -> cancelSongAnalysis());
-        HBox actions = new HBox(10, open, cancel, practiceSong);
+        HBox modelSelector = new HBox(8, label("Разделение", "muted"), songModel);
+        modelSelector.setAlignment(Pos.CENTER_LEFT);
+        FlowPane actions = new FlowPane(10, 8, open, cancel, practiceSong, modelSelector);
+        actions.setAlignment(Pos.CENTER_LEFT);
         songOverview = new Canvas(800, 120);
         songNotes = new ListView<>();
         songNotes.setPrefHeight(250);
         songNotes.setMinHeight(100);
         VBox.setVgrow(songNotes, Priority.ALWAYS);
-        Label columns = label("Время       Длительность       Предполагаемая нота", "muted");
+        Label columns = label("Время       Длительность       Предполагаемая нота       Оценка модели", "muted");
         Button noteDown = new Button("− полутон");
         Button noteUp = new Button("+ полутон");
         Button noteDelete = new Button("Удалить ноту");
+        Button noteAlternative = new Button("Выбрать другой голос");
         noteDown.setOnAction(e -> editSongNote(-1, false));
         noteUp.setOnAction(e -> editSongNote(1, false));
         noteDelete.setOnAction(e -> editSongNote(0, true));
-        HBox corrections = new HBox(8, noteDown, noteUp, noteDelete);
+        noteAlternative.setOnAction(e -> useSongAlternative());
+        HBox corrections = new HBox(8, noteDown, noteUp, noteDelete, noteAlternative);
         songPage = new VBox(9, heading, explanation, actions, songStatus, songOverview,
                 columns, songNotes, corrections);
         VBox.setVgrow(songPage, Priority.ALWAYS);
@@ -529,19 +572,80 @@ public final class IntonationApp extends Application {
         if (delete) changed.remove(index);
         else changed.set(index, new SongAnalyzer.NoteEvent(note.startSeconds(),
                 note.durationSeconds(), Math.max(0, Math.min(127, note.midi() + semitones))));
-        songResult = new SongAnalyzer.Result(changed, readySong.transcription().durationSeconds());
+        songResult = new SongAnalyzer.Result(changed, readySong.transcription().durationSeconds(),
+                readySong.transcription().alternatives());
         readySong = new SongPipeline.Result(readySong.vocals(), readySong.instrumental(), songResult);
         refreshSongNotes();
         if (!changed.isEmpty()) songNotes.getSelectionModel().select(Math.min(index, changed.size() - 1));
         practiceSong.setDisable(changed.isEmpty());
         songStatus.setText("Нотная линия исправлена вручную · " + changed.size() + " нот");
+        saveSongEdits();
+    }
+
+    private void useSongAlternative() {
+        if (readySong == null) return;
+        int index = songNotes.getSelectionModel().getSelectedIndex();
+        if (index < 0 || index >= songResult.notes().size()) return;
+        SongAnalyzer.NoteEvent selected = songResult.notes().get(index);
+        List<SongAnalyzer.Alternative> choices = songResult.alternatives().stream()
+                .filter(candidate -> Math.abs(candidate.startSeconds() - selected.startSeconds()) < 0.06
+                        && Math.abs(candidate.durationSeconds() - selected.durationSeconds()) < 0.06)
+                .filter(candidate -> candidate.midi() != selected.midi())
+                .collect(Collectors.toMap(SongAnalyzer.Alternative::midi, candidate -> candidate,
+                        (a, b) -> a.confidence() >= b.confidence() ? a : b))
+                .values().stream().sorted(java.util.Comparator.comparingDouble(
+                        SongAnalyzer.Alternative::confidence).reversed()).limit(5).toList();
+        if (choices.isEmpty()) {
+            songStatus.setText("Для этой ноты альтернативная вокальная линия не обнаружена");
+            return;
+        }
+        List<String> labels = IntStream.range(0, choices.size()).mapToObj(i ->
+                ExerciseCatalog.noteName(choices.get(i).midi())
+                        + String.format(" · оценка модели %.0f%%", choices.get(i).confidence() * 100)
+                        + " · вариант " + (i + 1)).toList();
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(labels.getFirst(), labels);
+        dialog.setTitle("Ведущая вокальная линия");
+        dialog.setHeaderText("Выберите голос для участка с "
+                + String.format("%.1f с", selected.startSeconds()));
+        dialog.setContentText("Нота:");
+        dialog.showAndWait().ifPresent(label -> {
+            SongAnalyzer.Alternative candidate = choices.get(labels.indexOf(label));
+            stopSongPractice();
+            List<SongAnalyzer.NoteEvent> changed = new java.util.ArrayList<>(songResult.notes());
+            changed.set(index, new SongAnalyzer.NoteEvent(selected.startSeconds(),
+                    selected.durationSeconds(), candidate.midi()));
+            songResult = new SongAnalyzer.Result(changed, songResult.durationSeconds(),
+                    songResult.alternatives());
+            readySong = new SongPipeline.Result(readySong.vocals(), readySong.instrumental(), songResult);
+            refreshSongNotes();
+            songNotes.getSelectionModel().select(index);
+            songStatus.setText("Выбрана другая вокальная линия для ноты");
+            saveSongEdits();
+        });
+    }
+
+    private void saveSongEdits() {
+        if (currentSongFile == null || songResult == null) return;
+        try {
+            songEditStore.save(currentSongFile, songResult);
+        } catch (IOException error) {
+            songStatus.setText("Ноты изменены, но не удалось сохранить исправления: " + error.getMessage());
+        }
     }
 
     private void refreshSongNotes() {
         if (songResult == null) return;
-        songNotes.getItems().setAll(songResult.notes().stream().map(note ->
-                String.format("%6.1f с   %4.1f с   %s", note.startSeconds(),
-                        note.durationSeconds(), ExerciseCatalog.noteName(note.midi()))).toList());
+        songNotes.getItems().setAll(songResult.notes().stream().map(note -> {
+            boolean alternatives = songResult.alternatives().stream().anyMatch(candidate ->
+                    Math.abs(candidate.startSeconds() - note.startSeconds()) < 0.06
+                            && Math.abs(candidate.durationSeconds() - note.durationSeconds()) < 0.06
+                            && candidate.midi() != note.midi());
+            return String.format("%6.1f с   %4.1f с   %s%s", note.startSeconds(),
+                    note.durationSeconds(), ExerciseCatalog.noteName(note.midi())
+                            + (Double.isFinite(note.confidence())
+                            ? String.format("   %.0f%%", note.confidence() * 100) : ""),
+                    alternatives ? "   ◇ другой голос" : "");
+        }).toList());
         drawSongOverview(songResult);
     }
 

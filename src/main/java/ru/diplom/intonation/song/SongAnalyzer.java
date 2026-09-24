@@ -17,9 +17,17 @@ public final class SongAnalyzer {
     private static final int MAX_SECONDS = 600;
     private volatile Process activeProcess;
 
-    public record NoteEvent(double startSeconds, double durationSeconds, int midi) {}
-    public record Result(List<NoteEvent> notes, double durationSeconds) {
-        public Result { notes = List.copyOf(notes); }
+    public record NoteEvent(double startSeconds, double durationSeconds, int midi, double confidence) {
+        public NoteEvent(double startSeconds, double durationSeconds, int midi) {
+            this(startSeconds, durationSeconds, midi, Double.NaN);
+        }
+    }
+    public record Alternative(double startSeconds, double durationSeconds, int midi, double confidence) {}
+    public record Result(List<NoteEvent> notes, double durationSeconds, List<Alternative> alternatives) {
+        public Result { notes = List.copyOf(notes); alternatives = List.copyOf(alternatives); }
+        public Result(List<NoteEvent> notes, double durationSeconds) {
+            this(notes, durationSeconds, List.of());
+        }
     }
 
     public Result analyze(Path file) throws IOException, InterruptedException {

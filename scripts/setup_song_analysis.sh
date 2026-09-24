@@ -12,5 +12,17 @@ uv pip install --python "${APP_DATA}/python/bin/python" --reinstall torchvision 
   --index-url https://download.pytorch.org/whl/cpu
 mkdir -p "${APP_DATA}/models"
 "${APP_DATA}/python/bin/audio-separator" \
-  -m UVR_MDXNET_KARA_2.onnx --download_model_only \
+  -m UVR-MDX-NET_Main_406.onnx --download_model_only \
   --model_file_dir "${APP_DATA}/models"
+"${APP_DATA}/python/bin/audio-separator" \
+  -m htdemucs_ft.yaml --download_model_only \
+  --model_file_dir "${APP_DATA}/models"
+"${APP_DATA}/python/bin/audio-separator" \
+  -m vocals_mel_band_roformer.ckpt --download_model_only \
+  --model_file_dir "${APP_DATA}/models"
+
+# Basic Pitch needs NumPy 1.x while current Audio Separator uses NumPy 2.x.
+# Keep the two model stacks isolated so installation is reproducible.
+uv venv --python python3.10 "${APP_DATA}/ml-venv"
+uv pip install --python "${APP_DATA}/ml-venv/bin/python" \
+  'basic-pitch==0.4.0' 'soundfile>=0.12,<1' 'numpy<2'
