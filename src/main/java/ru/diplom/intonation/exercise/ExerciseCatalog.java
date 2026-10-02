@@ -41,7 +41,8 @@ public final class ExerciseCatalog {
         public int notesInPart(int noteIndex) {
             int part = partNumber(noteIndex);
             int end = part < starts.size() ? starts.get(part) : exercise.notes().size();
-            return end - starts.get(part - 1);
+            return (int) exercise.notes().subList(starts.get(part - 1), end).stream()
+                    .filter(note -> note != Exercise.REST).count();
         }
 
         @Override public String toString() {
@@ -70,10 +71,12 @@ public final class ExerciseCatalog {
             for (Exercise pattern : patterns) {
                 if (pattern.secondsPerNote() != secondsPerNote)
                     throw new IllegalStateException("Set patterns must use the same tempo");
-                List<Integer> shifted = pattern.notes().stream().map(note -> note + shift).toList();
+                List<Integer> shifted = pattern.notes().stream()
+                        .map(note -> note == Exercise.REST ? Exercise.REST : note + shift).toList();
                 Exercise variant = new Exercise(pattern.id() + suffix,
                         pattern.title() + " · " + root, shifted, secondsPerNote);
                 choices.add(new Option(Kind.PATTERN, variant.title(), variant, List.of(0)));
+                if (!combined.isEmpty()) combined.add(Exercise.REST);
                 starts.add(combined.size());
                 combined.addAll(shifted);
             }

@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /** Runs the optional local multi-pitch model; callers can fall back to YIN. */
 public final class LeadVocalTranscriber {
@@ -31,6 +32,13 @@ public final class LeadVocalTranscriber {
                     + output.substring(Math.max(0, output.length() - 400)).trim());
             return parse(output);
         } finally {
+            Process running = process;
+            if (running != null) {
+                running.destroyForcibly();
+                try { running.waitFor(5, TimeUnit.SECONDS); }
+                catch (InterruptedException error) { Thread.currentThread().interrupt(); }
+                process = null;
+            }
             Files.deleteIfExists(script);
         }
     }

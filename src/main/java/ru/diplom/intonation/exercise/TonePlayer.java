@@ -10,9 +10,9 @@ public final class TonePlayer {
     private static volatile Thread previewThread;
     private TonePlayer() {}
 
-    public static synchronized void playAsync(Exercise exercise) {
+    public static synchronized void playAsync(WarmupRoute route) {
         stop();
-        Thread worker = new Thread(() -> play(exercise), "piano-preview");
+        Thread worker = new Thread(() -> play(route), "piano-preview");
         worker.setDaemon(true);
         previewThread = worker;
         worker.start();
@@ -23,21 +23,37 @@ public final class TonePlayer {
         previewThread = null;
     }
 
-    private static void play(Exercise exercise) {
+    private static void play(WarmupRoute route) {
         Synthesizer synth = null;
         try {
             synth = MidiSystem.getSynthesizer();
             synth.open();
-            MidiChannel piano = synth.getChannels()[0];
-            piano.programChange(0); // General MIDI Acoustic Grand Piano
-            for (int midi : exercise.notes()) {
-                if (Thread.currentThread().isInterrupted()) break;
-                if (midi != Exercise.REST) piano.noteOn(midi, 70);
-                Thread.sleep((long) (Math.min(0.9, exercise.secondsPerNote() * 0.65) * 1000));
-                if (midi != Exercise.REST) piano.noteOff(midi);
-                Thread.sleep(110);
+            MidiChannel melody = synth.getChannels()[0];
+            MidiChannel chords = synth.getChannels()[1];
+            melody.programChange(0);
+            chords.programChange(0);
+            long start = System.nanoTime();
+            long end = start + (long) (route.option().exercise().durationSeconds() * 1e9);
+            PianoCue previous = PianoCue.SILENCE;
+            while (System.nanoTime() < end && !Thread.currentThread().isInterrupted()) {
+                PianoCue next = PianoCue.at(route, System.nanoTime(), start, true, true);
+                if (next.melodyNote() != previous.melodyNote()) {
+                    melody.allNotesOff();
+                    if (next.melodyNote() >= 0) melody.noteOn(next.melodyNote(), 70);
+                }
+                if (next.chordRoot() != previous.chordRoot()) {
+                    chords.allNotesOff();
+                    if (next.chordRoot() >= 0) {
+                        chords.noteOn(next.chordRoot(), 43);
+                        chords.noteOn(next.chordRoot() + 4, 36);
+                        chords.noteOn(next.chordRoot() + 7, 36);
+                    }
+                }
+                previous = next;
+                Thread.sleep(10);
             }
-            piano.allNotesOff();
+            melody.allNotesOff();
+            chords.allNotesOff();
         } catch (MidiUnavailableException ignored) {
             // Preview is optional when the operating system has no audio output.
         } catch (InterruptedException interrupted) {

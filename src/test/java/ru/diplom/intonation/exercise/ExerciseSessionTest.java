@@ -19,8 +19,26 @@ class ExerciseSessionTest {
         session.accept(3_100_000_000L, 61.0);
         assertTrue(session.finished(4_000_000_000L));
         ExerciseSession.Result result = session.result();
-        assertEquals(33, result.score());
-        assertEquals(67, result.coverage());
+        assertEquals(5, result.score());
+        assertEquals(10, result.coverage());
         assertEquals(55, result.averageErrorCents());
+    }
+
+    @Test void missingMicrophoneFramesCannotEarnPerfectScore() {
+        Exercise exercise = new Exercise("long", "Long", List.of(60), 10.0);
+        ExerciseSession session = new ExerciseSession(exercise, 0);
+        for (int slot = 0; slot < 10; slot++)
+            session.accept(session.startNanos() + slot * 100_000_000L, 60);
+        assertEquals(10, session.result().score());
+        assertEquals(10, session.result().coverage());
+    }
+
+    @Test void extraFramesInsideOneIntervalDoNotIncreaseScore() {
+        Exercise exercise = new Exercise("one", "One", List.of(60), 1.0);
+        ExerciseSession session = new ExerciseSession(exercise, 0);
+        for (int frame = 0; frame < 20; frame++)
+            session.accept(session.startNanos() + frame * 1_000_000L, 60);
+        assertEquals(10, session.result().score());
+        assertEquals(10, session.result().coverage());
     }
 }

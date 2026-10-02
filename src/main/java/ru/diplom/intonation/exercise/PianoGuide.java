@@ -37,18 +37,24 @@ public final class PianoGuide implements AutoCloseable {
 
     private void setDesired(int nextMelody, int nextChord) {
         if (closed || (nextMelody == desiredMelody && nextChord == desiredChordRoot)) return;
+        int previousMelody = desiredMelody;
+        int previousChord = desiredChordRoot;
         desiredMelody = nextMelody;
         desiredChordRoot = nextChord;
         audio.execute(() -> {
             if ((nextMelody >= 0 || nextChord >= 0) && !open()) return;
             if (melody == null) return;
-            melody.allNotesOff();
-            chords.allNotesOff();
-            if (nextMelody >= 0) melody.noteOn(nextMelody, 64);
-            if (nextChord >= 0) {
-                chords.noteOn(nextChord, 43);
-                chords.noteOn(nextChord + 4, 36);
-                chords.noteOn(nextChord + 7, 36);
+            if (previousMelody != nextMelody) {
+                melody.allNotesOff();
+                if (nextMelody >= 0) melody.noteOn(nextMelody, 64);
+            }
+            if (previousChord != nextChord) {
+                chords.allNotesOff();
+                if (nextChord >= 0) {
+                    chords.noteOn(nextChord, 43);
+                    chords.noteOn(nextChord + 4, 36);
+                    chords.noteOn(nextChord + 7, 36);
+                }
             }
         });
     }

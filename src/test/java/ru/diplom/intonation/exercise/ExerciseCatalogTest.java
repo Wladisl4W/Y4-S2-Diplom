@@ -13,7 +13,8 @@ class ExerciseCatalogTest {
         assertEquals("C♯4", ExerciseCatalog.noteName(61));
         assertEquals(5, sharp.size());
         for (int choice = 0; choice < c.size(); choice++) {
-            assertEquals(c.get(choice).exercise().notes().stream().map(note -> note + 1).toList(),
+            assertEquals(c.get(choice).exercise().notes().stream()
+                            .map(note -> note == Exercise.REST ? Exercise.REST : note + 1).toList(),
                     sharp.get(choice).exercise().notes());
             assertEquals(c.get(choice).starts(), sharp.get(choice).starts());
         }
@@ -24,15 +25,16 @@ class ExerciseCatalogTest {
         assertEquals(15, options.size());
         ExerciseCatalog.Option set = options.get(4);
         assertEquals(ExerciseCatalog.Kind.SET, set.kind());
-        assertEquals(List.of(0, 5, 10, 15), set.starts());
-        assertEquals(20, set.exercise().notes().size());
+        assertEquals(List.of(0, 6, 12, 18), set.starts());
+        assertEquals(23, set.exercise().notes().size());
         assertEquals(options.get(0).exercise().notes(), set.exercise().notes().subList(0, 5));
-        assertEquals(options.get(1).exercise().notes(), set.exercise().notes().subList(5, 10));
-        assertEquals(40, set.exercise().durationSeconds());
+        assertEquals(Exercise.REST, set.exercise().notes().get(5));
+        assertEquals(options.get(1).exercise().notes(), set.exercise().notes().subList(6, 11));
+        assertEquals(46, set.exercise().durationSeconds());
         assertEquals(1, set.partNumber(4));
-        assertEquals(2, set.partNumber(5));
-        assertEquals(1, set.noteNumberInPart(5));
-        assertEquals(5, set.notesInPart(5));
+        assertEquals(2, set.partNumber(6));
+        assertEquals(1, set.noteNumberInPart(6));
+        assertEquals(5, set.notesInPart(6));
         assertEquals(48, options.get(5).exercise().notes().getFirst()); // C3
         assertEquals(72, options.get(10).exercise().notes().getFirst()); // C5
     }

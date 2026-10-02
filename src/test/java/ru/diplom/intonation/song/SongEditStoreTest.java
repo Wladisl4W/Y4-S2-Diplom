@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,6 +24,10 @@ class SongEditStoreTest {
         assertEquals(64, restored.notes().getFirst().midi());
         assertEquals(0.72, restored.notes().getFirst().confidence());
         assertEquals(original.alternatives(), restored.alternatives());
+        FileTime originalTime = Files.getLastModifiedTime(song);
+        Files.writeString(song, "other fixture"); // same size and timestamp, different audio
+        Files.setLastModifiedTime(song, originalTime);
+        assertEquals(original, store.load(song, original));
         Files.writeString(song, "updated song");
         assertEquals(original, store.load(song, original));
     }

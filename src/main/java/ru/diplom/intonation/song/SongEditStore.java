@@ -63,11 +63,14 @@ public final class SongEditStore {
     }
 
     private Path location(Path song) throws IOException {
-        String identity = song.toAbsolutePath().normalize() + ":" + Files.size(song) + ":"
-                + Files.getLastModifiedTime(song).toMillis();
         try {
-            byte[] hash = MessageDigest.getInstance("SHA-256").digest(identity.getBytes(StandardCharsets.UTF_8));
-            return directory.resolve(HexFormat.of().formatHex(hash) + ".csv");
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            try (var input = Files.newInputStream(song)) {
+                byte[] block = new byte[65_536];
+                int size;
+                while ((size = input.read(block)) != -1) digest.update(block, 0, size);
+            }
+            return directory.resolve(HexFormat.of().formatHex(digest.digest()) + ".csv");
         } catch (NoSuchAlgorithmException error) {
             throw new IOException("SHA-256 недоступен", error);
         }

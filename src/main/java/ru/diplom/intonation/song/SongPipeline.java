@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /** Separates two local stems before extracting candidate notes from vocals only. */
@@ -14,6 +15,9 @@ public final class SongPipeline implements AutoCloseable {
     private volatile Process process;
     private volatile SongAnalyzer analyzer;
     private volatile LeadVocalTranscriber leadTranscriber;
+    private volatile boolean cancelled;
+    private volatile boolean closed;
+    private Thread analysisThread;
     private Path output;
 
     public record Result(Path vocals, Path instrumental, SongAnalyzer.Result transcription) {}
@@ -26,6 +30,24 @@ public final class SongPipeline implements AutoCloseable {
     }
 
     public Result analyze(Path input, Consumer<String> progress) throws IOException, InterruptedException {
+        synchronized (this) {
+            if (analysisThread != null || closed) throw new IOException("Анализ уже запущен или закрыт");
+            analysisThread = Thread.currentThread();
+        }
+        boolean succeeded = false;
+        try {
+            Result result = analyzeInternal(input, progress);
+            checkActive();
+            succeeded = true;
+            return result;
+        } finally {
+            synchronized (this) { analysisThread = null; }
+            if (!succeeded || closed) cleanupOutput();
+        }
+    }
+
+    private Result analyzeInternal(Path input, Consumer<String> progress) throws IOException, InterruptedException {
+        checkActive();
         Path home = Path.of(System.getProperty("user.home"));
         Path modelDir = home.resolve(".local/share/intonation-trainer/models");
         String model = System.getenv("INTONATION_SEPARATOR_MODEL");
@@ -50,26 +72,26 @@ public final class SongPipeline implements AutoCloseable {
         output = Files.createTempDirectory("intonation-stems-");
         progress.accept("Подготовка аудио…");
         Path decoded = output.resolve("source.wav");
-        process = new ProcessBuilder("ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error",
+        process = startProcess(new ProcessBuilder("ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error",
                 "-y", "-i", input.toAbsolutePath().toString(), "-t", "600",
                 "-ac", "2", "-ar", "44100", decoded.toString())
                 .redirectError(ProcessBuilder.Redirect.DISCARD)
-                .redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
+                .redirectOutput(ProcessBuilder.Redirect.DISCARD));
         int decodeExit = process.waitFor();
         process = null;
-        if (Thread.currentThread().isInterrupted()) throw new InterruptedException();
+        checkActive();
         if (decodeExit != 0) throw new IOException("FFmpeg не смог прочитать аудиофайл");
         progress.accept(model.equals("htdemucs_ft.yaml") || model.endsWith(".ckpt")
                 ? "Тщательное отделение вокала… на CPU это может занять много минут"
                 : "Отделение вокала от инструментала…");
-        process = new ProcessBuilder(command, decoded.toString(),
+        process = startProcess(new ProcessBuilder(command, decoded.toString(),
                 "-m", model, "--output_format", "WAV", "--output_dir", output.toString(),
                 "--model_file_dir", modelDir.toString(), "--log_level", "ERROR")
                 .redirectError(ProcessBuilder.Redirect.DISCARD)
-                .redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
+                .redirectOutput(ProcessBuilder.Redirect.DISCARD));
         int exit = process.waitFor();
         process = null;
-        if (Thread.currentThread().isInterrupted()) throw new InterruptedException();
+        checkActive();
         if (exit != 0) throw new IOException("Модель не смогла разделить файл на вокал и инструментал");
         List<Path> stems;
         try (var paths = Files.list(output)) {
@@ -85,14 +107,15 @@ public final class SongPipeline implements AutoCloseable {
             Path drums = optionalStem(stems, "(Drums)");
             if (bass != null && drums != null) {
                 instrumental = output.resolve("instrumental-combined.wav");
-                process = new ProcessBuilder("ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error",
+                process = startProcess(new ProcessBuilder("ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error",
                         "-y", "-i", other.toString(), "-i", bass.toString(), "-i", drums.toString(),
                         "-filter_complex", "amix=inputs=3:duration=longest:normalize=0",
                         instrumental.toString())
                         .redirectError(ProcessBuilder.Redirect.DISCARD)
-                        .redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
+                        .redirectOutput(ProcessBuilder.Redirect.DISCARD));
                 int combineExit = process.waitFor();
                 process = null;
+                checkActive();
                 if (combineExit != 0) throw new IOException("Не удалось собрать инструментальную дорожку");
             } else instrumental = other;
         }
@@ -100,14 +123,28 @@ public final class SongPipeline implements AutoCloseable {
         SongAnalyzer.Result transcription;
         try {
             leadTranscriber = new LeadVocalTranscriber();
+            checkActive();
             transcription = leadTranscriber.analyze(vocals);
             if (transcription.notes().isEmpty()) throw new IOException("Модель не нашла нот");
         } catch (IOException error) {
             progress.accept("Многоголосный анализ недоступен; применяю резервный YIN…");
+            checkActive();
             analyzer = new SongAnalyzer();
             transcription = analyzer.analyze(vocals);
         }
         return new Result(vocals, instrumental, transcription);
+    }
+
+    private Process startProcess(ProcessBuilder builder) throws IOException, InterruptedException {
+        checkActive();
+        Process started = builder.start();
+        process = started;
+        if (cancelled || closed || Thread.currentThread().isInterrupted()) started.destroyForcibly();
+        return started;
+    }
+
+    private void checkActive() throws InterruptedException {
+        if (cancelled || closed || Thread.currentThread().isInterrupted()) throw new InterruptedException();
     }
 
     private static Path stem(List<Path> paths, String marker) throws IOException {
@@ -123,6 +160,7 @@ public final class SongPipeline implements AutoCloseable {
     }
 
     public void cancel() {
+        cancelled = true;
         Process running = process;
         if (running != null) running.destroyForcibly();
         SongAnalyzer runningAnalyzer = analyzer;
@@ -132,8 +170,26 @@ public final class SongPipeline implements AutoCloseable {
     }
 
     @Override public void close() {
+        closed = true;
         cancel();
-        Path directory = output;
+        synchronized (this) {
+            if (analysisThread != null) return; // The analysis worker removes files after it stops.
+        }
+        cleanupOutput();
+    }
+
+    private void cleanupOutput() {
+        Process running = process;
+        if (running != null) {
+            running.destroyForcibly();
+            try { running.waitFor(5, TimeUnit.SECONDS); }
+            catch (InterruptedException error) { Thread.currentThread().interrupt(); }
+        }
+        Path directory;
+        synchronized (this) {
+            directory = output;
+            output = null;
+        }
         if (directory != null) {
             try (var paths = Files.walk(directory)) {
                 paths.sorted(Comparator.reverseOrder()).forEach(path -> {
