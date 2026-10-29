@@ -3,28 +3,21 @@ package ru.diplom.intonation;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import javafx.stage.FileChooser;
 import ru.diplom.intonation.audio.*;
 import ru.diplom.intonation.exercise.*;
-import ru.diplom.intonation.song.SongAnalyzer;
 import ru.diplom.intonation.song.SongPipeline;
 import ru.diplom.intonation.song.SongPlayback;
-import ru.diplom.intonation.song.SongEditStore;
 
 import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
-import java.io.File;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -35,7 +28,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.prefs.Preferences;
 import java.util.stream.IntStream;
-import javafx.util.StringConverter;
 
 public final class IntonationApp extends Application {
     private final MicrophoneCapture capture = new MicrophoneCapture();
@@ -45,43 +37,23 @@ public final class IntonationApp extends Application {
     private final PlaybackClock clock = new PlaybackClock();
     private final Preferences preferences = Preferences.userNodeForPackage(IntonationApp.class);
     private static final String MICROPHONE_KEY = "microphone";
-    private static final String SONG_MODEL_KEY = "song_separator_model";
-    private static final String COMFORT_LOW_KEY = "warmup_comfort_low";
-    private static final String COMFORT_HIGH_KEY = "warmup_comfort_high";
-    private ExerciseCatalog.Option selectedExercise;
-    private ComboBox<Integer> exercisePitch;
-    private ComboBox<Integer> climbChoice;
-    private ComboBox<Double> paceChoice;
     private CheckBox notePiano;
     private CheckBox transitionPiano;
     private HBox pianoControls;
-    private FlowPane patternCards;
-    private Label selectionTitle;
-    private Label comfortNotice;
     private VBox livePage;
     private VBox libraryPage;
+    private WarmupLibrary warmupLibrary;
     private VBox songPage;
+    private SongLibrary songLibrary;
     private ToggleButton songMode;
-    private Task<SongPipeline.Result> songTask;
-    private SongPipeline songPipeline;
-    private SongPipeline.Result readySong;
     private final SongPlayback songPlayback = new SongPlayback();
     private SongChartState songChart;
     private HBox songControls;
     private Label songPracticeStatus;
     private CheckBox instrumentalSound;
     private CheckBox vocalSound;
-    private Button practiceSong;
-    private Label songStatus;
-    private ListView<String> songNotes;
-    private Canvas songOverview;
-    private SongAnalyzer.Result songResult;
-    private Path currentSongFile;
-    private final SongEditStore songEditStore = new SongEditStore(Path.of(System.getProperty("user.home"),
-            ".local/share/intonation-trainer/song-edits"));
     private Button transportButton;
     private MicrophoneCapture.Device selectedDevice;
-    private Button exerciseButton;
     private Button cancelExerciseButton;
     private Label note;
     private Label cents;
@@ -135,8 +107,11 @@ public final class IntonationApp extends Application {
         modeBar.setAlignment(Pos.CENTER_LEFT);
         modeBar.getStyleClass().add("mode-bar");
 
-        exerciseView();
-        songView(stage);
+        warmupLibrary = new WarmupLibrary(preferences, this::launchExercise);
+        libraryPage = warmupLibrary.page();
+        exerciseDetailsView();
+        songLibrary = new SongLibrary(stage, preferences, this::stopSongPractice, this::startSongPractice);
+        songPage = songLibrary.page();
         mode.selectedToggleProperty().addListener((obs, old, selected) -> {
             if (selected == null) { old.setSelected(true); return; }
             showPage(selected == exerciseMode, selected == songMode);
@@ -191,8 +166,7 @@ public final class IntonationApp extends Application {
         stage.setTitle(AppVersion.displayName());
         stage.setMinWidth(720);
         stage.setMinHeight(650);
-        stage.setOnCloseRequest(e -> { cancelSongAnalysis(); songPlayback.close();
-            if (songPipeline != null) songPipeline.close();
+        stage.setOnCloseRequest(e -> { songLibrary.close(); songPlayback.close();
             capture.stop(); piano.close(); TonePlayer.stop(); });
 
         refreshHistory();
@@ -220,104 +194,7 @@ public final class IntonationApp extends Application {
             Platform.runLater(() -> initializeMicrophone(stage));
     }
 
-    private void exerciseView() {
-        List<ExerciseCatalog.Option> presets = ExerciseCatalog.forRoot(60);
-        selectedExercise = presets.getFirst();
-
-        Label libraryTitle = label("Библиотека распевок", "library-title");
-        Label description = label("Начните с комфортной опорной ноты. Нажмите карточку, чтобы петь на главном полотне.", "muted");
-        ToggleGroup kinds = new ToggleGroup();
-        ToggleButton patterns = new ToggleButton("Паттерны");
-        ToggleButton sets = new ToggleButton("Наборы");
-        patterns.setToggleGroup(kinds);
-        sets.setToggleGroup(kinds);
-        patterns.setSelected(true);
-        patterns.getStyleClass().add("library-filter");
-        sets.getStyleClass().add("library-filter");
-        HBox filters = new HBox(7, patterns, sets);
-        patternCards = new FlowPane(12, 12);
-        patternCards.setPrefWrapLength(720);
-        patternCards.setAlignment(Pos.TOP_LEFT);
-        patternCards.setRowValignment(VPos.TOP);
-        ScrollPane scroll = new ScrollPane(patternCards);
-        scroll.setFitToWidth(true);
-        scroll.getStyleClass().add("content-scroll");
-        VBox.setVgrow(scroll, Priority.ALWAYS);
-        exercisePitch = new ComboBox<>(FXCollections.observableArrayList(
-                IntStream.rangeClosed(36, 72).boxed().toList()));
-        exercisePitch.setConverter(new StringConverter<>() {
-            @Override public String toString(Integer midi) {
-                return midi == null ? "" : ExerciseCatalog.noteName(midi);
-            }
-            @Override public Integer fromString(String text) { throw new UnsupportedOperationException(); }
-        });
-        exercisePitch.setId("exercise-pitch");
-        exercisePitch.setValue(60);
-        climbChoice = new ComboBox<>(FXCollections.observableArrayList(0, 2, 4));
-        climbChoice.setId("climb-choice");
-        climbChoice.setValue(2);
-        climbChoice.setConverter(new StringConverter<>() {
-            @Override public String toString(Integer semitones) {
-                return semitones == null ? "" : semitones == 0 ? "Один раз" :
-                        "+" + semitones + " и обратно";
-            }
-            @Override public Integer fromString(String text) { throw new UnsupportedOperationException(); }
-        });
-        climbChoice.valueProperty().addListener((obs, old, value) -> {
-            if (value != null) populateCards(sets.isSelected() ? ExerciseCatalog.Kind.SET : ExerciseCatalog.Kind.PATTERN);
-        });
-        paceChoice = new ComboBox<>(FXCollections.observableArrayList(2.5, 2.0, 1.5, 1.0));
-        paceChoice.setId("pace-choice");
-        paceChoice.setValue(1.5);
-        paceChoice.setConverter(new StringConverter<>() {
-            @Override public String toString(Double seconds) {
-                return seconds == null ? "" : switch (seconds.toString()) {
-                    case "2.5" -> "Медленно";
-                    case "2.0" -> "Спокойно";
-                    case "1.5" -> "Обычно";
-                    default -> "Быстро";
-                };
-            }
-            @Override public Double fromString(String text) { throw new UnsupportedOperationException(); }
-        });
-        paceChoice.valueProperty().addListener((obs, old, value) -> {
-            if (value != null) populateCards(sets.isSelected() ? ExerciseCatalog.Kind.SET : ExerciseCatalog.Kind.PATTERN);
-        });
-        exercisePitch.valueProperty().addListener((obs, old, value) -> {
-            if (value != null) populateCards(sets.isSelected() ? ExerciseCatalog.Kind.SET : ExerciseCatalog.Kind.PATTERN);
-        });
-        kinds.selectedToggleProperty().addListener((obs, old, value) -> {
-            if (value == null) { old.setSelected(true); return; }
-            climbChoice.setDisable(sets.isSelected());
-            populateCards(sets.isSelected() ? ExerciseCatalog.Kind.SET : ExerciseCatalog.Kind.PATTERN);
-        });
-        selectionTitle = label("", "selection-title");
-        Button listen = new Button("▶ Прослушать пример");
-        listen.setOnAction(e -> {
-            TonePlayer.playAsync(WarmupRoute.create(selectedExercise, exercisePitch.getValue(),
-                    selectedExercise.kind() == ExerciseCatalog.Kind.SET ? 0 : climbChoice.getValue(),
-                    paceChoice.getValue()));
-        });
-        exerciseButton = primaryButton("Начать выбранное →");
-        exerciseButton.setOnAction(e -> {
-            launchExercise();
-        });
-        HBox selectionSummary = new HBox(10, label("Опора", "muted"), exercisePitch,
-                label("Маршрут", "muted"), climbChoice,
-                label("Темп", "muted"), paceChoice, selectionTitle);
-        selectionSummary.setAlignment(Pos.CENTER_LEFT);
-        HBox selectionButtons = new HBox(10, listen, exerciseButton);
-        Button comfortSettings = new Button("Мой комфортный диапазон…");
-        comfortSettings.setOnAction(e -> showComfortRangeDialog());
-        comfortNotice = label("", "muted");
-        HBox comfortRow = new HBox(10, comfortSettings, comfortNotice);
-        comfortRow.setAlignment(Pos.CENTER_LEFT);
-        VBox selectionActions = new VBox(8, selectionSummary, selectionButtons, comfortRow);
-        selectionActions.getStyleClass().add("selection-bar");
-        libraryPage = new VBox(12, libraryTitle, description, filters, scroll, selectionActions);
-        VBox.setVgrow(libraryPage, Priority.ALWAYS);
-        populateCards(ExerciseCatalog.Kind.PATTERN);
-
+    private void exerciseDetailsView() {
         target = label("Цель: —", "target-note");
         notePiano = new CheckBox("Пианино · ноты");
         transitionPiano = new CheckBox("Пианино · переходы");
@@ -351,375 +228,8 @@ public final class IntonationApp extends Application {
         exerciseDetails.getStyleClass().add("exercise-summary");
     }
 
-    private void populateCards(ExerciseCatalog.Kind kind) {
-        patternCards.getChildren().clear();
-        String root = ExerciseCatalog.noteName(exercisePitch.getValue());
-        List<ExerciseCatalog.Option> options = ExerciseCatalog.forRoot(exercisePitch.getValue()).stream()
-                .filter(option -> option.kind() == kind).toList();
-        if (options.isEmpty()) return;
-        String priorId = basePatternId(selectedExercise.exercise().id());
-        selectedExercise = options.stream().filter(option ->
-                basePatternId(option.exercise().id()).equals(priorId)).findFirst().orElse(options.getFirst());
-        for (ExerciseCatalog.Option option : options) {
-            Button card = new Button();
-            card.getStyleClass().add("pattern-card");
-            card.setPrefSize(204, 224);
-            card.setMinSize(204, 224);
-            card.setMaxSize(204, 224);
-            if (option.equals(selectedExercise)) card.getStyleClass().add("selected-card");
-            Canvas preview = new Canvas(184, 84);
-            drawPatternPreview(preview, option);
-            String title = option.title().replace(" · " + root, "");
-            PatternInfo info = patternInfo(option);
-            Label category = label(info.category(), "pattern-kicker");
-            Label name = label(title, "pattern-name");
-            Label formula = label(info.formula(), "pattern-formula");
-            WarmupRoute route = WarmupRoute.create(option, exercisePitch.getValue(),
-                    kind == ExerciseCatalog.Kind.SET ? 0 : climbChoice.getValue(), paceChoice.getValue());
-            int low = route.option().exercise().notes().stream().mapToInt(Integer::intValue)
-                    .filter(value -> value != Exercise.REST).min().orElse(60);
-            int high = route.option().exercise().notes().stream().mapToInt(Integer::intValue)
-                    .filter(value -> value != Exercise.REST).max().orElse(60);
-            Label meta = label(ExerciseCatalog.noteName(low) + "–" + ExerciseCatalog.noteName(high)
-                    + " · " + Math.round(route.option().exercise().durationSeconds()) + " с", "pattern-meta");
-            Label goal = label(info.goal(), "pattern-goal");
-            goal.setWrapText(true);
-            goal.setPrefWidth(184);
-            card.setGraphic(new VBox(6, category, preview, name, formula, meta, goal));
-            card.setTooltip(new Tooltip("Нажмите, чтобы начать после двухсекундного отсчёта"));
-            card.setOnAction(e -> {
-                selectedExercise = option;
-                populateCards(kind);
-                launchExercise();
-            });
-            patternCards.getChildren().add(card);
-        }
-        selectionTitle.setText(selectedExercise.title().replace(" · " + root, ""));
-        if (comfortNotice != null) {
-            int comfortableLow = preferences.getInt(COMFORT_LOW_KEY, -1);
-            int comfortableHigh = preferences.getInt(COMFORT_HIGH_KEY, -1);
-            if (comfortableLow < 0 || comfortableHigh < 0) {
-                comfortNotice.setText("Диапазон не задан · выбирайте удобную высоту");
-            } else {
-                WarmupRoute route = WarmupRoute.create(selectedExercise, exercisePitch.getValue(),
-                        kind == ExerciseCatalog.Kind.SET ? 0 : climbChoice.getValue(), paceChoice.getValue());
-                int low = route.option().exercise().notes().stream().mapToInt(Integer::intValue)
-                        .filter(midi -> midi != Exercise.REST).min().orElse(60);
-                int high = route.option().exercise().notes().stream().mapToInt(Integer::intValue)
-                        .filter(midi -> midi != Exercise.REST).max().orElse(60);
-                comfortNotice.setText(low < comfortableLow || high > comfortableHigh
-                        ? "⚠ Маршрут выходит за ваш диапазон " + ExerciseCatalog.noteName(comfortableLow)
-                          + "–" + ExerciseCatalog.noteName(comfortableHigh)
-                        : "Ваш диапазон: " + ExerciseCatalog.noteName(comfortableLow)
-                          + "–" + ExerciseCatalog.noteName(comfortableHigh));
-            }
-        }
-    }
-
-    private void showComfortRangeDialog() {
-        ComboBox<Integer> low = new ComboBox<>(FXCollections.observableArrayList(
-                IntStream.rangeClosed(36, 83).boxed().toList()));
-        ComboBox<Integer> high = new ComboBox<>(FXCollections.observableArrayList(
-                IntStream.rangeClosed(36, 83).boxed().toList()));
-        StringConverter<Integer> converter = new StringConverter<>() {
-            @Override public String toString(Integer midi) {
-                return midi == null ? "" : ExerciseCatalog.noteName(midi);
-            }
-            @Override public Integer fromString(String text) { throw new UnsupportedOperationException(); }
-        };
-        low.setConverter(converter);
-        high.setConverter(converter);
-        low.setValue(preferences.getInt(COMFORT_LOW_KEY, 48));
-        high.setValue(preferences.getInt(COMFORT_HIGH_KEY, 72));
-        Dialog<int[]> dialog = new Dialog<>();
-        dialog.initOwner(exerciseButton.getScene().getWindow());
-        dialog.setTitle("Комфортный диапазон");
-        dialog.setHeaderText("Укажите ноты, которые вам удобно петь без напряжения");
-        dialog.getDialogPane().getStylesheets().add(getClass().getResource("theme.css").toExternalForm());
-        dialog.getDialogPane().setContent(new HBox(10, label("От", "muted"), low,
-                label("до", "muted"), high));
-        ButtonType save = new ButtonType("Сохранить", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(save, ButtonType.CANCEL);
-        var saveButton = dialog.getDialogPane().lookupButton(save);
-        saveButton.disableProperty().bind(javafx.beans.binding.Bindings.createBooleanBinding(
-                () -> low.getValue() > high.getValue(), low.valueProperty(), high.valueProperty()));
-        dialog.setResultConverter(button -> button == save ? new int[]{low.getValue(), high.getValue()} : null);
-        dialog.showAndWait().ifPresent(range -> {
-            preferences.putInt(COMFORT_LOW_KEY, range[0]);
-            preferences.putInt(COMFORT_HIGH_KEY, range[1]);
-            populateCards(selectedExercise.kind());
-        });
-    }
-
-    private record PatternInfo(String category, String formula, String goal) {}
-
-    private static String basePatternId(String id) {
-        return id.replaceFirst("(_c[35]|_m\\d+)$", "");
-    }
-
-    private static PatternInfo patternInfo(ExerciseCatalog.Option option) {
-        return switch (basePatternId(option.exercise().id())) {
-            case "ascending" -> new PatternInfo("01 · СТУПЕНИ", "1–2–3–4–5", "Плавный подъём");
-            case "descending" -> new PatternInfo("02 · СТУПЕНИ", "5–4–3–2–1", "Плавный спуск");
-            case "three_notes" -> new PatternInfo("03 · ФРАЗА", "1–2–3–2–1", "Возврат к опоре");
-            case "triad" -> new PatternInfo("04 · ИНТЕРВАЛЫ", "1–3–5–3–1", "Скачки по трезвучию");
-            default -> new PatternInfo("НАБОР · 4 ФОРМЫ", "Ступени → фраза → аккорд", "Полный цикл распевки");
-        };
-    }
-
-    private static void drawPatternPreview(Canvas canvas, ExerciseCatalog.Option option) {
-        var g = canvas.getGraphicsContext2D();
-        g.setFill(javafx.scene.paint.Color.web("#292929"));
-        g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        List<Integer> notes = option.exercise().notes();
-        int min = notes.stream().mapToInt(Integer::intValue)
-                .filter(midi -> midi != Exercise.REST).min().orElse(60);
-        int max = notes.stream().mapToInt(Integer::intValue)
-                .filter(midi -> midi != Exercise.REST).max().orElse(67);
-        double width = canvas.getWidth() / notes.size();
-        String clipColor = switch (option.exercise().id().split("_")[0]) {
-            case "ascending" -> "#66dcd3";
-            case "descending" -> "#a8b9ff";
-            case "three" -> "#e8d978";
-            case "triad" -> "#f9a6ae";
-            default -> "#ffad57";
-        };
-        for (int i = 0; i < notes.size(); i++) {
-            if (notes.get(i) == Exercise.REST) continue;
-            double y = 66 - (notes.get(i) - min) * 46.0 / Math.max(5, max - min);
-            g.setFill(javafx.scene.paint.Color.web(clipColor));
-            g.fillRoundRect(i * width + 2, y, Math.max(3, width - 4), 8, 3, 3);
-        }
-        g.setStroke(javafx.scene.paint.Color.web("#555555"));
-        g.strokeLine(0, 76, canvas.getWidth(), 76);
-    }
-
-    private void songView(Stage owner) {
-        Label heading = label("Разбор песни · исследовательский режим", "library-title");
-        Label explanation = label("MP3 локально делится на вокал и инструментал. Модель предлагает ведущую линию и варианты при наложении голосов.\nПроверьте ноты перед занятием: автоматический разбор может ошибаться.", "muted");
-        explanation.setWrapText(true);
-        explanation.setMinHeight(36);
-        songStatus = label("Выберите MP3 для просмотра черновой нотной линии.", "muted");
-        songStatus.setWrapText(true);
-        Button open = primaryButton("Открыть MP3…");
-        Button cancel = new Button("Отменить анализ");
-        cancel.setDisable(true);
-        ComboBox<String> songModel = new ComboBox<>(FXCollections.observableArrayList(
-                "vocals_mel_band_roformer.ckpt", "htdemucs_ft.yaml", "UVR-MDX-NET_Main_406.onnx"));
-        songModel.setPrefWidth(210);
-        songModel.setTooltip(new Tooltip("Тщательные модели лучше сохраняют вокал, "
-                + "но 30 с аудио могут обрабатываться несколько минут."));
-        songModel.setConverter(new StringConverter<>() {
-            @Override public String toString(String model) {
-                if (model == null) return "";
-                return switch (model) {
-                    case "vocals_mel_band_roformer.ckpt" -> "Максимум · MelBand";
-                    case "htdemucs_ft.yaml" -> "Точно · Demucs";
-                    default -> "Быстро · UVR-MDX";
-                };
-            }
-            @Override public String fromString(String text) { throw new UnsupportedOperationException(); }
-        });
-        String savedModel = preferences.get(SONG_MODEL_KEY, "vocals_mel_band_roformer.ckpt");
-        songModel.setValue(songModel.getItems().contains(savedModel)
-                ? savedModel : "vocals_mel_band_roformer.ckpt");
-        songModel.valueProperty().addListener((obs, old, value) -> preferences.put(SONG_MODEL_KEY, value));
-        practiceSong = primaryButton("Петь на главном полотне →");
-        practiceSong.setDisable(true);
-        practiceSong.setOnAction(e -> startSongPractice());
-        open.setOnAction(e -> {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Выбрать песню");
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Аудиофайлы", "*.mp3", "*.wav"));
-            File file = chooser.showOpenDialog(owner);
-            if (file == null) return;
-            currentSongFile = file.toPath();
-            stopSongPractice();
-            if (songPipeline != null) songPipeline.close();
-            readySong = null;
-            practiceSong.setDisable(true);
-            songNotes.getItems().clear();
-            songResult = null;
-            drawSongOverview(null);
-            songStatus.setText("Анализ: " + file.getName() + "…");
-            open.setDisable(true);
-            cancel.setDisable(false);
-            songPipeline = new SongPipeline(songModel.getValue());
-            SongPipeline pipeline = songPipeline;
-            Task<SongPipeline.Result> task = new Task<>() {
-                @Override protected SongPipeline.Result call() throws Exception {
-                    return pipeline.analyze(file.toPath(), this::updateMessage);
-                }
-            };
-            songTask = task;
-            task.messageProperty().addListener((obs, old, message) -> {
-                if (task.isRunning() && message != null) songStatus.setText(message);
-            });
-            task.setOnSucceeded(event -> {
-                readySong = task.getValue();
-                songResult = readySong.transcription();
-                boolean restoredEdits = false;
-                String editWarning = "";
-                try {
-                    SongAnalyzer.Result generated = songResult;
-                    songResult = songEditStore.load(file.toPath(), songResult);
-                    readySong = new SongPipeline.Result(readySong.vocals(), readySong.instrumental(), songResult);
-                    restoredEdits = songResult != generated;
-                } catch (IOException error) {
-                    editWarning = " · исправления не прочитаны: " + error.getMessage();
-                }
-                songStatus.setText(file.getName() + " · вокал отделён · "
-                        + songResult.notes().size() + " кандидатов в ноты"
-                        + (restoredEdits ? " · восстановлены ручные исправления" : "")
-                        + (songResult.durationSeconds() >= 599 ? " · первые 10 минут" : "")
-                        + editWarning);
-                refreshSongNotes();
-                practiceSong.setDisable(songResult.notes().isEmpty());
-                open.setDisable(false);
-                cancel.setDisable(true);
-            });
-            task.setOnFailed(event -> {
-                Throwable error = task.getException();
-                pipeline.close();
-                songStatus.setText("Не удалось обработать файл: " + error.getMessage()
-                        + ". Нужны локальная модель, Audio Separator и FFmpeg.");
-                open.setDisable(false);
-                cancel.setDisable(true);
-            });
-            task.setOnCancelled(event -> {
-                pipeline.close();
-                songStatus.setText("Анализ отменён");
-                open.setDisable(false);
-                cancel.setDisable(true);
-            });
-            Thread worker = new Thread(task, "song-analysis");
-            worker.setDaemon(true);
-            worker.start();
-        });
-        cancel.setOnAction(e -> cancelSongAnalysis());
-        HBox modelSelector = new HBox(8, label("Разделение", "muted"), songModel);
-        modelSelector.setAlignment(Pos.CENTER_LEFT);
-        FlowPane actions = new FlowPane(10, 8, open, cancel, practiceSong, modelSelector);
-        actions.setAlignment(Pos.CENTER_LEFT);
-        songOverview = new Canvas(800, 120);
-        songNotes = new ListView<>();
-        songNotes.setPrefHeight(250);
-        songNotes.setMinHeight(100);
-        VBox.setVgrow(songNotes, Priority.ALWAYS);
-        Label columns = label("Время       Длительность       Предполагаемая нота       Оценка модели", "muted");
-        Button noteDown = new Button("− полутон");
-        Button noteUp = new Button("+ полутон");
-        Button noteDelete = new Button("Удалить ноту");
-        Button noteAlternative = new Button("Выбрать другой голос");
-        noteDown.setOnAction(e -> editSongNote(-1, false));
-        noteUp.setOnAction(e -> editSongNote(1, false));
-        noteDelete.setOnAction(e -> editSongNote(0, true));
-        noteAlternative.setOnAction(e -> useSongAlternative());
-        HBox corrections = new HBox(8, noteDown, noteUp, noteDelete, noteAlternative);
-        songPage = new VBox(9, heading, explanation, actions, songStatus, songOverview,
-                columns, songNotes, corrections);
-        VBox.setVgrow(songPage, Priority.ALWAYS);
-        explanation.prefWidthProperty().bind(songPage.widthProperty().subtract(4));
-        songStatus.prefWidthProperty().bind(songPage.widthProperty().subtract(4));
-        songOverview.widthProperty().bind(songPage.widthProperty().subtract(2));
-        songOverview.widthProperty().addListener((obs, old, value) -> drawSongOverview(songResult));
-        drawSongOverview(null);
-    }
-
-    private void cancelSongAnalysis() {
-        if (songPipeline != null) songPipeline.cancel();
-        if (songTask != null) songTask.cancel(true);
-        if (songPipeline != null) songPipeline.close();
-    }
-
-    private void editSongNote(int semitones, boolean delete) {
-        if (readySong == null) return;
-        int index = songNotes.getSelectionModel().getSelectedIndex();
-        if (index < 0 || index >= readySong.transcription().notes().size()) return;
-        stopSongPractice();
-        List<SongAnalyzer.NoteEvent> changed = new java.util.ArrayList<>(readySong.transcription().notes());
-        SongAnalyzer.NoteEvent note = changed.get(index);
-        if (delete) changed.remove(index);
-        else changed.set(index, new SongAnalyzer.NoteEvent(note.startSeconds(),
-                note.durationSeconds(), Math.max(0, Math.min(127, note.midi() + semitones))));
-        songResult = new SongAnalyzer.Result(changed, readySong.transcription().durationSeconds(),
-                readySong.transcription().alternatives());
-        readySong = new SongPipeline.Result(readySong.vocals(), readySong.instrumental(), songResult);
-        refreshSongNotes();
-        if (!changed.isEmpty()) songNotes.getSelectionModel().select(Math.min(index, changed.size() - 1));
-        practiceSong.setDisable(changed.isEmpty());
-        songStatus.setText("Нотная линия исправлена вручную · " + changed.size() + " нот");
-        saveSongEdits();
-    }
-
-    private void useSongAlternative() {
-        if (readySong == null) return;
-        int index = songNotes.getSelectionModel().getSelectedIndex();
-        if (index < 0 || index >= songResult.notes().size()) return;
-        SongAnalyzer.NoteEvent selected = songResult.notes().get(index);
-        List<SongAnalyzer.Alternative> choices = songResult.alternatives().stream()
-                .filter(candidate -> Math.abs(candidate.startSeconds() - selected.startSeconds()) < 0.06
-                        && Math.abs(candidate.durationSeconds() - selected.durationSeconds()) < 0.06)
-                .filter(candidate -> candidate.midi() != selected.midi())
-                .collect(Collectors.toMap(SongAnalyzer.Alternative::midi, candidate -> candidate,
-                        (a, b) -> a.confidence() >= b.confidence() ? a : b))
-                .values().stream().sorted(java.util.Comparator.comparingDouble(
-                        SongAnalyzer.Alternative::confidence).reversed()).limit(5).toList();
-        if (choices.isEmpty()) {
-            songStatus.setText("Для этой ноты альтернативная вокальная линия не обнаружена");
-            return;
-        }
-        List<String> labels = IntStream.range(0, choices.size()).mapToObj(i ->
-                ExerciseCatalog.noteName(choices.get(i).midi())
-                        + String.format(" · оценка модели %.0f%%", choices.get(i).confidence() * 100)
-                        + " · вариант " + (i + 1)).toList();
-        ChoiceDialog<String> dialog = new ChoiceDialog<>(labels.getFirst(), labels);
-        dialog.setTitle("Ведущая вокальная линия");
-        dialog.setHeaderText("Выберите голос для участка с "
-                + String.format("%.1f с", selected.startSeconds()));
-        dialog.setContentText("Нота:");
-        dialog.showAndWait().ifPresent(label -> {
-            SongAnalyzer.Alternative candidate = choices.get(labels.indexOf(label));
-            stopSongPractice();
-            List<SongAnalyzer.NoteEvent> changed = new java.util.ArrayList<>(songResult.notes());
-            changed.set(index, new SongAnalyzer.NoteEvent(selected.startSeconds(),
-                    selected.durationSeconds(), candidate.midi()));
-            songResult = new SongAnalyzer.Result(changed, songResult.durationSeconds(),
-                    songResult.alternatives());
-            readySong = new SongPipeline.Result(readySong.vocals(), readySong.instrumental(), songResult);
-            refreshSongNotes();
-            songNotes.getSelectionModel().select(index);
-            songStatus.setText("Выбрана другая вокальная линия для ноты");
-            saveSongEdits();
-        });
-    }
-
-    private void saveSongEdits() {
-        if (currentSongFile == null || songResult == null) return;
-        try {
-            songEditStore.save(currentSongFile, songResult);
-        } catch (IOException error) {
-            songStatus.setText("Ноты изменены, но не удалось сохранить исправления: " + error.getMessage());
-        }
-    }
-
-    private void refreshSongNotes() {
-        if (songResult == null) return;
-        songNotes.getItems().setAll(songResult.notes().stream().map(note -> {
-            boolean alternatives = songResult.alternatives().stream().anyMatch(candidate ->
-                    Math.abs(candidate.startSeconds() - note.startSeconds()) < 0.06
-                            && Math.abs(candidate.durationSeconds() - note.durationSeconds()) < 0.06
-                            && candidate.midi() != note.midi());
-            return String.format("%6.1f с   %4.1f с   %s%s", note.startSeconds(),
-                    note.durationSeconds(), ExerciseCatalog.noteName(note.midi())
-                            + (Double.isFinite(note.confidence())
-                            ? String.format("   %.0f%%", note.confidence() * 100) : ""),
-                    alternatives ? "   ◇ другой голос" : "");
-        }).toList());
-        drawSongOverview(songResult);
-    }
-
     private void startSongPractice() {
+        SongPipeline.Result readySong = songLibrary.readySong();
         if (readySong == null || readySong.transcription().notes().isEmpty()) return;
         if (session != null) cancelExercise("Распевка остановлена для песни.");
         stopSongPractice();
@@ -768,33 +278,6 @@ public final class IntonationApp extends Application {
             songPlayback.stop();
             if (songChart.expired(now)) songChart = null;
         }
-    }
-
-    private void drawSongOverview(SongAnalyzer.Result result) {
-        if (songOverview == null) return;
-        var g = songOverview.getGraphicsContext2D();
-        double width = songOverview.getWidth(), height = songOverview.getHeight();
-        g.setFill(javafx.scene.paint.Color.web("#282828"));
-        g.fillRect(0, 0, width, height);
-        g.setFill(javafx.scene.paint.Color.web("#b8b8b5"));
-        if (result == null || result.notes().isEmpty()) {
-            g.fillText("Нотная линия появится после анализа", 16, 25);
-            return;
-        }
-        int min = result.notes().stream().mapToInt(SongAnalyzer.NoteEvent::midi).min().orElse(60);
-        int max = result.notes().stream().mapToInt(SongAnalyzer.NoteEvent::midi).max().orElse(72);
-        double seconds = Math.max(1, result.durationSeconds());
-        for (SongAnalyzer.NoteEvent note : result.notes()) {
-            double x = 12 + (width - 24) * note.startSeconds() / seconds;
-            double w = Math.max(2, (width - 24) * note.durationSeconds() / seconds);
-            double y = 28 + (height - 52) * (max - note.midi()) / Math.max(1, max - min);
-            g.setFill(javafx.scene.paint.Color.web("#ffad57"));
-            g.fillRect(x, y, w, 5);
-        }
-        g.setFill(javafx.scene.paint.Color.web("#b8b8b5"));
-        g.fillText(ExerciseCatalog.noteName(max), 8, 17);
-        g.fillText(ExerciseCatalog.noteName(min), 8, height - 8);
-        g.fillText(Math.round(seconds) + " с", width - 46, height - 8);
     }
 
     private void showPage(boolean library, boolean songs) {
@@ -961,9 +444,7 @@ public final class IntonationApp extends Application {
         exerciseScoringEnabled = capture.isRunning();
         TonePlayer.stop();
         piano.silence();
-        activeRoute = WarmupRoute.create(selectedExercise, exercisePitch.getValue(),
-                selectedExercise.kind() == ExerciseCatalog.Kind.SET ? 0 : climbChoice.getValue(),
-                paceChoice.getValue());
+        activeRoute = warmupLibrary.selectedRoute();
         activeOption = activeRoute.option();
         transitionPiano.setDisable(activeRoute.transitions().isEmpty());
         session = new ExerciseSession(activeOption.exercise(), clock.time(System.nanoTime()));
@@ -971,7 +452,7 @@ public final class IntonationApp extends Application {
         exerciseChart.start(session.startNanos());
         pianoControls.setVisible(true);
         pianoControls.setManaged(true);
-        exerciseButton.setDisable(true);
+        warmupLibrary.startButton().setDisable(true);
         cancelExerciseButton.setDisable(false);
         exerciseMode.setDisable(true);
         exerciseProgress.setProgress(0);
@@ -989,7 +470,7 @@ public final class IntonationApp extends Application {
         exerciseChart = null;
         pianoControls.setVisible(false);
         pianoControls.setManaged(false);
-        exerciseButton.setDisable(false);
+        warmupLibrary.startButton().setDisable(false);
         cancelExerciseButton.setDisable(true);
         exerciseMode.setDisable(false);
         exerciseProgress.setProgress(0);
@@ -1015,7 +496,7 @@ public final class IntonationApp extends Application {
             pianoControls.setVisible(false);
             pianoControls.setManaged(false);
             exerciseChart.finish();
-            exerciseButton.setDisable(false);
+            warmupLibrary.startButton().setDisable(false);
             cancelExerciseButton.setDisable(true);
             exerciseMode.setDisable(false);
             target.setText("Готово");
@@ -1045,7 +526,7 @@ public final class IntonationApp extends Application {
                         (session.exercise().durationSeconds() * 1e9));
                 return;
             }
-            String direction = transition != null && transition.toRoot() > transition.fromRoot()
+            String direction = transition.toRoot() > transition.fromRoot()
                     ? "↑" : "↓";
             target.setText("Переход " + direction);
             exerciseFeedback.setText("Слушайте два аккорда и приготовьтесь к следующей высоте");
@@ -1094,7 +575,7 @@ public final class IntonationApp extends Application {
                     rows.stream().map(row -> formatHistoryRow(row, true)).toList()));
             list.setPrefSize(560, 300);
             Dialog<Void> dialog = new Dialog<>();
-            dialog.initOwner(exerciseButton.getScene().getWindow());
+            dialog.initOwner(warmupLibrary.startButton().getScene().getWindow());
             dialog.setTitle("История занятий");
             dialog.setHeaderText("Последние занятия хранятся только на этом компьютере");
             dialog.getDialogPane().getStylesheets().add(getClass().getResource("theme.css").toExternalForm());
@@ -1140,9 +621,8 @@ public final class IntonationApp extends Application {
 
     @Override public void stop() {
         timer.stop();
-        cancelSongAnalysis();
+        songLibrary.close();
         songPlayback.close();
-        if (songPipeline != null) songPipeline.close();
         capture.stop();
         piano.close();
         TonePlayer.stop();
