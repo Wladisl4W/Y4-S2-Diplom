@@ -16,7 +16,6 @@ import ru.diplom.intonation.exercise.*;
 import ru.diplom.intonation.song.SongPipeline;
 import ru.diplom.intonation.song.SongPlayback;
 
-import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -25,18 +24,19 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.prefs.Preferences;
 import java.util.stream.IntStream;
 
 public final class IntonationApp extends Application {
-    private final MicrophoneCapture capture = new MicrophoneCapture();
-    private final ConcurrentLinkedQueue<PitchSample> samples = new ConcurrentLinkedQueue<>();
     private final PitchTimeline timeline = new PitchTimeline();
     private final ExerciseHistory history = new ExerciseHistory();
     private final PlaybackClock clock = new PlaybackClock();
     private final Preferences preferences = Preferences.userNodeForPackage(IntonationApp.class);
-    private static final String MICROPHONE_KEY = "microphone";
+    private final WarmupController warmup = new WarmupController(history,
+            new PianoGuide(message -> Platform.runLater(() -> setStatus(message))), this::setStatus);
+    private final MicrophoneController microphone = new MicrophoneController(new MicrophoneCapture(),
+            preferences, () -> clock.time(System.nanoTime()), clock::isPaused,
+            warmup::isRunning, this::setStatus, this::microphoneFailed);
     private CheckBox notePiano;
     private CheckBox transitionPiano;
     private HBox pianoControls;
@@ -53,29 +53,20 @@ public final class IntonationApp extends Application {
     private CheckBox instrumentalSound;
     private CheckBox vocalSound;
     private Button transportButton;
-    private MicrophoneCapture.Device selectedDevice;
     private Button cancelExerciseButton;
     private Label note;
     private Label cents;
     private Label status;
-    private final PianoGuide piano = new PianoGuide(message -> Platform.runLater(() -> status.setText(message)));
     private Label target;
     private Label exerciseFeedback;
     private Label recentResults;
     private ProgressBar exerciseProgress;
     private PitchChart chart;
-    private ExerciseChartState exerciseChart;
     private ToggleButton liveMode;
     private ToggleButton exerciseMode;
     private VBox exerciseDetails;
-    private volatile ExerciseSession session;
-    private boolean exerciseScoringEnabled;
-    private WarmupRoute activeRoute;
-    private ExerciseCatalog.Option activeOption;
     private AnimationTimer timer;
     private double smoothedMidi = Double.NaN;
-
-    private record PitchSample(long timeNanos, Optional<PitchResult> pitch) {}
 
     @Override public void start(Stage stage) {
         Label brand = label(AppVersion.displayName(), "brand");
@@ -87,7 +78,7 @@ public final class IntonationApp extends Application {
         transportButton.setOnAction(e -> toggleTransport());
         Button settings = new Button("⚙ Настройки");
         settings.setId("settings-button");
-        settings.setOnAction(e -> showMicrophoneSettings(stage, false));
+        settings.setOnAction(e -> showMicrophoneSettings(stage));
         HBox topBar = new HBox(10, brand, headingSpacer, transportButton, settings);
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.getStyleClass().add("top-bar");
@@ -167,7 +158,7 @@ public final class IntonationApp extends Application {
         stage.setMinWidth(720);
         stage.setMinHeight(650);
         stage.setOnCloseRequest(e -> { songLibrary.close(); songPlayback.close();
-            capture.stop(); piano.close(); TonePlayer.stop(); });
+            microphone.close(); warmup.close(); TonePlayer.stop(); });
 
         refreshHistory();
         timer = new AnimationTimer() {
@@ -176,22 +167,22 @@ public final class IntonationApp extends Application {
                 if (now - previous < 33_000_000) return;
                 previous = now;
                 if (clock.isPaused()) {
-                    samples.clear();
-                    chart.draw(timeline, clock.time(now), exerciseChart, songChart);
+                    microphone.clearSamples();
+                    chart.draw(timeline, clock.time(now), warmup.chart(), songChart);
                     return;
                 }
-                PitchSample sample;
-                while ((sample = samples.poll()) != null) updatePitch(sample);
+                MicrophoneController.Sample sample;
+                while ((sample = microphone.poll()) != null) updatePitch(sample);
                 long time = clock.time(now);
                 updateExercise(time);
                 updateSongPractice(time);
-                chart.draw(timeline, time, exerciseChart, songChart);
+                chart.draw(timeline, time, warmup.chart(), songChart);
             }
         };
         timer.start();
         stage.show();
         if (!Boolean.getBoolean("intonation.skipMicrophoneSetup"))
-            Platform.runLater(() -> initializeMicrophone(stage));
+            Platform.runLater(() -> microphone.initialize(stage));
     }
 
     private void exerciseDetailsView() {
@@ -231,11 +222,11 @@ public final class IntonationApp extends Application {
     private void startSongPractice() {
         SongPipeline.Result readySong = songLibrary.readySong();
         if (readySong == null || readySong.transcription().notes().isEmpty()) return;
-        if (session != null) cancelExercise("Распевка остановлена для песни.");
+        if (warmup.isRunning()) cancelExercise("Распевка остановлена для песни.");
         stopSongPractice();
         liveMode.setSelected(true);
         if (clock.isPaused()) toggleTransport();
-        if (!capture.isRunning()) startCapture();
+        if (!microphone.isRunning()) microphone.start();
         long start = clock.time(System.nanoTime()) + 2_000_000_000L;
         songChart = new SongChartState(readySong.transcription().notes(), start,
                 readySong.transcription().durationSeconds());
@@ -290,105 +281,17 @@ public final class IntonationApp extends Application {
         songPage.setManaged(songs);
     }
 
-    private static ExerciseChartState chartState(ExerciseCatalog.Option choice) {
-        return new ExerciseChartState(choice.exercise(), choice.starts());
+    private void setStatus(String message) {
+        if (status != null) status.setText(message);
     }
 
-    private static String deviceKey(MicrophoneCapture.Device device) {
-        var info = device.info();
-        return info.getName() + "|" + info.getVendor() + "|" + info.getDescription();
+    private void microphoneFailed(String error) {
+        if (warmup.isRunning()) cancelExercise("Распевка прервана из-за ошибки микрофона.");
     }
 
-    private void initializeMicrophone(Stage owner) {
-        String saved = preferences.get(MICROPHONE_KEY, "");
-        List<MicrophoneCapture.Device> available = MicrophoneCapture.devices();
-        selectedDevice = available.stream().filter(device -> deviceKey(device).equals(saved))
-                .findFirst().orElse(null);
-        if (selectedDevice == null) showMicrophoneSettings(owner, true);
-        else startCapture();
-    }
-
-    private void showMicrophoneSettings(Stage owner, boolean required) {
-        if (session != null) cancelExercise("Распевка прервана для смены микрофона.");
-        boolean wasRunning = capture.isRunning();
-        if (wasRunning) capture.stop();
-        samples.clear();
-        Dialog<MicrophoneCapture.Device> dialog = new Dialog<>();
-        dialog.initOwner(owner);
-        dialog.setTitle(required ? "Первый запуск · микрофон" : "Настройки · микрофон");
-        dialog.setHeaderText(required ? "Выберите микрофон и проверьте его" : "Микрофон для живого голоса");
-        ComboBox<MicrophoneCapture.Device> choices = new ComboBox<>();
-        choices.setPrefWidth(390);
-        choices.setItems(FXCollections.observableArrayList(MicrophoneCapture.devices()));
-        if (selectedDevice != null) choices.getItems().stream()
-                .filter(device -> deviceKey(device).equals(deviceKey(selectedDevice)))
-                .findFirst().ifPresent(choices::setValue);
-        if (choices.getValue() == null && !choices.getItems().isEmpty()) choices.setValue(choices.getItems().getFirst());
-        Label testResult = label("Спойте ноту после нажатия «Проверить».", "muted");
-        Button test = new Button("Проверить микрофон");
-        Button refresh = new Button("Обновить список");
-        refresh.setOnAction(e -> {
-            capture.stop();
-            choices.setItems(FXCollections.observableArrayList(MicrophoneCapture.devices()));
-            if (choices.getValue() == null && !choices.getItems().isEmpty()) choices.setValue(choices.getItems().getFirst());
-            testResult.setText(choices.getItems().isEmpty() ? "Устройства не найдены" : "Выберите устройство для проверки");
-        });
-        test.setOnAction(e -> {
-            capture.stop();
-            MicrophoneCapture.Device chosen = choices.getValue();
-            if (chosen == null) { testResult.setText("Микрофон не выбран"); return; }
-            try {
-                capture.start(chosen, pitch -> Platform.runLater(() ->
-                        testResult.setText(pitch.map(result -> "Сигнал есть · " +
-                                Note.fromFrequency(result.frequencyHz()).display())
-                                .orElse("Слушаю… спойте протяжную ноту"))),
-                        error -> Platform.runLater(() -> testResult.setText("Ошибка: " + error)));
-            } catch (LineUnavailableException | IllegalArgumentException error) {
-                testResult.setText("Не удалось открыть: " + error.getMessage());
-            }
-        });
-        choices.valueProperty().addListener((obs, old, value) -> {
-            capture.stop();
-            testResult.setText("Нажмите «Проверить микрофон»");
-        });
-        dialog.getDialogPane().getStylesheets().add(getClass().getResource("theme.css").toExternalForm());
-        dialog.getDialogPane().setContent(new VBox(12,
-                label("Устройство ввода", "muted"), choices, new HBox(8, test, refresh), testResult));
-        ButtonType save = new ButtonType("Сохранить и начать", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(save, ButtonType.CANCEL);
-        dialog.getDialogPane().lookupButton(save).disableProperty().bind(choices.valueProperty().isNull());
-        dialog.setResultConverter(button -> button == save ? choices.getValue() : null);
-        Optional<MicrophoneCapture.Device> chosen = dialog.showAndWait();
-        capture.stop();
-        if (chosen.isPresent()) {
-            selectedDevice = chosen.get();
-            preferences.put(MICROPHONE_KEY, deviceKey(selectedDevice));
-            try { preferences.flush(); }
-            catch (java.util.prefs.BackingStoreException error) {
-                status.setText("Не удалось сохранить выбор микрофона: " + error.getMessage());
-            }
-            startCapture();
-        } else if (wasRunning && selectedDevice != null) startCapture();
-        else status.setText("Микрофон не выбран · откройте настройки");
-    }
-
-    private void startCapture() {
-        if (selectedDevice == null || capture.isRunning()) return;
-        try {
-            samples.clear();
-            smoothedMidi = Double.NaN;
-            capture.start(selectedDevice, pitch -> {
-                if (clock.isPaused()) return;
-                while (session == null && samples.size() >= 8) samples.poll();
-                samples.add(new PitchSample(clock.time(System.nanoTime()), pitch));
-            }, error -> Platform.runLater(() -> {
-                if (session != null) cancelExercise("Распевка прервана из-за ошибки микрофона.");
-                status.setText("Ошибка микрофона: " + error + " · откройте настройки");
-            }));
-            status.setText("Микрофон: " + selectedDevice + " · звук остаётся на этом устройстве");
-        } catch (LineUnavailableException | IllegalArgumentException error) {
-            status.setText("Не удалось открыть микрофон: " + error.getMessage() + " · откройте настройки");
-        }
+    private void showMicrophoneSettings(Stage owner) {
+        if (warmup.isRunning()) cancelExercise("Распевка прервана для смены микрофона.");
+        microphone.showSettings(owner, false);
     }
 
     private void toggleTransport() {
@@ -397,19 +300,19 @@ public final class IntonationApp extends Application {
             clock.resume(now);
             songPlayback.resume();
             transportButton.setText("⏸ Пауза");
-            status.setText(capture.isRunning() ? "Полотно движется · микрофон активен" :
+            status.setText(microphone.isRunning() ? "Полотно движется · микрофон активен" :
                     "Полотно движется · выберите микрофон в настройках");
         } else {
             clock.pause(now);
             songPlayback.pause();
-            samples.clear();
-            piano.silence();
+            microphone.clearSamples();
+            warmup.pause();
             transportButton.setText("▶ Продолжить");
             status.setText("Пауза · график и распевка остановлены");
         }
     }
 
-    private void updatePitch(PitchSample sample) {
+    private void updatePitch(MicrophoneController.Sample sample) {
         Optional<PitchResult> result = sample.pitch();
         if (result.isEmpty()) {
             smoothedMidi = Double.NaN;
@@ -427,9 +330,7 @@ public final class IntonationApp extends Application {
             cents.setText(String.format("%+.0f центов · %.1f Гц", pitch.cents(), smoothHz));
             timeline.add(sample.timeNanos(), smoothedMidi);
         }
-        if (session != null) {
-            session.accept(sample.timeNanos(), smoothedMidi);
-        }
+        warmup.accept(sample.timeNanos(), smoothedMidi);
     }
 
     private void launchExercise() {
@@ -440,121 +341,39 @@ public final class IntonationApp extends Application {
 
     private void startExercise() {
         stopSongPractice();
-        if (!capture.isRunning()) startCapture();
-        exerciseScoringEnabled = capture.isRunning();
+        if (!microphone.isRunning()) microphone.start();
         TonePlayer.stop();
-        piano.silence();
-        activeRoute = warmupLibrary.selectedRoute();
-        activeOption = activeRoute.option();
-        transitionPiano.setDisable(activeRoute.transitions().isEmpty());
-        session = new ExerciseSession(activeOption.exercise(), clock.time(System.nanoTime()));
-        exerciseChart = chartState(activeOption);
-        exerciseChart.start(session.startNanos());
-        pianoControls.setVisible(true);
-        pianoControls.setManaged(true);
-        warmupLibrary.startButton().setDisable(true);
-        cancelExerciseButton.setDisable(false);
-        exerciseMode.setDisable(true);
-        exerciseProgress.setProgress(0);
-        exerciseFeedback.setText(capture.isRunning()
-                ? "Приготовьтесь. Через 2 секунды начнётся первая нота."
-                : "Микрофон недоступен. Ноты видны, но оценка голоса не будет получена.");
+        WarmupRoute route = warmupLibrary.selectedRoute();
+        warmup.start(route, clock.time(System.nanoTime()), microphone.isRunning());
+        showWarmupSnapshot();
     }
 
     private void cancelExercise(String message) {
-        session = null;
-        exerciseScoringEnabled = false;
-        piano.silence();
-        activeRoute = null;
-        activeOption = null;
-        exerciseChart = null;
-        pianoControls.setVisible(false);
-        pianoControls.setManaged(false);
-        warmupLibrary.startButton().setDisable(false);
-        cancelExerciseButton.setDisable(true);
-        exerciseMode.setDisable(false);
-        exerciseProgress.setProgress(0);
-        target.setText("Целевая нота: —");
-        exerciseFeedback.setText(message);
+        warmup.cancel(message);
+        showWarmupSnapshot();
     }
 
     private void updateExercise(long now) {
-        if (session == null) {
-            if (exerciseChart != null && exerciseChart.expired(now)) exerciseChart = null;
-            return;
-        }
-        if (exerciseScoringEnabled && !capture.isRunning()) {
-            cancelExercise("Распевка прервана: микрофон перестал передавать звук.");
-            return;
-        }
-        if (session.finished(now)) {
-            ExerciseSession.Result result = session.result();
-            session = null;
-            piano.silence();
-            activeRoute = null;
-            activeOption = null;
-            pianoControls.setVisible(false);
-            pianoControls.setManaged(false);
-            exerciseChart.finish();
-            warmupLibrary.startButton().setDisable(false);
-            cancelExerciseButton.setDisable(true);
-            exerciseMode.setDisable(false);
-            target.setText("Готово");
-            exerciseProgress.setProgress(1);
-            if (exerciseScoringEnabled) {
-                exerciseFeedback.setText("Попадание: " + result.score() + "% · голос звучал: "
-                        + result.coverage() + "% · среднее отклонение: " + result.averageErrorCents() + " центов");
-                try { history.append(result); refreshHistory(); }
-                catch (IOException e) { status.setText("Не удалось сохранить историю: " + e.getMessage()); }
-            } else exerciseFeedback.setText("Маршрут завершён без оценки: микрофон не был подключён.");
-            exerciseScoringEnabled = false;
-            return;
-        }
-        int index = session.noteIndex(now);
-        if (index < 0) {
-            target.setText("Старт через " + session.countdown(now));
-            return;
-        }
-        refreshPiano(now);
-        int midi = session.exercise().notes().get(index);
-        if (midi == Exercise.REST) {
-            WarmupRoute.Transition transition = activeRoute.transitionAt(index);
-            if (transition == null) {
-                target.setText("Пауза · следующий паттерн");
-                exerciseFeedback.setText("Спокойно вдохните и подготовьтесь к следующему рисунку");
-                exerciseProgress.setProgress((now - session.startNanos()) /
-                        (session.exercise().durationSeconds() * 1e9));
-                return;
-            }
-            String direction = transition.toRoot() > transition.fromRoot()
-                    ? "↑" : "↓";
-            target.setText("Переход " + direction);
-            exerciseFeedback.setText("Слушайте два аккорда и приготовьтесь к следующей высоте");
-            exerciseProgress.setProgress((now - session.startNanos()) /
-                    (session.exercise().durationSeconds() * 1e9));
-            return;
-        }
-        double hz = 440 * Math.pow(2, (midi - 69) / 12.0);
-        Note expected = Note.fromFrequency(hz);
-        target.setText(expected.display());
-        ExerciseCatalog.Option choice = activeOption;
-        String part = choice.partCount() > 1
-                ? (activeRoute.climbSemitones() > 0 ? "Высота " : "Паттерн ")
-                  + choice.partNumber(index) + "/" + choice.partCount() + " · " : "";
-        exerciseFeedback.setText(part + "нота " + choice.noteNumberInPart(index) + "/"
-                + choice.notesInPart(index) + " · пойте до смены подсказки");
-        exerciseProgress.setProgress((now - session.startNanos()) /
-                (session.exercise().durationSeconds() * 1e9));
+        warmup.update(now, microphone.isRunning(), notePiano.isSelected(), transitionPiano.isSelected());
+        showWarmupSnapshot();
+        if (warmup.consumeHistoryChanged()) refreshHistory();
+    }
+
+    private void showWarmupSnapshot() {
+        WarmupController.Snapshot snapshot = warmup.snapshot();
+        transitionPiano.setDisable(!snapshot.transitionsAvailable());
+        pianoControls.setVisible(snapshot.showPiano());
+        pianoControls.setManaged(snapshot.showPiano());
+        warmupLibrary.startButton().setDisable(snapshot.running());
+        cancelExerciseButton.setDisable(!snapshot.running());
+        exerciseMode.setDisable(snapshot.running());
+        target.setText(snapshot.target());
+        exerciseFeedback.setText(snapshot.feedback());
+        exerciseProgress.setProgress(snapshot.progress());
     }
 
     private void refreshPiano() {
-        if (session != null && !clock.isPaused()) refreshPiano(clock.time(System.nanoTime()));
-        else piano.silence();
-    }
-
-    private void refreshPiano(long now) {
-        if (session == null || activeRoute == null) return;
-        piano.update(activeRoute, now, session.startNanos(),
+        warmup.updatePiano(clock.time(System.nanoTime()), clock.isPaused(),
                 notePiano.isSelected(), transitionPiano.isSelected());
     }
 
@@ -623,8 +442,8 @@ public final class IntonationApp extends Application {
         timer.stop();
         songLibrary.close();
         songPlayback.close();
-        capture.stop();
-        piano.close();
+        microphone.close();
+        warmup.close();
         TonePlayer.stop();
     }
 
