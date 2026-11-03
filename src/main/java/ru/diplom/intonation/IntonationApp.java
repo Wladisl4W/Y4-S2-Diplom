@@ -36,7 +36,7 @@ public final class IntonationApp extends Application {
             new PianoGuide(message -> Platform.runLater(() -> setStatus(message))), this::setStatus);
     private final MicrophoneController microphone = new MicrophoneController(new MicrophoneCapture(),
             preferences, () -> clock.time(System.nanoTime()), clock::isPaused,
-            warmup::isRunning, this::setStatus, this::microphoneFailed);
+            this::setStatus, this::microphoneFailed);
     private CheckBox notePiano;
     private CheckBox transitionPiano;
     private HBox pianoControls;
@@ -342,6 +342,7 @@ public final class IntonationApp extends Application {
     private void startExercise() {
         stopSongPractice();
         if (!microphone.isRunning()) microphone.start();
+        microphone.clearSamples();
         TonePlayer.stop();
         WarmupRoute route = warmupLibrary.selectedRoute();
         warmup.start(route, clock.time(System.nanoTime()), microphone.isRunning());

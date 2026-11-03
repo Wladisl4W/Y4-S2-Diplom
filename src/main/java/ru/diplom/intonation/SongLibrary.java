@@ -1,7 +1,6 @@
 package ru.diplom.intonation;
 
 import javafx.collections.FXCollections;
-import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
@@ -29,9 +28,7 @@ final class SongLibrary implements AutoCloseable {
     private final SongEditStore songEditStore = new SongEditStore(Path.of(System.getProperty("user.home"),
             ".local/share/intonation-trainer/song-edits"));
     private final VBox page;
-    private Task<SongPipeline.Result> songTask;
-    private SongPipeline songPipeline;
-    private SongPipeline.Result readySong;
+    private final SongAnalysisController analysis = new SongAnalysisController();
     private Button practiceSong;
     private Label songStatus;
     private ListView<String> songNotes;
@@ -47,7 +44,7 @@ final class SongLibrary implements AutoCloseable {
     }
 
     VBox page() { return page; }
-    SongPipeline.Result readySong() { return readySong; }
+    SongPipeline.Result readySong() { return analysis.readySong(); }
 
     private VBox createPage(Stage owner) {
         Label heading = label("Разбор песни · исследовательский режим", "library-title");
@@ -88,10 +85,8 @@ final class SongLibrary implements AutoCloseable {
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Аудиофайлы", "*.mp3", "*.wav"));
             File file = chooser.showOpenDialog(owner);
             if (file == null) return;
-            currentSongFile = file.toPath();
             onBeforeEdit.run();
-            if (songPipeline != null) songPipeline.close();
-            readySong = null;
+            currentSongFile = file.toPath();
             practiceSong.setDisable(true);
             songNotes.getItems().clear();
             songResult = null;
@@ -99,59 +94,46 @@ final class SongLibrary implements AutoCloseable {
             songStatus.setText("Анализ: " + file.getName() + "…");
             open.setDisable(true);
             cancel.setDisable(false);
-            songPipeline = new SongPipeline(songModel.getValue());
-            SongPipeline pipeline = songPipeline;
-            Task<SongPipeline.Result> task = new Task<>() {
-                @Override protected SongPipeline.Result call() throws Exception {
-                    return pipeline.analyze(file.toPath(), this::updateMessage);
+            analysis.start(file.toPath(), songModel.getValue(), new SongAnalysisController.Listener() {
+                @Override public void onProgress(String message) { songStatus.setText(message); }
+
+                @Override public void onSuccess(SongPipeline.Result result) {
+                    songResult = result.transcription();
+                    boolean restoredEdits = false;
+                    String editWarning = "";
+                    try {
+                        SongAnalyzer.Result generated = songResult;
+                        songResult = songEditStore.load(file.toPath(), songResult);
+                        analysis.replaceTranscription(songResult);
+                        restoredEdits = songResult != generated;
+                    } catch (IOException error) {
+                        editWarning = " · исправления не прочитаны: " + error.getMessage();
+                    }
+                    songStatus.setText(file.getName() + " · вокал отделён · "
+                            + songResult.notes().size() + " кандидатов в ноты"
+                            + (restoredEdits ? " · восстановлены ручные исправления" : "")
+                            + (songResult.durationSeconds() >= 599 ? " · первые 10 минут" : "")
+                            + editWarning);
+                    refreshSongNotes();
+                    practiceSong.setDisable(songResult.notes().isEmpty());
+                    open.setDisable(false);
+                    cancel.setDisable(true);
                 }
-            };
-            songTask = task;
-            task.messageProperty().addListener((obs, old, message) -> {
-                if (task.isRunning() && message != null) songStatus.setText(message);
-            });
-            task.setOnSucceeded(event -> {
-                readySong = task.getValue();
-                songResult = readySong.transcription();
-                boolean restoredEdits = false;
-                String editWarning = "";
-                try {
-                    SongAnalyzer.Result generated = songResult;
-                    songResult = songEditStore.load(file.toPath(), songResult);
-                    readySong = new SongPipeline.Result(readySong.vocals(), readySong.instrumental(), songResult);
-                    restoredEdits = songResult != generated;
-                } catch (IOException error) {
-                    editWarning = " · исправления не прочитаны: " + error.getMessage();
+
+                @Override public void onFailure(Exception error) {
+                    songStatus.setText("Не удалось обработать файл: " + error.getMessage()
+                            + ". Нужны локальная модель, Audio Separator и FFmpeg.");
+                    open.setDisable(false);
+                    cancel.setDisable(true);
                 }
-                songStatus.setText(file.getName() + " · вокал отделён · "
-                        + songResult.notes().size() + " кандидатов в ноты"
-                        + (restoredEdits ? " · восстановлены ручные исправления" : "")
-                        + (songResult.durationSeconds() >= 599 ? " · первые 10 минут" : "")
-                        + editWarning);
-                refreshSongNotes();
-                practiceSong.setDisable(songResult.notes().isEmpty());
-                open.setDisable(false);
-                cancel.setDisable(true);
             });
-            task.setOnFailed(event -> {
-                Throwable error = task.getException();
-                pipeline.close();
-                songStatus.setText("Не удалось обработать файл: " + error.getMessage()
-                        + ". Нужны локальная модель, Audio Separator и FFmpeg.");
-                open.setDisable(false);
-                cancel.setDisable(true);
-            });
-            task.setOnCancelled(event -> {
-                pipeline.close();
-                songStatus.setText("Анализ отменён");
-                open.setDisable(false);
-                cancel.setDisable(true);
-            });
-            Thread worker = new Thread(task, "song-analysis");
-            worker.setDaemon(true);
-            worker.start();
         });
-        cancel.setOnAction(e -> cancelSongAnalysis());
+        cancel.setOnAction(e -> {
+            analysis.cancel();
+            songStatus.setText("Анализ отменён");
+            open.setDisable(false);
+            cancel.setDisable(true);
+        });
         HBox modelSelector = new HBox(8, label("Разделение", "muted"), songModel);
         modelSelector.setAlignment(Pos.CENTER_LEFT);
         FlowPane actions = new FlowPane(10, 8, open, cancel, practiceSong, modelSelector);
@@ -182,13 +164,8 @@ final class SongLibrary implements AutoCloseable {
         return songPage;
     }
 
-    private void cancelSongAnalysis() {
-        if (songPipeline != null) songPipeline.cancel();
-        if (songTask != null) songTask.cancel(true);
-        if (songPipeline != null) songPipeline.close();
-    }
-
     private void editSongNote(int semitones, boolean delete) {
+        SongPipeline.Result readySong = readySong();
         if (readySong == null) return;
         int index = songNotes.getSelectionModel().getSelectedIndex();
         if (index < 0 || index >= readySong.transcription().notes().size()) return;
@@ -200,7 +177,7 @@ final class SongLibrary implements AutoCloseable {
                 note.durationSeconds(), Math.max(0, Math.min(127, note.midi() + semitones))));
         songResult = new SongAnalyzer.Result(changed, readySong.transcription().durationSeconds(),
                 readySong.transcription().alternatives());
-        readySong = new SongPipeline.Result(readySong.vocals(), readySong.instrumental(), songResult);
+        analysis.replaceTranscription(songResult);
         refreshSongNotes();
         if (!changed.isEmpty()) songNotes.getSelectionModel().select(Math.min(index, changed.size() - 1));
         practiceSong.setDisable(changed.isEmpty());
@@ -209,6 +186,7 @@ final class SongLibrary implements AutoCloseable {
     }
 
     private void useSongAlternative() {
+        SongPipeline.Result readySong = readySong();
         if (readySong == null) return;
         int index = songNotes.getSelectionModel().getSelectedIndex();
         if (index < 0 || index >= songResult.notes().size()) return;
@@ -242,7 +220,7 @@ final class SongLibrary implements AutoCloseable {
                     selected.durationSeconds(), candidate.midi()));
             songResult = new SongAnalyzer.Result(changed, songResult.durationSeconds(),
                     songResult.alternatives());
-            readySong = new SongPipeline.Result(readySong.vocals(), readySong.instrumental(), songResult);
+            analysis.replaceTranscription(songResult);
             refreshSongNotes();
             songNotes.getSelectionModel().select(index);
             songStatus.setText("Выбрана другая вокальная линия для ноты");
@@ -302,10 +280,7 @@ final class SongLibrary implements AutoCloseable {
         g.fillText(Math.round(seconds) + " с", width - 46, height - 8);
     }
 
-    @Override public void close() {
-        cancelSongAnalysis();
-        if (songPipeline != null) songPipeline.close();
-    }
+    @Override public void close() { analysis.close(); }
 
     private static Label label(String text, String styleClass) {
         Label label = new Label(text);

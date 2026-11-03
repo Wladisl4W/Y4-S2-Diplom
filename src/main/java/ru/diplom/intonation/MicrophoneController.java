@@ -12,10 +12,9 @@ import ru.diplom.intonation.audio.PitchResult;
 
 import javax.sound.sampled.LineUnavailableException;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
+import java.util.function.BooleanSupplier;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -27,20 +26,18 @@ final class MicrophoneController implements AutoCloseable {
     private final Preferences preferences;
     private final LongSupplier time;
     private final BooleanSupplier paused;
-    private final BooleanSupplier preserveAllSamples;
     private final Consumer<String> status;
     private final Consumer<String> failure;
-    private final ConcurrentLinkedQueue<Sample> samples = new ConcurrentLinkedQueue<>();
+    private final PitchSampleBuffer<Sample> samples = new PitchSampleBuffer<>(64);
     private MicrophoneCapture.Device selectedDevice;
 
     MicrophoneController(MicrophoneCapture capture, Preferences preferences, LongSupplier time,
-                         BooleanSupplier paused, BooleanSupplier preserveAllSamples,
+                         BooleanSupplier paused,
                          Consumer<String> status, Consumer<String> failure) {
         this.capture = capture;
         this.preferences = preferences;
         this.time = time;
         this.paused = paused;
-        this.preserveAllSamples = preserveAllSamples;
         this.status = status;
         this.failure = failure;
     }
@@ -129,7 +126,6 @@ final class MicrophoneController implements AutoCloseable {
             samples.clear();
             capture.start(selectedDevice, pitch -> {
                 if (paused.getAsBoolean()) return;
-                while (!preserveAllSamples.getAsBoolean() && samples.size() >= 8) samples.poll();
                 samples.add(new Sample(time.getAsLong(), pitch));
             }, error -> Platform.runLater(() -> {
                 failure.accept(error);
