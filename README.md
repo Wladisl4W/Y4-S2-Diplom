@@ -20,7 +20,7 @@
 
 `./gradlew test` выполняет Java тесты детектора, нотной шкалы, графика, упражнений и сохранения исправлений песни. `python -m unittest discover -s scripts -p 'test_*.py'` проверяет выбор ведущей линии без установки моделей. `./gradlew build` собирает приложение и запускает Java тесты. Пользовательские аудиофайлы и локальные результаты исключены из репозитория.
 
-Документы: [архитектура](docs/architecture.md), [дизайн](docs/design.md), [методика качества](docs/quality.md), [каталог распевок](docs/warmups.md), [этапы](docs/roadmap.md), [эксперимент MP3](docs/mp3-experiment.md), [решения](docs/decisions/0001-java-local-processing.md).
+Документы: [архитектура](docs/architecture.md), [дизайн](docs/design.md), [методика качества](docs/quality.md), [каталог распевок](docs/warmups.md), [этапы](docs/roadmap.md), [эксперимент MP3](docs/mp3-experiment.md), [сравнение ведущей линии](docs/measurements/2026-11-03-lead-comparison.md), [решения](docs/decisions/0001-java-local-processing.md).
 
 ## Пакеты
 

@@ -25,6 +25,23 @@ class LeadTrackerTest(unittest.TestCase):
         self.assertEqual(2, len(notes))
         self.assertGreater(notes[1][0] - notes[0][0], 0.5)
 
+    def test_crossing_voices_follows_confident_lead(self):
+        notes, alternatives = lead.select_lead([
+            (0, 0.5, 60, 0.92), (0, 0.5, 67, 0.55),
+            (0.5, 1, 69, 0.93), (0.5, 1, 62, 0.53),
+        ], 1)
+        self.assertEqual([60, 69], [note[2] for note in notes])
+        self.assertEqual([67, 62], [note[2] for note in alternatives])
+
+    def test_new_onset_of_same_pitch_stays_two_notes(self):
+        notes, _ = lead.select_lead([(0, 0.4, 60, 0.9), (0.4, 0.8, 60, 0.9)], 0.8)
+        self.assertEqual(2, len(notes))
+        self.assertEqual([0.0, 0.4], [note[0] for note in notes])
+
+    def test_switches_when_old_lead_ends(self):
+        notes, _ = lead.select_lead([(0, 0.5, 60, 0.95), (0.5, 1, 67, 0.95)], 1)
+        self.assertEqual([60, 67], [note[2] for note in notes])
+
 
 if __name__ == "__main__":
     unittest.main()

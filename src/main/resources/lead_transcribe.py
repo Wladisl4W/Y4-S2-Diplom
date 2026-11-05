@@ -12,9 +12,17 @@ import sys
 
 STEP = 0.05
 
+# The default values reproduce the released 1.18 lead tracker exactly.
+BASELINE = {
+    "candidate_base": 0.32, "confidence": 0.5, "duration": 0.12,
+    "register": 0.04, "jump": 0.035, "same": 0.18,
+    "silence": -0.22, "switch_to_silence": 0.08,
+}
 
-def select_lead(events, duration):
+
+def select_lead(events, duration, config=None):
     """Track one continuous voice without assuming the highest note is the lead."""
+    config = BASELINE if config is None else config
     count = math.ceil(duration / STEP)
     choices = []
     order = sorted(range(len(events)), key=lambda i: events[i][0])
@@ -40,21 +48,22 @@ def select_lead(events, duration):
             best_parent = None
             for previous, score in states.items():
                 if candidate is None:
-                    emission = -0.22 if active else 0.0
+                    emission = config["silence"] if active else 0.0
                 else:
                     start, end, midi, confidence = events[candidate][:4]
-                    emission = 0.32 + 0.5 * confidence + min(end - start, 1.0) * 0.12
+                    emission = (config["candidate_base"] + config["confidence"] * confidence
+                                + min(end - start, 1.0) * config["duration"])
                     if register is not None:
-                        emission -= 0.04 * min(abs(midi - register), 18)
+                        emission -= config["register"] * min(abs(midi - register), 18)
                 transition = 0.0
                 if candidate is not None and previous is not None:
                     old_midi = events[previous][2]
                     new_midi = events[candidate][2]
-                    transition = -0.035 * min(abs(new_midi - old_midi), 24)
+                    transition = -config["jump"] * min(abs(new_midi - old_midi), 24)
                     if candidate == previous:
-                        transition += 0.18
+                        transition += config["same"]
                 elif candidate != previous and (candidate is None or previous is None):
-                    transition = -0.08
+                    transition = -config["switch_to_silence"]
                 value = score + emission + transition
                 if best is None or value > best:
                     best = value

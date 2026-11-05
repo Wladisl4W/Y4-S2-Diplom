@@ -1,0 +1,5288 @@
+{
+  "basic_pitch_version": "0.4.0",
+  "inference": {
+    "onset_threshold": 0.45,
+    "frame_threshold": 0.26,
+    "minimum_note_length_ms": 100,
+    "midi_range": [
+      36,
+      96
+    ]
+  },
+  "presets": {
+    "released_1_18": {
+      "candidate_base": 0.32,
+      "confidence": 0.5,
+      "duration": 0.12,
+      "register": 0.04,
+      "jump": 0.035,
+      "same": 0.18,
+      "silence": -0.22,
+      "switch_to_silence": 0.08
+    },
+    "balanced": {
+      "candidate_base": -0.05,
+      "confidence": 0.75,
+      "duration": 0.15,
+      "register": 0.05,
+      "jump": 0.06,
+      "same": 0.24,
+      "silence": -0.05,
+      "switch_to_silence": 0.08
+    },
+    "cautious": {
+      "candidate_base": -0.3,
+      "confidence": 0.95,
+      "duration": 0.2,
+      "register": 0.04,
+      "jump": 0.04,
+      "same": 0.2,
+      "silence": 0.0,
+      "switch_to_silence": 0.08
+    },
+    "continuity": {
+      "candidate_base": 0.2,
+      "confidence": 0.55,
+      "duration": 0.12,
+      "register": 0.06,
+      "jump": 0.08,
+      "same": 0.3,
+      "silence": -0.1,
+      "switch_to_silence": 0.08
+    }
+  },
+  "tracks": [
+    {
+      "id": "vocadito_1",
+      "song_id": "vocadito_1",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 33.212,
+      "candidate_events": 92,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.01,
+      "variants": {
+        "released_1_18": {
+          "notes": 87,
+          "alternatives": 3,
+          "vocal_frames": 3642,
+          "correct_pitch_rate": 0.747,
+          "miss_rate": 0.131,
+          "silent_frames": 2080,
+          "false_voice_rate": 0.175,
+          "candidate_oracle_pitch_rate": 0.747,
+          "reference_notes": 59,
+          "detected_notes": 87,
+          "matched_notes": 31,
+          "note_event_f1": 0.425,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.064
+        },
+        "balanced": {
+          "notes": 87,
+          "alternatives": 3,
+          "vocal_frames": 3642,
+          "correct_pitch_rate": 0.747,
+          "miss_rate": 0.131,
+          "silent_frames": 2080,
+          "false_voice_rate": 0.175,
+          "candidate_oracle_pitch_rate": 0.747,
+          "reference_notes": 59,
+          "detected_notes": 87,
+          "matched_notes": 31,
+          "note_event_f1": 0.425,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.064
+        },
+        "cautious": {
+          "notes": 85,
+          "alternatives": 3,
+          "vocal_frames": 3642,
+          "correct_pitch_rate": 0.742,
+          "miss_rate": 0.144,
+          "silent_frames": 2080,
+          "false_voice_rate": 0.174,
+          "candidate_oracle_pitch_rate": 0.742,
+          "reference_notes": 59,
+          "detected_notes": 85,
+          "matched_notes": 31,
+          "note_event_f1": 0.431,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.064
+        },
+        "continuity": {
+          "notes": 87,
+          "alternatives": 3,
+          "vocal_frames": 3642,
+          "correct_pitch_rate": 0.747,
+          "miss_rate": 0.131,
+          "silent_frames": 2080,
+          "false_voice_rate": 0.175,
+          "candidate_oracle_pitch_rate": 0.747,
+          "reference_notes": 59,
+          "detected_notes": 87,
+          "matched_notes": 31,
+          "note_event_f1": 0.425,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.064
+        }
+      }
+    },
+    {
+      "id": "vocadito_2",
+      "song_id": "vocadito_2",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 35.208,
+      "candidate_events": 118,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.01,
+      "variants": {
+        "released_1_18": {
+          "notes": 93,
+          "alternatives": 21,
+          "vocal_frames": 4570,
+          "correct_pitch_rate": 0.827,
+          "miss_rate": 0.1,
+          "silent_frames": 1496,
+          "false_voice_rate": 0.043,
+          "candidate_oracle_pitch_rate": 0.827,
+          "reference_notes": 76,
+          "detected_notes": 93,
+          "matched_notes": 38,
+          "note_event_f1": 0.45,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.053
+        },
+        "balanced": {
+          "notes": 93,
+          "alternatives": 21,
+          "vocal_frames": 4570,
+          "correct_pitch_rate": 0.827,
+          "miss_rate": 0.1,
+          "silent_frames": 1496,
+          "false_voice_rate": 0.043,
+          "candidate_oracle_pitch_rate": 0.827,
+          "reference_notes": 76,
+          "detected_notes": 93,
+          "matched_notes": 38,
+          "note_event_f1": 0.45,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.053
+        },
+        "cautious": {
+          "notes": 92,
+          "alternatives": 21,
+          "vocal_frames": 4570,
+          "correct_pitch_rate": 0.827,
+          "miss_rate": 0.1,
+          "silent_frames": 1496,
+          "false_voice_rate": 0.032,
+          "candidate_oracle_pitch_rate": 0.827,
+          "reference_notes": 76,
+          "detected_notes": 92,
+          "matched_notes": 38,
+          "note_event_f1": 0.452,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.053
+        },
+        "continuity": {
+          "notes": 94,
+          "alternatives": 22,
+          "vocal_frames": 4570,
+          "correct_pitch_rate": 0.827,
+          "miss_rate": 0.098,
+          "silent_frames": 1496,
+          "false_voice_rate": 0.043,
+          "candidate_oracle_pitch_rate": 0.828,
+          "reference_notes": 76,
+          "detected_notes": 94,
+          "matched_notes": 38,
+          "note_event_f1": 0.447,
+          "onset_mae_seconds": 0.035,
+          "offset_mae_seconds": 0.053
+        }
+      }
+    },
+    {
+      "id": "vocadito_3",
+      "song_id": "vocadito_3",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 21.736,
+      "candidate_events": 70,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.01,
+      "variants": {
+        "released_1_18": {
+          "notes": 57,
+          "alternatives": 13,
+          "vocal_frames": 2206,
+          "correct_pitch_rate": 0.749,
+          "miss_rate": 0.123,
+          "silent_frames": 1539,
+          "false_voice_rate": 0.175,
+          "candidate_oracle_pitch_rate": 0.749,
+          "reference_notes": 51,
+          "detected_notes": 57,
+          "matched_notes": 34,
+          "note_event_f1": 0.63,
+          "onset_mae_seconds": 0.029,
+          "offset_mae_seconds": 0.043
+        },
+        "balanced": {
+          "notes": 57,
+          "alternatives": 13,
+          "vocal_frames": 2206,
+          "correct_pitch_rate": 0.749,
+          "miss_rate": 0.123,
+          "silent_frames": 1539,
+          "false_voice_rate": 0.175,
+          "candidate_oracle_pitch_rate": 0.749,
+          "reference_notes": 51,
+          "detected_notes": 57,
+          "matched_notes": 34,
+          "note_event_f1": 0.63,
+          "onset_mae_seconds": 0.029,
+          "offset_mae_seconds": 0.043
+        },
+        "cautious": {
+          "notes": 57,
+          "alternatives": 13,
+          "vocal_frames": 2206,
+          "correct_pitch_rate": 0.749,
+          "miss_rate": 0.123,
+          "silent_frames": 1539,
+          "false_voice_rate": 0.175,
+          "candidate_oracle_pitch_rate": 0.749,
+          "reference_notes": 51,
+          "detected_notes": 57,
+          "matched_notes": 34,
+          "note_event_f1": 0.63,
+          "onset_mae_seconds": 0.029,
+          "offset_mae_seconds": 0.043
+        },
+        "continuity": {
+          "notes": 57,
+          "alternatives": 13,
+          "vocal_frames": 2206,
+          "correct_pitch_rate": 0.749,
+          "miss_rate": 0.123,
+          "silent_frames": 1539,
+          "false_voice_rate": 0.175,
+          "candidate_oracle_pitch_rate": 0.749,
+          "reference_notes": 51,
+          "detected_notes": 57,
+          "matched_notes": 34,
+          "note_event_f1": 0.63,
+          "onset_mae_seconds": 0.029,
+          "offset_mae_seconds": 0.043
+        }
+      }
+    },
+    {
+      "id": "vocadito_4",
+      "song_id": "vocadito_4",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 18.456,
+      "candidate_events": 99,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.01,
+      "variants": {
+        "released_1_18": {
+          "notes": 75,
+          "alternatives": 22,
+          "vocal_frames": 2463,
+          "correct_pitch_rate": 0.676,
+          "miss_rate": 0.188,
+          "silent_frames": 717,
+          "false_voice_rate": 0.289,
+          "candidate_oracle_pitch_rate": 0.676,
+          "reference_notes": 69,
+          "detected_notes": 75,
+          "matched_notes": 35,
+          "note_event_f1": 0.486,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.043
+        },
+        "balanced": {
+          "notes": 74,
+          "alternatives": 22,
+          "vocal_frames": 2463,
+          "correct_pitch_rate": 0.669,
+          "miss_rate": 0.197,
+          "silent_frames": 717,
+          "false_voice_rate": 0.287,
+          "candidate_oracle_pitch_rate": 0.669,
+          "reference_notes": 69,
+          "detected_notes": 74,
+          "matched_notes": 34,
+          "note_event_f1": 0.476,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.043
+        },
+        "cautious": {
+          "notes": 72,
+          "alternatives": 22,
+          "vocal_frames": 2463,
+          "correct_pitch_rate": 0.661,
+          "miss_rate": 0.215,
+          "silent_frames": 717,
+          "false_voice_rate": 0.287,
+          "candidate_oracle_pitch_rate": 0.661,
+          "reference_notes": 69,
+          "detected_notes": 72,
+          "matched_notes": 34,
+          "note_event_f1": 0.482,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.043
+        },
+        "continuity": {
+          "notes": 75,
+          "alternatives": 22,
+          "vocal_frames": 2463,
+          "correct_pitch_rate": 0.676,
+          "miss_rate": 0.188,
+          "silent_frames": 717,
+          "false_voice_rate": 0.289,
+          "candidate_oracle_pitch_rate": 0.676,
+          "reference_notes": 69,
+          "detected_notes": 75,
+          "matched_notes": 35,
+          "note_event_f1": 0.486,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.043
+        }
+      }
+    },
+    {
+      "id": "vocadito_5",
+      "song_id": "vocadito_5",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 23.232,
+      "candidate_events": 97,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.01,
+      "variants": {
+        "released_1_18": {
+          "notes": 91,
+          "alternatives": 6,
+          "vocal_frames": 2895,
+          "correct_pitch_rate": 0.653,
+          "miss_rate": 0.192,
+          "silent_frames": 1108,
+          "false_voice_rate": 0.232,
+          "candidate_oracle_pitch_rate": 0.653,
+          "reference_notes": 96,
+          "detected_notes": 91,
+          "matched_notes": 54,
+          "note_event_f1": 0.578,
+          "onset_mae_seconds": 0.029,
+          "offset_mae_seconds": 0.031
+        },
+        "balanced": {
+          "notes": 90,
+          "alternatives": 6,
+          "vocal_frames": 2895,
+          "correct_pitch_rate": 0.653,
+          "miss_rate": 0.201,
+          "silent_frames": 1108,
+          "false_voice_rate": 0.232,
+          "candidate_oracle_pitch_rate": 0.653,
+          "reference_notes": 96,
+          "detected_notes": 90,
+          "matched_notes": 54,
+          "note_event_f1": 0.581,
+          "onset_mae_seconds": 0.029,
+          "offset_mae_seconds": 0.031
+        },
+        "cautious": {
+          "notes": 89,
+          "alternatives": 6,
+          "vocal_frames": 2895,
+          "correct_pitch_rate": 0.65,
+          "miss_rate": 0.207,
+          "silent_frames": 1108,
+          "false_voice_rate": 0.232,
+          "candidate_oracle_pitch_rate": 0.65,
+          "reference_notes": 96,
+          "detected_notes": 89,
+          "matched_notes": 53,
+          "note_event_f1": 0.573,
+          "onset_mae_seconds": 0.029,
+          "offset_mae_seconds": 0.032
+        },
+        "continuity": {
+          "notes": 90,
+          "alternatives": 6,
+          "vocal_frames": 2895,
+          "correct_pitch_rate": 0.653,
+          "miss_rate": 0.201,
+          "silent_frames": 1108,
+          "false_voice_rate": 0.232,
+          "candidate_oracle_pitch_rate": 0.653,
+          "reference_notes": 96,
+          "detected_notes": 90,
+          "matched_notes": 54,
+          "note_event_f1": 0.581,
+          "onset_mae_seconds": 0.029,
+          "offset_mae_seconds": 0.031
+        }
+      }
+    },
+    {
+      "id": "vocadito_6",
+      "song_id": "vocadito_6",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 23.832,
+      "candidate_events": 76,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.01,
+      "variants": {
+        "released_1_18": {
+          "notes": 74,
+          "alternatives": 1,
+          "vocal_frames": 2813,
+          "correct_pitch_rate": 0.56,
+          "miss_rate": 0.237,
+          "silent_frames": 1293,
+          "false_voice_rate": 0.066,
+          "candidate_oracle_pitch_rate": 0.56,
+          "reference_notes": 73,
+          "detected_notes": 74,
+          "matched_notes": 37,
+          "note_event_f1": 0.503,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.041
+        },
+        "balanced": {
+          "notes": 74,
+          "alternatives": 1,
+          "vocal_frames": 2813,
+          "correct_pitch_rate": 0.56,
+          "miss_rate": 0.237,
+          "silent_frames": 1293,
+          "false_voice_rate": 0.066,
+          "candidate_oracle_pitch_rate": 0.56,
+          "reference_notes": 73,
+          "detected_notes": 74,
+          "matched_notes": 37,
+          "note_event_f1": 0.503,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.041
+        },
+        "cautious": {
+          "notes": 68,
+          "alternatives": 1,
+          "vocal_frames": 2813,
+          "correct_pitch_rate": 0.542,
+          "miss_rate": 0.287,
+          "silent_frames": 1293,
+          "false_voice_rate": 0.06,
+          "candidate_oracle_pitch_rate": 0.542,
+          "reference_notes": 73,
+          "detected_notes": 68,
+          "matched_notes": 37,
+          "note_event_f1": 0.525,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.041
+        },
+        "continuity": {
+          "notes": 74,
+          "alternatives": 1,
+          "vocal_frames": 2813,
+          "correct_pitch_rate": 0.56,
+          "miss_rate": 0.237,
+          "silent_frames": 1293,
+          "false_voice_rate": 0.066,
+          "candidate_oracle_pitch_rate": 0.56,
+          "reference_notes": 73,
+          "detected_notes": 74,
+          "matched_notes": 37,
+          "note_event_f1": 0.503,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.041
+        }
+      }
+    },
+    {
+      "id": "vocadito_7",
+      "song_id": "vocadito_7",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 19.467,
+      "candidate_events": 66,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 60,
+          "alternatives": 4,
+          "vocal_frames": 1996,
+          "correct_pitch_rate": 0.703,
+          "miss_rate": 0.136,
+          "silent_frames": 1358,
+          "false_voice_rate": 0.259,
+          "candidate_oracle_pitch_rate": 0.719,
+          "reference_notes": 47,
+          "detected_notes": 60,
+          "matched_notes": 32,
+          "note_event_f1": 0.598,
+          "onset_mae_seconds": 0.022,
+          "offset_mae_seconds": 0.062
+        },
+        "balanced": {
+          "notes": 60,
+          "alternatives": 4,
+          "vocal_frames": 1996,
+          "correct_pitch_rate": 0.703,
+          "miss_rate": 0.136,
+          "silent_frames": 1358,
+          "false_voice_rate": 0.259,
+          "candidate_oracle_pitch_rate": 0.719,
+          "reference_notes": 47,
+          "detected_notes": 60,
+          "matched_notes": 32,
+          "note_event_f1": 0.598,
+          "onset_mae_seconds": 0.022,
+          "offset_mae_seconds": 0.062
+        },
+        "cautious": {
+          "notes": 61,
+          "alternatives": 4,
+          "vocal_frames": 1996,
+          "correct_pitch_rate": 0.707,
+          "miss_rate": 0.145,
+          "silent_frames": 1358,
+          "false_voice_rate": 0.259,
+          "candidate_oracle_pitch_rate": 0.708,
+          "reference_notes": 47,
+          "detected_notes": 61,
+          "matched_notes": 33,
+          "note_event_f1": 0.611,
+          "onset_mae_seconds": 0.022,
+          "offset_mae_seconds": 0.061
+        },
+        "continuity": {
+          "notes": 60,
+          "alternatives": 4,
+          "vocal_frames": 1996,
+          "correct_pitch_rate": 0.703,
+          "miss_rate": 0.136,
+          "silent_frames": 1358,
+          "false_voice_rate": 0.259,
+          "candidate_oracle_pitch_rate": 0.719,
+          "reference_notes": 47,
+          "detected_notes": 60,
+          "matched_notes": 32,
+          "note_event_f1": 0.598,
+          "onset_mae_seconds": 0.022,
+          "offset_mae_seconds": 0.062
+        }
+      }
+    },
+    {
+      "id": "vocadito_8",
+      "song_id": "vocadito_8",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 17.042,
+      "candidate_events": 41,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 37,
+          "alternatives": 2,
+          "vocal_frames": 1545,
+          "correct_pitch_rate": 0.738,
+          "miss_rate": 0.113,
+          "silent_frames": 1391,
+          "false_voice_rate": 0.183,
+          "candidate_oracle_pitch_rate": 0.738,
+          "reference_notes": 40,
+          "detected_notes": 37,
+          "matched_notes": 27,
+          "note_event_f1": 0.701,
+          "onset_mae_seconds": 0.021,
+          "offset_mae_seconds": 0.06
+        },
+        "balanced": {
+          "notes": 37,
+          "alternatives": 2,
+          "vocal_frames": 1545,
+          "correct_pitch_rate": 0.738,
+          "miss_rate": 0.113,
+          "silent_frames": 1391,
+          "false_voice_rate": 0.183,
+          "candidate_oracle_pitch_rate": 0.738,
+          "reference_notes": 40,
+          "detected_notes": 37,
+          "matched_notes": 27,
+          "note_event_f1": 0.701,
+          "onset_mae_seconds": 0.021,
+          "offset_mae_seconds": 0.06
+        },
+        "cautious": {
+          "notes": 37,
+          "alternatives": 2,
+          "vocal_frames": 1545,
+          "correct_pitch_rate": 0.738,
+          "miss_rate": 0.113,
+          "silent_frames": 1391,
+          "false_voice_rate": 0.183,
+          "candidate_oracle_pitch_rate": 0.738,
+          "reference_notes": 40,
+          "detected_notes": 37,
+          "matched_notes": 27,
+          "note_event_f1": 0.701,
+          "onset_mae_seconds": 0.021,
+          "offset_mae_seconds": 0.06
+        },
+        "continuity": {
+          "notes": 37,
+          "alternatives": 2,
+          "vocal_frames": 1545,
+          "correct_pitch_rate": 0.738,
+          "miss_rate": 0.113,
+          "silent_frames": 1391,
+          "false_voice_rate": 0.183,
+          "candidate_oracle_pitch_rate": 0.738,
+          "reference_notes": 40,
+          "detected_notes": 37,
+          "matched_notes": 27,
+          "note_event_f1": 0.701,
+          "onset_mae_seconds": 0.021,
+          "offset_mae_seconds": 0.06
+        }
+      }
+    },
+    {
+      "id": "vocadito_9",
+      "song_id": "vocadito_9",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 20.375,
+      "candidate_events": 61,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 61,
+          "alternatives": 0,
+          "vocal_frames": 2071,
+          "correct_pitch_rate": 0.638,
+          "miss_rate": 0.19,
+          "silent_frames": 1439,
+          "false_voice_rate": 0.179,
+          "candidate_oracle_pitch_rate": 0.638,
+          "reference_notes": 62,
+          "detected_notes": 61,
+          "matched_notes": 39,
+          "note_event_f1": 0.634,
+          "onset_mae_seconds": 0.03,
+          "offset_mae_seconds": 0.056
+        },
+        "balanced": {
+          "notes": 60,
+          "alternatives": 0,
+          "vocal_frames": 2071,
+          "correct_pitch_rate": 0.634,
+          "miss_rate": 0.198,
+          "silent_frames": 1439,
+          "false_voice_rate": 0.179,
+          "candidate_oracle_pitch_rate": 0.634,
+          "reference_notes": 62,
+          "detected_notes": 60,
+          "matched_notes": 39,
+          "note_event_f1": 0.639,
+          "onset_mae_seconds": 0.03,
+          "offset_mae_seconds": 0.056
+        },
+        "cautious": {
+          "notes": 59,
+          "alternatives": 0,
+          "vocal_frames": 2071,
+          "correct_pitch_rate": 0.627,
+          "miss_rate": 0.204,
+          "silent_frames": 1439,
+          "false_voice_rate": 0.164,
+          "candidate_oracle_pitch_rate": 0.627,
+          "reference_notes": 62,
+          "detected_notes": 59,
+          "matched_notes": 38,
+          "note_event_f1": 0.628,
+          "onset_mae_seconds": 0.03,
+          "offset_mae_seconds": 0.054
+        },
+        "continuity": {
+          "notes": 61,
+          "alternatives": 0,
+          "vocal_frames": 2071,
+          "correct_pitch_rate": 0.638,
+          "miss_rate": 0.19,
+          "silent_frames": 1439,
+          "false_voice_rate": 0.179,
+          "candidate_oracle_pitch_rate": 0.638,
+          "reference_notes": 62,
+          "detected_notes": 61,
+          "matched_notes": 39,
+          "note_event_f1": 0.634,
+          "onset_mae_seconds": 0.03,
+          "offset_mae_seconds": 0.056
+        }
+      }
+    },
+    {
+      "id": "vocadito_10",
+      "song_id": "vocadito_10",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 9.098,
+      "candidate_events": 45,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 38,
+          "alternatives": 5,
+          "vocal_frames": 1180,
+          "correct_pitch_rate": 0.573,
+          "miss_rate": 0.245,
+          "silent_frames": 388,
+          "false_voice_rate": 0.294,
+          "candidate_oracle_pitch_rate": 0.573,
+          "reference_notes": 35,
+          "detected_notes": 38,
+          "matched_notes": 15,
+          "note_event_f1": 0.411,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.05
+        },
+        "balanced": {
+          "notes": 38,
+          "alternatives": 5,
+          "vocal_frames": 1180,
+          "correct_pitch_rate": 0.573,
+          "miss_rate": 0.245,
+          "silent_frames": 388,
+          "false_voice_rate": 0.294,
+          "candidate_oracle_pitch_rate": 0.573,
+          "reference_notes": 35,
+          "detected_notes": 38,
+          "matched_notes": 15,
+          "note_event_f1": 0.411,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.05
+        },
+        "cautious": {
+          "notes": 34,
+          "alternatives": 5,
+          "vocal_frames": 1180,
+          "correct_pitch_rate": 0.539,
+          "miss_rate": 0.297,
+          "silent_frames": 388,
+          "false_voice_rate": 0.229,
+          "candidate_oracle_pitch_rate": 0.539,
+          "reference_notes": 35,
+          "detected_notes": 34,
+          "matched_notes": 13,
+          "note_event_f1": 0.377,
+          "onset_mae_seconds": 0.032,
+          "offset_mae_seconds": 0.053
+        },
+        "continuity": {
+          "notes": 38,
+          "alternatives": 5,
+          "vocal_frames": 1180,
+          "correct_pitch_rate": 0.573,
+          "miss_rate": 0.245,
+          "silent_frames": 388,
+          "false_voice_rate": 0.294,
+          "candidate_oracle_pitch_rate": 0.573,
+          "reference_notes": 35,
+          "detected_notes": 38,
+          "matched_notes": 15,
+          "note_event_f1": 0.411,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.05
+        }
+      }
+    },
+    {
+      "id": "vocadito_11",
+      "song_id": "vocadito_11",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 12.984,
+      "candidate_events": 47,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 44,
+          "alternatives": 3,
+          "vocal_frames": 1707,
+          "correct_pitch_rate": 0.716,
+          "miss_rate": 0.165,
+          "silent_frames": 530,
+          "false_voice_rate": 0.138,
+          "candidate_oracle_pitch_rate": 0.716,
+          "reference_notes": 37,
+          "detected_notes": 44,
+          "matched_notes": 18,
+          "note_event_f1": 0.444,
+          "onset_mae_seconds": 0.045,
+          "offset_mae_seconds": 0.053
+        },
+        "balanced": {
+          "notes": 44,
+          "alternatives": 3,
+          "vocal_frames": 1707,
+          "correct_pitch_rate": 0.716,
+          "miss_rate": 0.165,
+          "silent_frames": 530,
+          "false_voice_rate": 0.138,
+          "candidate_oracle_pitch_rate": 0.716,
+          "reference_notes": 37,
+          "detected_notes": 44,
+          "matched_notes": 18,
+          "note_event_f1": 0.444,
+          "onset_mae_seconds": 0.045,
+          "offset_mae_seconds": 0.053
+        },
+        "cautious": {
+          "notes": 42,
+          "alternatives": 3,
+          "vocal_frames": 1707,
+          "correct_pitch_rate": 0.703,
+          "miss_rate": 0.185,
+          "silent_frames": 530,
+          "false_voice_rate": 0.138,
+          "candidate_oracle_pitch_rate": 0.703,
+          "reference_notes": 37,
+          "detected_notes": 42,
+          "matched_notes": 18,
+          "note_event_f1": 0.456,
+          "onset_mae_seconds": 0.045,
+          "offset_mae_seconds": 0.053
+        },
+        "continuity": {
+          "notes": 44,
+          "alternatives": 3,
+          "vocal_frames": 1707,
+          "correct_pitch_rate": 0.715,
+          "miss_rate": 0.166,
+          "silent_frames": 530,
+          "false_voice_rate": 0.143,
+          "candidate_oracle_pitch_rate": 0.715,
+          "reference_notes": 37,
+          "detected_notes": 44,
+          "matched_notes": 17,
+          "note_event_f1": 0.42,
+          "onset_mae_seconds": 0.043,
+          "offset_mae_seconds": 0.057
+        }
+      }
+    },
+    {
+      "id": "vocadito_12",
+      "song_id": "vocadito_12",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 15.153,
+      "candidate_events": 46,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 43,
+          "alternatives": 3,
+          "vocal_frames": 1941,
+          "correct_pitch_rate": 0.826,
+          "miss_rate": 0.104,
+          "silent_frames": 670,
+          "false_voice_rate": 0.173,
+          "candidate_oracle_pitch_rate": 0.826,
+          "reference_notes": 27,
+          "detected_notes": 43,
+          "matched_notes": 17,
+          "note_event_f1": 0.486,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.043
+        },
+        "balanced": {
+          "notes": 43,
+          "alternatives": 3,
+          "vocal_frames": 1941,
+          "correct_pitch_rate": 0.826,
+          "miss_rate": 0.104,
+          "silent_frames": 670,
+          "false_voice_rate": 0.173,
+          "candidate_oracle_pitch_rate": 0.826,
+          "reference_notes": 27,
+          "detected_notes": 43,
+          "matched_notes": 17,
+          "note_event_f1": 0.486,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.043
+        },
+        "cautious": {
+          "notes": 43,
+          "alternatives": 3,
+          "vocal_frames": 1941,
+          "correct_pitch_rate": 0.826,
+          "miss_rate": 0.104,
+          "silent_frames": 670,
+          "false_voice_rate": 0.173,
+          "candidate_oracle_pitch_rate": 0.826,
+          "reference_notes": 27,
+          "detected_notes": 43,
+          "matched_notes": 17,
+          "note_event_f1": 0.486,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.043
+        },
+        "continuity": {
+          "notes": 43,
+          "alternatives": 3,
+          "vocal_frames": 1941,
+          "correct_pitch_rate": 0.826,
+          "miss_rate": 0.104,
+          "silent_frames": 670,
+          "false_voice_rate": 0.173,
+          "candidate_oracle_pitch_rate": 0.826,
+          "reference_notes": 27,
+          "detected_notes": 43,
+          "matched_notes": 17,
+          "note_event_f1": 0.486,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.043
+        }
+      }
+    },
+    {
+      "id": "vocadito_13",
+      "song_id": "vocadito_13",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 22.36,
+      "candidate_events": 87,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.01,
+      "variants": {
+        "released_1_18": {
+          "notes": 79,
+          "alternatives": 6,
+          "vocal_frames": 2527,
+          "correct_pitch_rate": 0.603,
+          "miss_rate": 0.224,
+          "silent_frames": 1325,
+          "false_voice_rate": 0.066,
+          "candidate_oracle_pitch_rate": 0.614,
+          "reference_notes": 74,
+          "detected_notes": 79,
+          "matched_notes": 30,
+          "note_event_f1": 0.392,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.055
+        },
+        "balanced": {
+          "notes": 78,
+          "alternatives": 6,
+          "vocal_frames": 2527,
+          "correct_pitch_rate": 0.603,
+          "miss_rate": 0.232,
+          "silent_frames": 1325,
+          "false_voice_rate": 0.065,
+          "candidate_oracle_pitch_rate": 0.614,
+          "reference_notes": 74,
+          "detected_notes": 78,
+          "matched_notes": 30,
+          "note_event_f1": 0.395,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.055
+        },
+        "cautious": {
+          "notes": 73,
+          "alternatives": 5,
+          "vocal_frames": 2527,
+          "correct_pitch_rate": 0.576,
+          "miss_rate": 0.28,
+          "silent_frames": 1325,
+          "false_voice_rate": 0.054,
+          "candidate_oracle_pitch_rate": 0.584,
+          "reference_notes": 74,
+          "detected_notes": 73,
+          "matched_notes": 27,
+          "note_event_f1": 0.367,
+          "onset_mae_seconds": 0.035,
+          "offset_mae_seconds": 0.055
+        },
+        "continuity": {
+          "notes": 78,
+          "alternatives": 6,
+          "vocal_frames": 2527,
+          "correct_pitch_rate": 0.603,
+          "miss_rate": 0.232,
+          "silent_frames": 1325,
+          "false_voice_rate": 0.065,
+          "candidate_oracle_pitch_rate": 0.614,
+          "reference_notes": 74,
+          "detected_notes": 78,
+          "matched_notes": 30,
+          "note_event_f1": 0.395,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.055
+        }
+      }
+    },
+    {
+      "id": "vocadito_14",
+      "song_id": "vocadito_14",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 12.198,
+      "candidate_events": 34,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 33,
+          "alternatives": 0,
+          "vocal_frames": 1428,
+          "correct_pitch_rate": 0.593,
+          "miss_rate": 0.204,
+          "silent_frames": 674,
+          "false_voice_rate": 0.156,
+          "candidate_oracle_pitch_rate": 0.593,
+          "reference_notes": 34,
+          "detected_notes": 33,
+          "matched_notes": 15,
+          "note_event_f1": 0.448,
+          "onset_mae_seconds": 0.026,
+          "offset_mae_seconds": 0.066
+        },
+        "balanced": {
+          "notes": 33,
+          "alternatives": 0,
+          "vocal_frames": 1428,
+          "correct_pitch_rate": 0.593,
+          "miss_rate": 0.204,
+          "silent_frames": 674,
+          "false_voice_rate": 0.156,
+          "candidate_oracle_pitch_rate": 0.593,
+          "reference_notes": 34,
+          "detected_notes": 33,
+          "matched_notes": 15,
+          "note_event_f1": 0.448,
+          "onset_mae_seconds": 0.026,
+          "offset_mae_seconds": 0.066
+        },
+        "cautious": {
+          "notes": 33,
+          "alternatives": 0,
+          "vocal_frames": 1428,
+          "correct_pitch_rate": 0.593,
+          "miss_rate": 0.204,
+          "silent_frames": 674,
+          "false_voice_rate": 0.156,
+          "candidate_oracle_pitch_rate": 0.593,
+          "reference_notes": 34,
+          "detected_notes": 33,
+          "matched_notes": 15,
+          "note_event_f1": 0.448,
+          "onset_mae_seconds": 0.026,
+          "offset_mae_seconds": 0.066
+        },
+        "continuity": {
+          "notes": 33,
+          "alternatives": 0,
+          "vocal_frames": 1428,
+          "correct_pitch_rate": 0.593,
+          "miss_rate": 0.204,
+          "silent_frames": 674,
+          "false_voice_rate": 0.156,
+          "candidate_oracle_pitch_rate": 0.593,
+          "reference_notes": 34,
+          "detected_notes": 33,
+          "matched_notes": 15,
+          "note_event_f1": 0.448,
+          "onset_mae_seconds": 0.026,
+          "offset_mae_seconds": 0.066
+        }
+      }
+    },
+    {
+      "id": "vocadito_15",
+      "song_id": "vocadito_15",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 20.28,
+      "candidate_events": 66,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 56,
+          "alternatives": 9,
+          "vocal_frames": 2314,
+          "correct_pitch_rate": 0.701,
+          "miss_rate": 0.16,
+          "silent_frames": 1180,
+          "false_voice_rate": 0.077,
+          "candidate_oracle_pitch_rate": 0.701,
+          "reference_notes": 47,
+          "detected_notes": 56,
+          "matched_notes": 34,
+          "note_event_f1": 0.66,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.054
+        },
+        "balanced": {
+          "notes": 55,
+          "alternatives": 9,
+          "vocal_frames": 2314,
+          "correct_pitch_rate": 0.695,
+          "miss_rate": 0.17,
+          "silent_frames": 1180,
+          "false_voice_rate": 0.077,
+          "candidate_oracle_pitch_rate": 0.695,
+          "reference_notes": 47,
+          "detected_notes": 55,
+          "matched_notes": 33,
+          "note_event_f1": 0.647,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.055
+        },
+        "cautious": {
+          "notes": 52,
+          "alternatives": 9,
+          "vocal_frames": 2314,
+          "correct_pitch_rate": 0.678,
+          "miss_rate": 0.199,
+          "silent_frames": 1180,
+          "false_voice_rate": 0.075,
+          "candidate_oracle_pitch_rate": 0.678,
+          "reference_notes": 47,
+          "detected_notes": 52,
+          "matched_notes": 32,
+          "note_event_f1": 0.646,
+          "onset_mae_seconds": 0.035,
+          "offset_mae_seconds": 0.056
+        },
+        "continuity": {
+          "notes": 56,
+          "alternatives": 9,
+          "vocal_frames": 2314,
+          "correct_pitch_rate": 0.701,
+          "miss_rate": 0.16,
+          "silent_frames": 1180,
+          "false_voice_rate": 0.077,
+          "candidate_oracle_pitch_rate": 0.701,
+          "reference_notes": 47,
+          "detected_notes": 56,
+          "matched_notes": 34,
+          "note_event_f1": 0.66,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.054
+        }
+      }
+    },
+    {
+      "id": "vocadito_16",
+      "song_id": "vocadito_16",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 17.277,
+      "candidate_events": 53,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 50,
+          "alternatives": 2,
+          "vocal_frames": 1877,
+          "correct_pitch_rate": 0.696,
+          "miss_rate": 0.156,
+          "silent_frames": 1100,
+          "false_voice_rate": 0.232,
+          "candidate_oracle_pitch_rate": 0.701,
+          "reference_notes": 47,
+          "detected_notes": 50,
+          "matched_notes": 37,
+          "note_event_f1": 0.763,
+          "onset_mae_seconds": 0.027,
+          "offset_mae_seconds": 0.031
+        },
+        "balanced": {
+          "notes": 50,
+          "alternatives": 2,
+          "vocal_frames": 1877,
+          "correct_pitch_rate": 0.696,
+          "miss_rate": 0.156,
+          "silent_frames": 1100,
+          "false_voice_rate": 0.232,
+          "candidate_oracle_pitch_rate": 0.701,
+          "reference_notes": 47,
+          "detected_notes": 50,
+          "matched_notes": 37,
+          "note_event_f1": 0.763,
+          "onset_mae_seconds": 0.027,
+          "offset_mae_seconds": 0.031
+        },
+        "cautious": {
+          "notes": 50,
+          "alternatives": 2,
+          "vocal_frames": 1877,
+          "correct_pitch_rate": 0.696,
+          "miss_rate": 0.156,
+          "silent_frames": 1100,
+          "false_voice_rate": 0.232,
+          "candidate_oracle_pitch_rate": 0.701,
+          "reference_notes": 47,
+          "detected_notes": 50,
+          "matched_notes": 37,
+          "note_event_f1": 0.763,
+          "onset_mae_seconds": 0.027,
+          "offset_mae_seconds": 0.031
+        },
+        "continuity": {
+          "notes": 50,
+          "alternatives": 2,
+          "vocal_frames": 1877,
+          "correct_pitch_rate": 0.696,
+          "miss_rate": 0.156,
+          "silent_frames": 1100,
+          "false_voice_rate": 0.232,
+          "candidate_oracle_pitch_rate": 0.701,
+          "reference_notes": 47,
+          "detected_notes": 50,
+          "matched_notes": 37,
+          "note_event_f1": 0.763,
+          "onset_mae_seconds": 0.027,
+          "offset_mae_seconds": 0.031
+        }
+      }
+    },
+    {
+      "id": "vocadito_17",
+      "song_id": "vocadito_17",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 23.568,
+      "candidate_events": 75,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 69,
+          "alternatives": 6,
+          "vocal_frames": 3303,
+          "correct_pitch_rate": 0.743,
+          "miss_rate": 0.152,
+          "silent_frames": 757,
+          "false_voice_rate": 0.005,
+          "candidate_oracle_pitch_rate": 0.743,
+          "reference_notes": 54,
+          "detected_notes": 69,
+          "matched_notes": 27,
+          "note_event_f1": 0.439,
+          "onset_mae_seconds": 0.037,
+          "offset_mae_seconds": 0.043
+        },
+        "balanced": {
+          "notes": 69,
+          "alternatives": 6,
+          "vocal_frames": 3303,
+          "correct_pitch_rate": 0.743,
+          "miss_rate": 0.152,
+          "silent_frames": 757,
+          "false_voice_rate": 0.005,
+          "candidate_oracle_pitch_rate": 0.743,
+          "reference_notes": 54,
+          "detected_notes": 69,
+          "matched_notes": 27,
+          "note_event_f1": 0.439,
+          "onset_mae_seconds": 0.037,
+          "offset_mae_seconds": 0.043
+        },
+        "cautious": {
+          "notes": 68,
+          "alternatives": 6,
+          "vocal_frames": 3303,
+          "correct_pitch_rate": 0.739,
+          "miss_rate": 0.16,
+          "silent_frames": 757,
+          "false_voice_rate": 0.005,
+          "candidate_oracle_pitch_rate": 0.739,
+          "reference_notes": 54,
+          "detected_notes": 68,
+          "matched_notes": 27,
+          "note_event_f1": 0.443,
+          "onset_mae_seconds": 0.037,
+          "offset_mae_seconds": 0.043
+        },
+        "continuity": {
+          "notes": 69,
+          "alternatives": 6,
+          "vocal_frames": 3303,
+          "correct_pitch_rate": 0.743,
+          "miss_rate": 0.153,
+          "silent_frames": 757,
+          "false_voice_rate": 0.005,
+          "candidate_oracle_pitch_rate": 0.743,
+          "reference_notes": 54,
+          "detected_notes": 69,
+          "matched_notes": 27,
+          "note_event_f1": 0.439,
+          "onset_mae_seconds": 0.037,
+          "offset_mae_seconds": 0.043
+        }
+      }
+    },
+    {
+      "id": "vocadito_18",
+      "song_id": "vocadito_18",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 29.139,
+      "candidate_events": 74,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 69,
+          "alternatives": 4,
+          "vocal_frames": 2241,
+          "correct_pitch_rate": 0.668,
+          "miss_rate": 0.145,
+          "silent_frames": 2779,
+          "false_voice_rate": 0.096,
+          "candidate_oracle_pitch_rate": 0.668,
+          "reference_notes": 45,
+          "detected_notes": 69,
+          "matched_notes": 20,
+          "note_event_f1": 0.351,
+          "onset_mae_seconds": 0.025,
+          "offset_mae_seconds": 0.042
+        },
+        "balanced": {
+          "notes": 69,
+          "alternatives": 4,
+          "vocal_frames": 2241,
+          "correct_pitch_rate": 0.668,
+          "miss_rate": 0.145,
+          "silent_frames": 2779,
+          "false_voice_rate": 0.096,
+          "candidate_oracle_pitch_rate": 0.668,
+          "reference_notes": 45,
+          "detected_notes": 69,
+          "matched_notes": 20,
+          "note_event_f1": 0.351,
+          "onset_mae_seconds": 0.025,
+          "offset_mae_seconds": 0.042
+        },
+        "cautious": {
+          "notes": 67,
+          "alternatives": 4,
+          "vocal_frames": 2241,
+          "correct_pitch_rate": 0.659,
+          "miss_rate": 0.167,
+          "silent_frames": 2779,
+          "false_voice_rate": 0.096,
+          "candidate_oracle_pitch_rate": 0.66,
+          "reference_notes": 45,
+          "detected_notes": 67,
+          "matched_notes": 20,
+          "note_event_f1": 0.357,
+          "onset_mae_seconds": 0.025,
+          "offset_mae_seconds": 0.042
+        },
+        "continuity": {
+          "notes": 69,
+          "alternatives": 4,
+          "vocal_frames": 2241,
+          "correct_pitch_rate": 0.668,
+          "miss_rate": 0.145,
+          "silent_frames": 2779,
+          "false_voice_rate": 0.096,
+          "candidate_oracle_pitch_rate": 0.668,
+          "reference_notes": 45,
+          "detected_notes": 69,
+          "matched_notes": 20,
+          "note_event_f1": 0.351,
+          "onset_mae_seconds": 0.025,
+          "offset_mae_seconds": 0.042
+        }
+      }
+    },
+    {
+      "id": "vocadito_19",
+      "song_id": "vocadito_19",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 30.493,
+      "candidate_events": 103,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.01,
+      "variants": {
+        "released_1_18": {
+          "notes": 98,
+          "alternatives": 7,
+          "vocal_frames": 3352,
+          "correct_pitch_rate": 0.583,
+          "miss_rate": 0.234,
+          "silent_frames": 1901,
+          "false_voice_rate": 0.121,
+          "candidate_oracle_pitch_rate": 0.583,
+          "reference_notes": 73,
+          "detected_notes": 98,
+          "matched_notes": 32,
+          "note_event_f1": 0.374,
+          "onset_mae_seconds": 0.024,
+          "offset_mae_seconds": 0.059
+        },
+        "balanced": {
+          "notes": 97,
+          "alternatives": 7,
+          "vocal_frames": 3352,
+          "correct_pitch_rate": 0.578,
+          "miss_rate": 0.239,
+          "silent_frames": 1901,
+          "false_voice_rate": 0.121,
+          "candidate_oracle_pitch_rate": 0.578,
+          "reference_notes": 73,
+          "detected_notes": 97,
+          "matched_notes": 32,
+          "note_event_f1": 0.376,
+          "onset_mae_seconds": 0.024,
+          "offset_mae_seconds": 0.059
+        },
+        "cautious": {
+          "notes": 84,
+          "alternatives": 7,
+          "vocal_frames": 3352,
+          "correct_pitch_rate": 0.528,
+          "miss_rate": 0.322,
+          "silent_frames": 1901,
+          "false_voice_rate": 0.109,
+          "candidate_oracle_pitch_rate": 0.528,
+          "reference_notes": 73,
+          "detected_notes": 84,
+          "matched_notes": 27,
+          "note_event_f1": 0.344,
+          "onset_mae_seconds": 0.024,
+          "offset_mae_seconds": 0.055
+        },
+        "continuity": {
+          "notes": 98,
+          "alternatives": 7,
+          "vocal_frames": 3352,
+          "correct_pitch_rate": 0.583,
+          "miss_rate": 0.234,
+          "silent_frames": 1901,
+          "false_voice_rate": 0.121,
+          "candidate_oracle_pitch_rate": 0.583,
+          "reference_notes": 73,
+          "detected_notes": 98,
+          "matched_notes": 32,
+          "note_event_f1": 0.374,
+          "onset_mae_seconds": 0.024,
+          "offset_mae_seconds": 0.059
+        }
+      }
+    },
+    {
+      "id": "vocadito_20",
+      "song_id": "vocadito_20",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 8.713,
+      "candidate_events": 35,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 31,
+          "alternatives": 4,
+          "vocal_frames": 938,
+          "correct_pitch_rate": 0.614,
+          "miss_rate": 0.22,
+          "silent_frames": 564,
+          "false_voice_rate": 0.211,
+          "candidate_oracle_pitch_rate": 0.642,
+          "reference_notes": 31,
+          "detected_notes": 31,
+          "matched_notes": 18,
+          "note_event_f1": 0.581,
+          "onset_mae_seconds": 0.023,
+          "offset_mae_seconds": 0.033
+        },
+        "balanced": {
+          "notes": 31,
+          "alternatives": 4,
+          "vocal_frames": 938,
+          "correct_pitch_rate": 0.614,
+          "miss_rate": 0.22,
+          "silent_frames": 564,
+          "false_voice_rate": 0.211,
+          "candidate_oracle_pitch_rate": 0.642,
+          "reference_notes": 31,
+          "detected_notes": 31,
+          "matched_notes": 18,
+          "note_event_f1": 0.581,
+          "onset_mae_seconds": 0.023,
+          "offset_mae_seconds": 0.033
+        },
+        "cautious": {
+          "notes": 31,
+          "alternatives": 4,
+          "vocal_frames": 938,
+          "correct_pitch_rate": 0.614,
+          "miss_rate": 0.228,
+          "silent_frames": 564,
+          "false_voice_rate": 0.211,
+          "candidate_oracle_pitch_rate": 0.633,
+          "reference_notes": 31,
+          "detected_notes": 31,
+          "matched_notes": 18,
+          "note_event_f1": 0.581,
+          "onset_mae_seconds": 0.023,
+          "offset_mae_seconds": 0.033
+        },
+        "continuity": {
+          "notes": 31,
+          "alternatives": 4,
+          "vocal_frames": 938,
+          "correct_pitch_rate": 0.614,
+          "miss_rate": 0.22,
+          "silent_frames": 564,
+          "false_voice_rate": 0.211,
+          "candidate_oracle_pitch_rate": 0.642,
+          "reference_notes": 31,
+          "detected_notes": 31,
+          "matched_notes": 18,
+          "note_event_f1": 0.581,
+          "onset_mae_seconds": 0.023,
+          "offset_mae_seconds": 0.033
+        }
+      }
+    },
+    {
+      "id": "vocadito_21",
+      "song_id": "vocadito_21",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 22.0,
+      "candidate_events": 66,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 64,
+          "alternatives": 0,
+          "vocal_frames": 2972,
+          "correct_pitch_rate": 0.573,
+          "miss_rate": 0.312,
+          "silent_frames": 818,
+          "false_voice_rate": 0.165,
+          "candidate_oracle_pitch_rate": 0.573,
+          "reference_notes": 97,
+          "detected_notes": 64,
+          "matched_notes": 40,
+          "note_event_f1": 0.497,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.045
+        },
+        "balanced": {
+          "notes": 64,
+          "alternatives": 0,
+          "vocal_frames": 2972,
+          "correct_pitch_rate": 0.573,
+          "miss_rate": 0.312,
+          "silent_frames": 818,
+          "false_voice_rate": 0.165,
+          "candidate_oracle_pitch_rate": 0.573,
+          "reference_notes": 97,
+          "detected_notes": 64,
+          "matched_notes": 40,
+          "note_event_f1": 0.497,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.045
+        },
+        "cautious": {
+          "notes": 60,
+          "alternatives": 0,
+          "vocal_frames": 2972,
+          "correct_pitch_rate": 0.554,
+          "miss_rate": 0.334,
+          "silent_frames": 818,
+          "false_voice_rate": 0.144,
+          "candidate_oracle_pitch_rate": 0.554,
+          "reference_notes": 97,
+          "detected_notes": 60,
+          "matched_notes": 38,
+          "note_event_f1": 0.484,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.041
+        },
+        "continuity": {
+          "notes": 64,
+          "alternatives": 0,
+          "vocal_frames": 2972,
+          "correct_pitch_rate": 0.573,
+          "miss_rate": 0.312,
+          "silent_frames": 818,
+          "false_voice_rate": 0.165,
+          "candidate_oracle_pitch_rate": 0.573,
+          "reference_notes": 97,
+          "detected_notes": 64,
+          "matched_notes": 40,
+          "note_event_f1": 0.497,
+          "onset_mae_seconds": 0.033,
+          "offset_mae_seconds": 0.045
+        }
+      }
+    },
+    {
+      "id": "vocadito_22",
+      "song_id": "vocadito_22",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 18.333,
+      "candidate_events": 53,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 52,
+          "alternatives": 1,
+          "vocal_frames": 1800,
+          "correct_pitch_rate": 0.702,
+          "miss_rate": 0.183,
+          "silent_frames": 1359,
+          "false_voice_rate": 0.107,
+          "candidate_oracle_pitch_rate": 0.703,
+          "reference_notes": 45,
+          "detected_notes": 52,
+          "matched_notes": 26,
+          "note_event_f1": 0.536,
+          "onset_mae_seconds": 0.015,
+          "offset_mae_seconds": 0.053
+        },
+        "balanced": {
+          "notes": 50,
+          "alternatives": 1,
+          "vocal_frames": 1800,
+          "correct_pitch_rate": 0.69,
+          "miss_rate": 0.202,
+          "silent_frames": 1359,
+          "false_voice_rate": 0.091,
+          "candidate_oracle_pitch_rate": 0.691,
+          "reference_notes": 45,
+          "detected_notes": 50,
+          "matched_notes": 25,
+          "note_event_f1": 0.526,
+          "onset_mae_seconds": 0.015,
+          "offset_mae_seconds": 0.055
+        },
+        "cautious": {
+          "notes": 50,
+          "alternatives": 1,
+          "vocal_frames": 1800,
+          "correct_pitch_rate": 0.69,
+          "miss_rate": 0.202,
+          "silent_frames": 1359,
+          "false_voice_rate": 0.091,
+          "candidate_oracle_pitch_rate": 0.691,
+          "reference_notes": 45,
+          "detected_notes": 50,
+          "matched_notes": 25,
+          "note_event_f1": 0.526,
+          "onset_mae_seconds": 0.015,
+          "offset_mae_seconds": 0.055
+        },
+        "continuity": {
+          "notes": 51,
+          "alternatives": 1,
+          "vocal_frames": 1800,
+          "correct_pitch_rate": 0.702,
+          "miss_rate": 0.183,
+          "silent_frames": 1359,
+          "false_voice_rate": 0.091,
+          "candidate_oracle_pitch_rate": 0.703,
+          "reference_notes": 45,
+          "detected_notes": 51,
+          "matched_notes": 26,
+          "note_event_f1": 0.542,
+          "onset_mae_seconds": 0.015,
+          "offset_mae_seconds": 0.053
+        }
+      }
+    },
+    {
+      "id": "vocadito_23",
+      "song_id": "vocadito_23",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 18.038,
+      "candidate_events": 71,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 54,
+          "alternatives": 19,
+          "vocal_frames": 1966,
+          "correct_pitch_rate": 0.609,
+          "miss_rate": 0.25,
+          "silent_frames": 1142,
+          "false_voice_rate": 0.139,
+          "candidate_oracle_pitch_rate": 0.609,
+          "reference_notes": 53,
+          "detected_notes": 54,
+          "matched_notes": 27,
+          "note_event_f1": 0.505,
+          "onset_mae_seconds": 0.032,
+          "offset_mae_seconds": 0.042
+        },
+        "balanced": {
+          "notes": 54,
+          "alternatives": 19,
+          "vocal_frames": 1966,
+          "correct_pitch_rate": 0.609,
+          "miss_rate": 0.25,
+          "silent_frames": 1142,
+          "false_voice_rate": 0.139,
+          "candidate_oracle_pitch_rate": 0.609,
+          "reference_notes": 53,
+          "detected_notes": 54,
+          "matched_notes": 27,
+          "note_event_f1": 0.505,
+          "onset_mae_seconds": 0.032,
+          "offset_mae_seconds": 0.042
+        },
+        "cautious": {
+          "notes": 49,
+          "alternatives": 19,
+          "vocal_frames": 1966,
+          "correct_pitch_rate": 0.587,
+          "miss_rate": 0.297,
+          "silent_frames": 1142,
+          "false_voice_rate": 0.124,
+          "candidate_oracle_pitch_rate": 0.587,
+          "reference_notes": 53,
+          "detected_notes": 49,
+          "matched_notes": 24,
+          "note_event_f1": 0.471,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.044
+        },
+        "continuity": {
+          "notes": 54,
+          "alternatives": 19,
+          "vocal_frames": 1966,
+          "correct_pitch_rate": 0.609,
+          "miss_rate": 0.25,
+          "silent_frames": 1142,
+          "false_voice_rate": 0.139,
+          "candidate_oracle_pitch_rate": 0.609,
+          "reference_notes": 53,
+          "detected_notes": 54,
+          "matched_notes": 27,
+          "note_event_f1": 0.505,
+          "onset_mae_seconds": 0.032,
+          "offset_mae_seconds": 0.042
+        }
+      }
+    },
+    {
+      "id": "vocadito_24",
+      "song_id": "vocadito_24",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 14.758,
+      "candidate_events": 43,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 37,
+          "alternatives": 5,
+          "vocal_frames": 1642,
+          "correct_pitch_rate": 0.727,
+          "miss_rate": 0.152,
+          "silent_frames": 901,
+          "false_voice_rate": 0.262,
+          "candidate_oracle_pitch_rate": 0.73,
+          "reference_notes": 39,
+          "detected_notes": 37,
+          "matched_notes": 23,
+          "note_event_f1": 0.605,
+          "onset_mae_seconds": 0.032,
+          "offset_mae_seconds": 0.045
+        },
+        "balanced": {
+          "notes": 37,
+          "alternatives": 5,
+          "vocal_frames": 1642,
+          "correct_pitch_rate": 0.727,
+          "miss_rate": 0.152,
+          "silent_frames": 901,
+          "false_voice_rate": 0.262,
+          "candidate_oracle_pitch_rate": 0.73,
+          "reference_notes": 39,
+          "detected_notes": 37,
+          "matched_notes": 23,
+          "note_event_f1": 0.605,
+          "onset_mae_seconds": 0.032,
+          "offset_mae_seconds": 0.045
+        },
+        "cautious": {
+          "notes": 36,
+          "alternatives": 5,
+          "vocal_frames": 1642,
+          "correct_pitch_rate": 0.72,
+          "miss_rate": 0.162,
+          "silent_frames": 901,
+          "false_voice_rate": 0.262,
+          "candidate_oracle_pitch_rate": 0.724,
+          "reference_notes": 39,
+          "detected_notes": 36,
+          "matched_notes": 23,
+          "note_event_f1": 0.613,
+          "onset_mae_seconds": 0.032,
+          "offset_mae_seconds": 0.045
+        },
+        "continuity": {
+          "notes": 37,
+          "alternatives": 5,
+          "vocal_frames": 1642,
+          "correct_pitch_rate": 0.727,
+          "miss_rate": 0.152,
+          "silent_frames": 901,
+          "false_voice_rate": 0.262,
+          "candidate_oracle_pitch_rate": 0.73,
+          "reference_notes": 39,
+          "detected_notes": 37,
+          "matched_notes": 23,
+          "note_event_f1": 0.605,
+          "onset_mae_seconds": 0.032,
+          "offset_mae_seconds": 0.045
+        }
+      }
+    },
+    {
+      "id": "vocadito_25",
+      "song_id": "vocadito_25",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 14.658,
+      "candidate_events": 51,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 51,
+          "alternatives": 0,
+          "vocal_frames": 1704,
+          "correct_pitch_rate": 0.681,
+          "miss_rate": 0.185,
+          "silent_frames": 822,
+          "false_voice_rate": 0.124,
+          "candidate_oracle_pitch_rate": 0.681,
+          "reference_notes": 38,
+          "detected_notes": 51,
+          "matched_notes": 23,
+          "note_event_f1": 0.517,
+          "onset_mae_seconds": 0.049,
+          "offset_mae_seconds": 0.076
+        },
+        "balanced": {
+          "notes": 51,
+          "alternatives": 0,
+          "vocal_frames": 1704,
+          "correct_pitch_rate": 0.681,
+          "miss_rate": 0.185,
+          "silent_frames": 822,
+          "false_voice_rate": 0.124,
+          "candidate_oracle_pitch_rate": 0.681,
+          "reference_notes": 38,
+          "detected_notes": 51,
+          "matched_notes": 23,
+          "note_event_f1": 0.517,
+          "onset_mae_seconds": 0.049,
+          "offset_mae_seconds": 0.076
+        },
+        "cautious": {
+          "notes": 51,
+          "alternatives": 0,
+          "vocal_frames": 1704,
+          "correct_pitch_rate": 0.681,
+          "miss_rate": 0.185,
+          "silent_frames": 822,
+          "false_voice_rate": 0.124,
+          "candidate_oracle_pitch_rate": 0.681,
+          "reference_notes": 38,
+          "detected_notes": 51,
+          "matched_notes": 23,
+          "note_event_f1": 0.517,
+          "onset_mae_seconds": 0.049,
+          "offset_mae_seconds": 0.076
+        },
+        "continuity": {
+          "notes": 51,
+          "alternatives": 0,
+          "vocal_frames": 1704,
+          "correct_pitch_rate": 0.681,
+          "miss_rate": 0.185,
+          "silent_frames": 822,
+          "false_voice_rate": 0.124,
+          "candidate_oracle_pitch_rate": 0.681,
+          "reference_notes": 38,
+          "detected_notes": 51,
+          "matched_notes": 23,
+          "note_event_f1": 0.517,
+          "onset_mae_seconds": 0.049,
+          "offset_mae_seconds": 0.076
+        }
+      }
+    },
+    {
+      "id": "vocadito_26",
+      "song_id": "vocadito_26",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 12.858,
+      "candidate_events": 54,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 48,
+          "alternatives": 6,
+          "vocal_frames": 1465,
+          "correct_pitch_rate": 0.54,
+          "miss_rate": 0.253,
+          "silent_frames": 750,
+          "false_voice_rate": 0.252,
+          "candidate_oracle_pitch_rate": 0.54,
+          "reference_notes": 73,
+          "detected_notes": 48,
+          "matched_notes": 38,
+          "note_event_f1": 0.628,
+          "onset_mae_seconds": 0.02,
+          "offset_mae_seconds": 0.038
+        },
+        "balanced": {
+          "notes": 45,
+          "alternatives": 6,
+          "vocal_frames": 1465,
+          "correct_pitch_rate": 0.514,
+          "miss_rate": 0.288,
+          "silent_frames": 750,
+          "false_voice_rate": 0.233,
+          "candidate_oracle_pitch_rate": 0.514,
+          "reference_notes": 73,
+          "detected_notes": 45,
+          "matched_notes": 35,
+          "note_event_f1": 0.593,
+          "onset_mae_seconds": 0.018,
+          "offset_mae_seconds": 0.041
+        },
+        "cautious": {
+          "notes": 38,
+          "alternatives": 6,
+          "vocal_frames": 1465,
+          "correct_pitch_rate": 0.472,
+          "miss_rate": 0.378,
+          "silent_frames": 750,
+          "false_voice_rate": 0.195,
+          "candidate_oracle_pitch_rate": 0.472,
+          "reference_notes": 73,
+          "detected_notes": 38,
+          "matched_notes": 31,
+          "note_event_f1": 0.559,
+          "onset_mae_seconds": 0.019,
+          "offset_mae_seconds": 0.036
+        },
+        "continuity": {
+          "notes": 47,
+          "alternatives": 6,
+          "vocal_frames": 1465,
+          "correct_pitch_rate": 0.537,
+          "miss_rate": 0.257,
+          "silent_frames": 750,
+          "false_voice_rate": 0.233,
+          "candidate_oracle_pitch_rate": 0.537,
+          "reference_notes": 73,
+          "detected_notes": 47,
+          "matched_notes": 37,
+          "note_event_f1": 0.617,
+          "onset_mae_seconds": 0.02,
+          "offset_mae_seconds": 0.039
+        }
+      }
+    },
+    {
+      "id": "vocadito_27",
+      "song_id": "vocadito_27",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 14.018,
+      "candidate_events": 39,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 38,
+          "alternatives": 0,
+          "vocal_frames": 1455,
+          "correct_pitch_rate": 0.724,
+          "miss_rate": 0.159,
+          "silent_frames": 960,
+          "false_voice_rate": 0.15,
+          "candidate_oracle_pitch_rate": 0.724,
+          "reference_notes": 34,
+          "detected_notes": 38,
+          "matched_notes": 21,
+          "note_event_f1": 0.583,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.067
+        },
+        "balanced": {
+          "notes": 38,
+          "alternatives": 0,
+          "vocal_frames": 1455,
+          "correct_pitch_rate": 0.724,
+          "miss_rate": 0.159,
+          "silent_frames": 960,
+          "false_voice_rate": 0.15,
+          "candidate_oracle_pitch_rate": 0.724,
+          "reference_notes": 34,
+          "detected_notes": 38,
+          "matched_notes": 21,
+          "note_event_f1": 0.583,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.067
+        },
+        "cautious": {
+          "notes": 37,
+          "alternatives": 0,
+          "vocal_frames": 1455,
+          "correct_pitch_rate": 0.718,
+          "miss_rate": 0.171,
+          "silent_frames": 960,
+          "false_voice_rate": 0.15,
+          "candidate_oracle_pitch_rate": 0.718,
+          "reference_notes": 34,
+          "detected_notes": 37,
+          "matched_notes": 21,
+          "note_event_f1": 0.592,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.067
+        },
+        "continuity": {
+          "notes": 38,
+          "alternatives": 0,
+          "vocal_frames": 1455,
+          "correct_pitch_rate": 0.724,
+          "miss_rate": 0.159,
+          "silent_frames": 960,
+          "false_voice_rate": 0.15,
+          "candidate_oracle_pitch_rate": 0.724,
+          "reference_notes": 34,
+          "detected_notes": 38,
+          "matched_notes": 21,
+          "note_event_f1": 0.583,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.067
+        }
+      }
+    },
+    {
+      "id": "vocadito_28",
+      "song_id": "vocadito_28",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 12.898,
+      "candidate_events": 51,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 48,
+          "alternatives": 3,
+          "vocal_frames": 1514,
+          "correct_pitch_rate": 0.612,
+          "miss_rate": 0.199,
+          "silent_frames": 708,
+          "false_voice_rate": 0.285,
+          "candidate_oracle_pitch_rate": 0.612,
+          "reference_notes": 44,
+          "detected_notes": 48,
+          "matched_notes": 25,
+          "note_event_f1": 0.543,
+          "onset_mae_seconds": 0.036,
+          "offset_mae_seconds": 0.065
+        },
+        "balanced": {
+          "notes": 48,
+          "alternatives": 3,
+          "vocal_frames": 1514,
+          "correct_pitch_rate": 0.612,
+          "miss_rate": 0.199,
+          "silent_frames": 708,
+          "false_voice_rate": 0.285,
+          "candidate_oracle_pitch_rate": 0.612,
+          "reference_notes": 44,
+          "detected_notes": 48,
+          "matched_notes": 25,
+          "note_event_f1": 0.543,
+          "onset_mae_seconds": 0.036,
+          "offset_mae_seconds": 0.065
+        },
+        "cautious": {
+          "notes": 46,
+          "alternatives": 3,
+          "vocal_frames": 1514,
+          "correct_pitch_rate": 0.594,
+          "miss_rate": 0.231,
+          "silent_frames": 708,
+          "false_voice_rate": 0.285,
+          "candidate_oracle_pitch_rate": 0.594,
+          "reference_notes": 44,
+          "detected_notes": 46,
+          "matched_notes": 23,
+          "note_event_f1": 0.511,
+          "onset_mae_seconds": 0.036,
+          "offset_mae_seconds": 0.066
+        },
+        "continuity": {
+          "notes": 48,
+          "alternatives": 3,
+          "vocal_frames": 1514,
+          "correct_pitch_rate": 0.612,
+          "miss_rate": 0.199,
+          "silent_frames": 708,
+          "false_voice_rate": 0.285,
+          "candidate_oracle_pitch_rate": 0.612,
+          "reference_notes": 44,
+          "detected_notes": 48,
+          "matched_notes": 25,
+          "note_event_f1": 0.543,
+          "onset_mae_seconds": 0.036,
+          "offset_mae_seconds": 0.065
+        }
+      }
+    },
+    {
+      "id": "vocadito_29",
+      "song_id": "vocadito_29",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 14.893,
+      "candidate_events": 51,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 47,
+          "alternatives": 4,
+          "vocal_frames": 1820,
+          "correct_pitch_rate": 0.751,
+          "miss_rate": 0.101,
+          "silent_frames": 746,
+          "false_voice_rate": 0.231,
+          "candidate_oracle_pitch_rate": 0.752,
+          "reference_notes": 36,
+          "detected_notes": 47,
+          "matched_notes": 22,
+          "note_event_f1": 0.53,
+          "onset_mae_seconds": 0.023,
+          "offset_mae_seconds": 0.053
+        },
+        "balanced": {
+          "notes": 47,
+          "alternatives": 4,
+          "vocal_frames": 1820,
+          "correct_pitch_rate": 0.751,
+          "miss_rate": 0.101,
+          "silent_frames": 746,
+          "false_voice_rate": 0.231,
+          "candidate_oracle_pitch_rate": 0.752,
+          "reference_notes": 36,
+          "detected_notes": 47,
+          "matched_notes": 22,
+          "note_event_f1": 0.53,
+          "onset_mae_seconds": 0.023,
+          "offset_mae_seconds": 0.053
+        },
+        "cautious": {
+          "notes": 47,
+          "alternatives": 4,
+          "vocal_frames": 1820,
+          "correct_pitch_rate": 0.751,
+          "miss_rate": 0.101,
+          "silent_frames": 746,
+          "false_voice_rate": 0.231,
+          "candidate_oracle_pitch_rate": 0.752,
+          "reference_notes": 36,
+          "detected_notes": 47,
+          "matched_notes": 22,
+          "note_event_f1": 0.53,
+          "onset_mae_seconds": 0.023,
+          "offset_mae_seconds": 0.053
+        },
+        "continuity": {
+          "notes": 47,
+          "alternatives": 4,
+          "vocal_frames": 1820,
+          "correct_pitch_rate": 0.751,
+          "miss_rate": 0.101,
+          "silent_frames": 746,
+          "false_voice_rate": 0.231,
+          "candidate_oracle_pitch_rate": 0.752,
+          "reference_notes": 36,
+          "detected_notes": 47,
+          "matched_notes": 22,
+          "note_event_f1": 0.53,
+          "onset_mae_seconds": 0.023,
+          "offset_mae_seconds": 0.053
+        }
+      }
+    },
+    {
+      "id": "vocadito_30",
+      "song_id": "vocadito_30",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 13.018,
+      "candidate_events": 41,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 37,
+          "alternatives": 3,
+          "vocal_frames": 1222,
+          "correct_pitch_rate": 0.515,
+          "miss_rate": 0.309,
+          "silent_frames": 1021,
+          "false_voice_rate": 0.175,
+          "candidate_oracle_pitch_rate": 0.524,
+          "reference_notes": 58,
+          "detected_notes": 37,
+          "matched_notes": 24,
+          "note_event_f1": 0.505,
+          "onset_mae_seconds": 0.027,
+          "offset_mae_seconds": 0.035
+        },
+        "balanced": {
+          "notes": 37,
+          "alternatives": 3,
+          "vocal_frames": 1222,
+          "correct_pitch_rate": 0.515,
+          "miss_rate": 0.309,
+          "silent_frames": 1021,
+          "false_voice_rate": 0.175,
+          "candidate_oracle_pitch_rate": 0.524,
+          "reference_notes": 58,
+          "detected_notes": 37,
+          "matched_notes": 24,
+          "note_event_f1": 0.505,
+          "onset_mae_seconds": 0.027,
+          "offset_mae_seconds": 0.035
+        },
+        "cautious": {
+          "notes": 32,
+          "alternatives": 3,
+          "vocal_frames": 1222,
+          "correct_pitch_rate": 0.461,
+          "miss_rate": 0.403,
+          "silent_frames": 1021,
+          "false_voice_rate": 0.156,
+          "candidate_oracle_pitch_rate": 0.47,
+          "reference_notes": 58,
+          "detected_notes": 32,
+          "matched_notes": 21,
+          "note_event_f1": 0.467,
+          "onset_mae_seconds": 0.027,
+          "offset_mae_seconds": 0.038
+        },
+        "continuity": {
+          "notes": 37,
+          "alternatives": 3,
+          "vocal_frames": 1222,
+          "correct_pitch_rate": 0.515,
+          "miss_rate": 0.309,
+          "silent_frames": 1021,
+          "false_voice_rate": 0.175,
+          "candidate_oracle_pitch_rate": 0.524,
+          "reference_notes": 58,
+          "detected_notes": 37,
+          "matched_notes": 24,
+          "note_event_f1": 0.505,
+          "onset_mae_seconds": 0.027,
+          "offset_mae_seconds": 0.035
+        }
+      }
+    },
+    {
+      "id": "vocadito_31",
+      "song_id": "vocadito_31",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 14.033,
+      "candidate_events": 41,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 41,
+          "alternatives": 0,
+          "vocal_frames": 1404,
+          "correct_pitch_rate": 0.645,
+          "miss_rate": 0.212,
+          "silent_frames": 1014,
+          "false_voice_rate": 0.121,
+          "candidate_oracle_pitch_rate": 0.645,
+          "reference_notes": 47,
+          "detected_notes": 41,
+          "matched_notes": 31,
+          "note_event_f1": 0.705,
+          "onset_mae_seconds": 0.019,
+          "offset_mae_seconds": 0.035
+        },
+        "balanced": {
+          "notes": 41,
+          "alternatives": 0,
+          "vocal_frames": 1404,
+          "correct_pitch_rate": 0.645,
+          "miss_rate": 0.212,
+          "silent_frames": 1014,
+          "false_voice_rate": 0.121,
+          "candidate_oracle_pitch_rate": 0.645,
+          "reference_notes": 47,
+          "detected_notes": 41,
+          "matched_notes": 31,
+          "note_event_f1": 0.705,
+          "onset_mae_seconds": 0.019,
+          "offset_mae_seconds": 0.035
+        },
+        "cautious": {
+          "notes": 41,
+          "alternatives": 0,
+          "vocal_frames": 1404,
+          "correct_pitch_rate": 0.645,
+          "miss_rate": 0.212,
+          "silent_frames": 1014,
+          "false_voice_rate": 0.121,
+          "candidate_oracle_pitch_rate": 0.645,
+          "reference_notes": 47,
+          "detected_notes": 41,
+          "matched_notes": 31,
+          "note_event_f1": 0.705,
+          "onset_mae_seconds": 0.019,
+          "offset_mae_seconds": 0.035
+        },
+        "continuity": {
+          "notes": 41,
+          "alternatives": 0,
+          "vocal_frames": 1404,
+          "correct_pitch_rate": 0.645,
+          "miss_rate": 0.212,
+          "silent_frames": 1014,
+          "false_voice_rate": 0.121,
+          "candidate_oracle_pitch_rate": 0.645,
+          "reference_notes": 47,
+          "detected_notes": 41,
+          "matched_notes": 31,
+          "note_event_f1": 0.705,
+          "onset_mae_seconds": 0.019,
+          "offset_mae_seconds": 0.035
+        }
+      }
+    },
+    {
+      "id": "vocadito_32",
+      "song_id": "vocadito_32",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 25.033,
+      "candidate_events": 81,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 77,
+          "alternatives": 4,
+          "vocal_frames": 2654,
+          "correct_pitch_rate": 0.676,
+          "miss_rate": 0.164,
+          "silent_frames": 1659,
+          "false_voice_rate": 0.189,
+          "candidate_oracle_pitch_rate": 0.676,
+          "reference_notes": 57,
+          "detected_notes": 77,
+          "matched_notes": 28,
+          "note_event_f1": 0.418,
+          "onset_mae_seconds": 0.03,
+          "offset_mae_seconds": 0.078
+        },
+        "balanced": {
+          "notes": 77,
+          "alternatives": 4,
+          "vocal_frames": 2654,
+          "correct_pitch_rate": 0.676,
+          "miss_rate": 0.164,
+          "silent_frames": 1659,
+          "false_voice_rate": 0.189,
+          "candidate_oracle_pitch_rate": 0.676,
+          "reference_notes": 57,
+          "detected_notes": 77,
+          "matched_notes": 28,
+          "note_event_f1": 0.418,
+          "onset_mae_seconds": 0.03,
+          "offset_mae_seconds": 0.078
+        },
+        "cautious": {
+          "notes": 77,
+          "alternatives": 4,
+          "vocal_frames": 2654,
+          "correct_pitch_rate": 0.676,
+          "miss_rate": 0.164,
+          "silent_frames": 1659,
+          "false_voice_rate": 0.189,
+          "candidate_oracle_pitch_rate": 0.676,
+          "reference_notes": 57,
+          "detected_notes": 77,
+          "matched_notes": 28,
+          "note_event_f1": 0.418,
+          "onset_mae_seconds": 0.03,
+          "offset_mae_seconds": 0.078
+        },
+        "continuity": {
+          "notes": 77,
+          "alternatives": 4,
+          "vocal_frames": 2654,
+          "correct_pitch_rate": 0.676,
+          "miss_rate": 0.164,
+          "silent_frames": 1659,
+          "false_voice_rate": 0.189,
+          "candidate_oracle_pitch_rate": 0.676,
+          "reference_notes": 57,
+          "detected_notes": 77,
+          "matched_notes": 28,
+          "note_event_f1": 0.418,
+          "onset_mae_seconds": 0.03,
+          "offset_mae_seconds": 0.078
+        }
+      }
+    },
+    {
+      "id": "vocadito_33",
+      "song_id": "vocadito_33",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 30.0,
+      "candidate_events": 110,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 106,
+          "alternatives": 3,
+          "vocal_frames": 3373,
+          "correct_pitch_rate": 0.592,
+          "miss_rate": 0.198,
+          "silent_frames": 1795,
+          "false_voice_rate": 0.228,
+          "candidate_oracle_pitch_rate": 0.596,
+          "reference_notes": 80,
+          "detected_notes": 106,
+          "matched_notes": 36,
+          "note_event_f1": 0.387,
+          "onset_mae_seconds": 0.027,
+          "offset_mae_seconds": 0.057
+        },
+        "balanced": {
+          "notes": 106,
+          "alternatives": 3,
+          "vocal_frames": 3373,
+          "correct_pitch_rate": 0.592,
+          "miss_rate": 0.198,
+          "silent_frames": 1795,
+          "false_voice_rate": 0.228,
+          "candidate_oracle_pitch_rate": 0.596,
+          "reference_notes": 80,
+          "detected_notes": 106,
+          "matched_notes": 36,
+          "note_event_f1": 0.387,
+          "onset_mae_seconds": 0.027,
+          "offset_mae_seconds": 0.057
+        },
+        "cautious": {
+          "notes": 95,
+          "alternatives": 3,
+          "vocal_frames": 3373,
+          "correct_pitch_rate": 0.554,
+          "miss_rate": 0.264,
+          "silent_frames": 1795,
+          "false_voice_rate": 0.201,
+          "candidate_oracle_pitch_rate": 0.557,
+          "reference_notes": 80,
+          "detected_notes": 95,
+          "matched_notes": 35,
+          "note_event_f1": 0.4,
+          "onset_mae_seconds": 0.027,
+          "offset_mae_seconds": 0.057
+        },
+        "continuity": {
+          "notes": 106,
+          "alternatives": 3,
+          "vocal_frames": 3373,
+          "correct_pitch_rate": 0.592,
+          "miss_rate": 0.198,
+          "silent_frames": 1795,
+          "false_voice_rate": 0.228,
+          "candidate_oracle_pitch_rate": 0.596,
+          "reference_notes": 80,
+          "detected_notes": 106,
+          "matched_notes": 36,
+          "note_event_f1": 0.387,
+          "onset_mae_seconds": 0.027,
+          "offset_mae_seconds": 0.057
+        }
+      }
+    },
+    {
+      "id": "vocadito_34",
+      "song_id": "vocadito_34",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 24.853,
+      "candidate_events": 144,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 105,
+          "alternatives": 61,
+          "vocal_frames": 3138,
+          "correct_pitch_rate": 0.663,
+          "miss_rate": 0.204,
+          "silent_frames": 1144,
+          "false_voice_rate": 0.459,
+          "candidate_oracle_pitch_rate": 0.667,
+          "reference_notes": 89,
+          "detected_notes": 105,
+          "matched_notes": 45,
+          "note_event_f1": 0.464,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.062
+        },
+        "balanced": {
+          "notes": 97,
+          "alternatives": 61,
+          "vocal_frames": 3138,
+          "correct_pitch_rate": 0.663,
+          "miss_rate": 0.214,
+          "silent_frames": 1144,
+          "false_voice_rate": 0.217,
+          "candidate_oracle_pitch_rate": 0.667,
+          "reference_notes": 89,
+          "detected_notes": 97,
+          "matched_notes": 45,
+          "note_event_f1": 0.484,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.062
+        },
+        "cautious": {
+          "notes": 94,
+          "alternatives": 61,
+          "vocal_frames": 3138,
+          "correct_pitch_rate": 0.652,
+          "miss_rate": 0.232,
+          "silent_frames": 1144,
+          "false_voice_rate": 0.199,
+          "candidate_oracle_pitch_rate": 0.655,
+          "reference_notes": 89,
+          "detected_notes": 94,
+          "matched_notes": 43,
+          "note_event_f1": 0.47,
+          "onset_mae_seconds": 0.03,
+          "offset_mae_seconds": 0.064
+        },
+        "continuity": {
+          "notes": 97,
+          "alternatives": 61,
+          "vocal_frames": 3138,
+          "correct_pitch_rate": 0.663,
+          "miss_rate": 0.214,
+          "silent_frames": 1144,
+          "false_voice_rate": 0.217,
+          "candidate_oracle_pitch_rate": 0.667,
+          "reference_notes": 89,
+          "detected_notes": 97,
+          "matched_notes": 45,
+          "note_event_f1": 0.484,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.062
+        }
+      }
+    },
+    {
+      "id": "vocadito_35",
+      "song_id": "vocadito_35",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 13.8,
+      "candidate_events": 66,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 62,
+          "alternatives": 4,
+          "vocal_frames": 1654,
+          "correct_pitch_rate": 0.626,
+          "miss_rate": 0.163,
+          "silent_frames": 724,
+          "false_voice_rate": 0.358,
+          "candidate_oracle_pitch_rate": 0.635,
+          "reference_notes": 37,
+          "detected_notes": 62,
+          "matched_notes": 14,
+          "note_event_f1": 0.283,
+          "onset_mae_seconds": 0.036,
+          "offset_mae_seconds": 0.067
+        },
+        "balanced": {
+          "notes": 61,
+          "alternatives": 4,
+          "vocal_frames": 1654,
+          "correct_pitch_rate": 0.626,
+          "miss_rate": 0.163,
+          "silent_frames": 724,
+          "false_voice_rate": 0.322,
+          "candidate_oracle_pitch_rate": 0.635,
+          "reference_notes": 37,
+          "detected_notes": 61,
+          "matched_notes": 14,
+          "note_event_f1": 0.286,
+          "onset_mae_seconds": 0.036,
+          "offset_mae_seconds": 0.067
+        },
+        "cautious": {
+          "notes": 55,
+          "alternatives": 4,
+          "vocal_frames": 1654,
+          "correct_pitch_rate": 0.613,
+          "miss_rate": 0.197,
+          "silent_frames": 724,
+          "false_voice_rate": 0.186,
+          "candidate_oracle_pitch_rate": 0.622,
+          "reference_notes": 37,
+          "detected_notes": 55,
+          "matched_notes": 13,
+          "note_event_f1": 0.283,
+          "onset_mae_seconds": 0.038,
+          "offset_mae_seconds": 0.07
+        },
+        "continuity": {
+          "notes": 62,
+          "alternatives": 4,
+          "vocal_frames": 1654,
+          "correct_pitch_rate": 0.626,
+          "miss_rate": 0.163,
+          "silent_frames": 724,
+          "false_voice_rate": 0.345,
+          "candidate_oracle_pitch_rate": 0.635,
+          "reference_notes": 37,
+          "detected_notes": 62,
+          "matched_notes": 14,
+          "note_event_f1": 0.283,
+          "onset_mae_seconds": 0.036,
+          "offset_mae_seconds": 0.067
+        }
+      }
+    },
+    {
+      "id": "vocadito_36",
+      "song_id": "vocadito_36",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 23.278,
+      "candidate_events": 105,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 95,
+          "alternatives": 7,
+          "vocal_frames": 2612,
+          "correct_pitch_rate": 0.691,
+          "miss_rate": 0.155,
+          "silent_frames": 1398,
+          "false_voice_rate": 0.48,
+          "candidate_oracle_pitch_rate": 0.691,
+          "reference_notes": 67,
+          "detected_notes": 95,
+          "matched_notes": 31,
+          "note_event_f1": 0.383,
+          "onset_mae_seconds": 0.028,
+          "offset_mae_seconds": 0.056
+        },
+        "balanced": {
+          "notes": 95,
+          "alternatives": 7,
+          "vocal_frames": 2612,
+          "correct_pitch_rate": 0.691,
+          "miss_rate": 0.155,
+          "silent_frames": 1398,
+          "false_voice_rate": 0.477,
+          "candidate_oracle_pitch_rate": 0.691,
+          "reference_notes": 67,
+          "detected_notes": 95,
+          "matched_notes": 31,
+          "note_event_f1": 0.383,
+          "onset_mae_seconds": 0.028,
+          "offset_mae_seconds": 0.055
+        },
+        "cautious": {
+          "notes": 92,
+          "alternatives": 7,
+          "vocal_frames": 2612,
+          "correct_pitch_rate": 0.684,
+          "miss_rate": 0.169,
+          "silent_frames": 1398,
+          "false_voice_rate": 0.45,
+          "candidate_oracle_pitch_rate": 0.684,
+          "reference_notes": 67,
+          "detected_notes": 92,
+          "matched_notes": 30,
+          "note_event_f1": 0.377,
+          "onset_mae_seconds": 0.028,
+          "offset_mae_seconds": 0.056
+        },
+        "continuity": {
+          "notes": 95,
+          "alternatives": 7,
+          "vocal_frames": 2612,
+          "correct_pitch_rate": 0.691,
+          "miss_rate": 0.155,
+          "silent_frames": 1398,
+          "false_voice_rate": 0.48,
+          "candidate_oracle_pitch_rate": 0.691,
+          "reference_notes": 67,
+          "detected_notes": 95,
+          "matched_notes": 31,
+          "note_event_f1": 0.383,
+          "onset_mae_seconds": 0.028,
+          "offset_mae_seconds": 0.056
+        }
+      }
+    },
+    {
+      "id": "vocadito_37",
+      "song_id": "vocadito_37",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 38.736,
+      "candidate_events": 105,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 102,
+          "alternatives": 2,
+          "vocal_frames": 5106,
+          "correct_pitch_rate": 0.809,
+          "miss_rate": 0.08,
+          "silent_frames": 1567,
+          "false_voice_rate": 0.124,
+          "candidate_oracle_pitch_rate": 0.809,
+          "reference_notes": 51,
+          "detected_notes": 102,
+          "matched_notes": 20,
+          "note_event_f1": 0.261,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.058
+        },
+        "balanced": {
+          "notes": 101,
+          "alternatives": 1,
+          "vocal_frames": 5106,
+          "correct_pitch_rate": 0.809,
+          "miss_rate": 0.08,
+          "silent_frames": 1567,
+          "false_voice_rate": 0.098,
+          "candidate_oracle_pitch_rate": 0.809,
+          "reference_notes": 51,
+          "detected_notes": 101,
+          "matched_notes": 20,
+          "note_event_f1": 0.263,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.058
+        },
+        "cautious": {
+          "notes": 99,
+          "alternatives": 1,
+          "vocal_frames": 5106,
+          "correct_pitch_rate": 0.806,
+          "miss_rate": 0.087,
+          "silent_frames": 1567,
+          "false_voice_rate": 0.096,
+          "candidate_oracle_pitch_rate": 0.806,
+          "reference_notes": 51,
+          "detected_notes": 99,
+          "matched_notes": 20,
+          "note_event_f1": 0.267,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.058
+        },
+        "continuity": {
+          "notes": 101,
+          "alternatives": 1,
+          "vocal_frames": 5106,
+          "correct_pitch_rate": 0.809,
+          "miss_rate": 0.08,
+          "silent_frames": 1567,
+          "false_voice_rate": 0.098,
+          "candidate_oracle_pitch_rate": 0.809,
+          "reference_notes": 51,
+          "detected_notes": 101,
+          "matched_notes": 20,
+          "note_event_f1": 0.263,
+          "onset_mae_seconds": 0.031,
+          "offset_mae_seconds": 0.058
+        }
+      }
+    },
+    {
+      "id": "vocadito_38",
+      "song_id": "vocadito_38",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 27.84,
+      "candidate_events": 80,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 78,
+          "alternatives": 2,
+          "vocal_frames": 2463,
+          "correct_pitch_rate": 0.622,
+          "miss_rate": 0.206,
+          "silent_frames": 2333,
+          "false_voice_rate": 0.11,
+          "candidate_oracle_pitch_rate": 0.622,
+          "reference_notes": 78,
+          "detected_notes": 78,
+          "matched_notes": 45,
+          "note_event_f1": 0.577,
+          "onset_mae_seconds": 0.019,
+          "offset_mae_seconds": 0.038
+        },
+        "balanced": {
+          "notes": 77,
+          "alternatives": 2,
+          "vocal_frames": 2463,
+          "correct_pitch_rate": 0.622,
+          "miss_rate": 0.206,
+          "silent_frames": 2333,
+          "false_voice_rate": 0.1,
+          "candidate_oracle_pitch_rate": 0.622,
+          "reference_notes": 78,
+          "detected_notes": 77,
+          "matched_notes": 45,
+          "note_event_f1": 0.581,
+          "onset_mae_seconds": 0.019,
+          "offset_mae_seconds": 0.038
+        },
+        "cautious": {
+          "notes": 75,
+          "alternatives": 2,
+          "vocal_frames": 2463,
+          "correct_pitch_rate": 0.615,
+          "miss_rate": 0.221,
+          "silent_frames": 2333,
+          "false_voice_rate": 0.1,
+          "candidate_oracle_pitch_rate": 0.615,
+          "reference_notes": 78,
+          "detected_notes": 75,
+          "matched_notes": 45,
+          "note_event_f1": 0.588,
+          "onset_mae_seconds": 0.019,
+          "offset_mae_seconds": 0.038
+        },
+        "continuity": {
+          "notes": 77,
+          "alternatives": 2,
+          "vocal_frames": 2463,
+          "correct_pitch_rate": 0.622,
+          "miss_rate": 0.206,
+          "silent_frames": 2333,
+          "false_voice_rate": 0.1,
+          "candidate_oracle_pitch_rate": 0.622,
+          "reference_notes": 78,
+          "detected_notes": 77,
+          "matched_notes": 45,
+          "note_event_f1": 0.581,
+          "onset_mae_seconds": 0.019,
+          "offset_mae_seconds": 0.038
+        }
+      }
+    },
+    {
+      "id": "vocadito_39",
+      "song_id": "vocadito_39",
+      "source": "Vocadito v3 solo",
+      "split": "development",
+      "duration_seconds": 31.68,
+      "candidate_events": 123,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 115,
+          "alternatives": 5,
+          "vocal_frames": 3951,
+          "correct_pitch_rate": 0.68,
+          "miss_rate": 0.159,
+          "silent_frames": 1507,
+          "false_voice_rate": 0.143,
+          "candidate_oracle_pitch_rate": 0.681,
+          "reference_notes": 92,
+          "detected_notes": 115,
+          "matched_notes": 51,
+          "note_event_f1": 0.493,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.044
+        },
+        "balanced": {
+          "notes": 115,
+          "alternatives": 5,
+          "vocal_frames": 3951,
+          "correct_pitch_rate": 0.68,
+          "miss_rate": 0.159,
+          "silent_frames": 1507,
+          "false_voice_rate": 0.143,
+          "candidate_oracle_pitch_rate": 0.681,
+          "reference_notes": 92,
+          "detected_notes": 115,
+          "matched_notes": 51,
+          "note_event_f1": 0.493,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.044
+        },
+        "cautious": {
+          "notes": 111,
+          "alternatives": 5,
+          "vocal_frames": 3951,
+          "correct_pitch_rate": 0.668,
+          "miss_rate": 0.183,
+          "silent_frames": 1507,
+          "false_voice_rate": 0.143,
+          "candidate_oracle_pitch_rate": 0.669,
+          "reference_notes": 92,
+          "detected_notes": 111,
+          "matched_notes": 51,
+          "note_event_f1": 0.502,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.044
+        },
+        "continuity": {
+          "notes": 115,
+          "alternatives": 5,
+          "vocal_frames": 3951,
+          "correct_pitch_rate": 0.68,
+          "miss_rate": 0.159,
+          "silent_frames": 1507,
+          "false_voice_rate": 0.143,
+          "candidate_oracle_pitch_rate": 0.681,
+          "reference_notes": 92,
+          "detected_notes": 115,
+          "matched_notes": 51,
+          "note_event_f1": 0.493,
+          "onset_mae_seconds": 0.034,
+          "offset_mae_seconds": 0.044
+        }
+      }
+    },
+    {
+      "id": "vocadito_40",
+      "song_id": "vocadito_40",
+      "source": "Vocadito v3 solo",
+      "split": "holdout",
+      "duration_seconds": 18.578,
+      "candidate_events": 54,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 52,
+          "alternatives": 1,
+          "vocal_frames": 2042,
+          "correct_pitch_rate": 0.675,
+          "miss_rate": 0.145,
+          "silent_frames": 1159,
+          "false_voice_rate": 0.148,
+          "candidate_oracle_pitch_rate": 0.675,
+          "reference_notes": 45,
+          "detected_notes": 52,
+          "matched_notes": 22,
+          "note_event_f1": 0.454,
+          "onset_mae_seconds": 0.035,
+          "offset_mae_seconds": 0.06
+        },
+        "balanced": {
+          "notes": 52,
+          "alternatives": 1,
+          "vocal_frames": 2042,
+          "correct_pitch_rate": 0.675,
+          "miss_rate": 0.145,
+          "silent_frames": 1159,
+          "false_voice_rate": 0.148,
+          "candidate_oracle_pitch_rate": 0.675,
+          "reference_notes": 45,
+          "detected_notes": 52,
+          "matched_notes": 22,
+          "note_event_f1": 0.454,
+          "onset_mae_seconds": 0.035,
+          "offset_mae_seconds": 0.06
+        },
+        "cautious": {
+          "notes": 49,
+          "alternatives": 1,
+          "vocal_frames": 2042,
+          "correct_pitch_rate": 0.658,
+          "miss_rate": 0.171,
+          "silent_frames": 1159,
+          "false_voice_rate": 0.144,
+          "candidate_oracle_pitch_rate": 0.658,
+          "reference_notes": 45,
+          "detected_notes": 49,
+          "matched_notes": 20,
+          "note_event_f1": 0.426,
+          "onset_mae_seconds": 0.035,
+          "offset_mae_seconds": 0.056
+        },
+        "continuity": {
+          "notes": 52,
+          "alternatives": 1,
+          "vocal_frames": 2042,
+          "correct_pitch_rate": 0.675,
+          "miss_rate": 0.145,
+          "silent_frames": 1159,
+          "false_voice_rate": 0.148,
+          "candidate_oracle_pitch_rate": 0.675,
+          "reference_notes": 45,
+          "detected_notes": 52,
+          "matched_notes": 22,
+          "note_event_f1": 0.454,
+          "onset_mae_seconds": 0.035,
+          "offset_mae_seconds": 0.06
+        }
+      }
+    },
+    {
+      "id": "ClaraBerryAndWooldog_Boys_seg_3",
+      "song_id": "ClaraBerryAndWooldog_Boys",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "holdout",
+      "duration_seconds": 7.625,
+      "candidate_events": 34,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 15,
+          "alternatives": 24,
+          "vocal_frames": 806,
+          "correct_pitch_rate": 0.485,
+          "miss_rate": 0.066,
+          "silent_frames": 507,
+          "false_voice_rate": 0.698,
+          "candidate_oracle_pitch_rate": 0.723
+        },
+        "balanced": {
+          "notes": 15,
+          "alternatives": 24,
+          "vocal_frames": 806,
+          "correct_pitch_rate": 0.485,
+          "miss_rate": 0.066,
+          "silent_frames": 507,
+          "false_voice_rate": 0.698,
+          "candidate_oracle_pitch_rate": 0.723
+        },
+        "cautious": {
+          "notes": 16,
+          "alternatives": 24,
+          "vocal_frames": 806,
+          "correct_pitch_rate": 0.507,
+          "miss_rate": 0.047,
+          "silent_frames": 507,
+          "false_voice_rate": 0.704,
+          "candidate_oracle_pitch_rate": 0.743
+        },
+        "continuity": {
+          "notes": 15,
+          "alternatives": 24,
+          "vocal_frames": 806,
+          "correct_pitch_rate": 0.485,
+          "miss_rate": 0.066,
+          "silent_frames": 507,
+          "false_voice_rate": 0.698,
+          "candidate_oracle_pitch_rate": 0.723
+        }
+      }
+    },
+    {
+      "id": "ClaraBerryAndWooldog_Boys_seg_6",
+      "song_id": "ClaraBerryAndWooldog_Boys",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "holdout",
+      "duration_seconds": 7.5,
+      "candidate_events": 42,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 21,
+          "alternatives": 25,
+          "vocal_frames": 751,
+          "correct_pitch_rate": 0.518,
+          "miss_rate": 0.025,
+          "silent_frames": 541,
+          "false_voice_rate": 0.765,
+          "candidate_oracle_pitch_rate": 0.684
+        },
+        "balanced": {
+          "notes": 21,
+          "alternatives": 25,
+          "vocal_frames": 751,
+          "correct_pitch_rate": 0.518,
+          "miss_rate": 0.025,
+          "silent_frames": 541,
+          "false_voice_rate": 0.765,
+          "candidate_oracle_pitch_rate": 0.684
+        },
+        "cautious": {
+          "notes": 19,
+          "alternatives": 25,
+          "vocal_frames": 751,
+          "correct_pitch_rate": 0.47,
+          "miss_rate": 0.025,
+          "silent_frames": 541,
+          "false_voice_rate": 0.773,
+          "candidate_oracle_pitch_rate": 0.684
+        },
+        "continuity": {
+          "notes": 21,
+          "alternatives": 25,
+          "vocal_frames": 751,
+          "correct_pitch_rate": 0.518,
+          "miss_rate": 0.025,
+          "silent_frames": 541,
+          "false_voice_rate": 0.765,
+          "candidate_oracle_pitch_rate": 0.684
+        }
+      }
+    },
+    {
+      "id": "ClaraBerryAndWooldog_Boys_seg_8",
+      "song_id": "ClaraBerryAndWooldog_Boys",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "holdout",
+      "duration_seconds": 16.0,
+      "candidate_events": 77,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 24,
+          "alternatives": 52,
+          "vocal_frames": 2289,
+          "correct_pitch_rate": 0.383,
+          "miss_rate": 0.024,
+          "silent_frames": 467,
+          "false_voice_rate": 0.503,
+          "candidate_oracle_pitch_rate": 0.887
+        },
+        "balanced": {
+          "notes": 24,
+          "alternatives": 52,
+          "vocal_frames": 2289,
+          "correct_pitch_rate": 0.401,
+          "miss_rate": 0.026,
+          "silent_frames": 467,
+          "false_voice_rate": 0.488,
+          "candidate_oracle_pitch_rate": 0.886
+        },
+        "cautious": {
+          "notes": 24,
+          "alternatives": 52,
+          "vocal_frames": 2289,
+          "correct_pitch_rate": 0.401,
+          "miss_rate": 0.026,
+          "silent_frames": 467,
+          "false_voice_rate": 0.488,
+          "candidate_oracle_pitch_rate": 0.886
+        },
+        "continuity": {
+          "notes": 24,
+          "alternatives": 52,
+          "vocal_frames": 2289,
+          "correct_pitch_rate": 0.384,
+          "miss_rate": 0.028,
+          "silent_frames": 467,
+          "false_voice_rate": 0.48,
+          "candidate_oracle_pitch_rate": 0.884
+        }
+      }
+    },
+    {
+      "id": "FacesOnFilm_WaitingForGa_seg_8",
+      "song_id": "FacesOnFilm_WaitingForGa",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "development",
+      "duration_seconds": 7.313,
+      "candidate_events": 39,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 17,
+          "alternatives": 39,
+          "vocal_frames": 1060,
+          "correct_pitch_rate": 0.552,
+          "miss_rate": 0.05,
+          "silent_frames": 200,
+          "false_voice_rate": 0.635,
+          "candidate_oracle_pitch_rate": 0.872
+        },
+        "balanced": {
+          "notes": 17,
+          "alternatives": 39,
+          "vocal_frames": 1060,
+          "correct_pitch_rate": 0.552,
+          "miss_rate": 0.05,
+          "silent_frames": 200,
+          "false_voice_rate": 0.635,
+          "candidate_oracle_pitch_rate": 0.872
+        },
+        "cautious": {
+          "notes": 17,
+          "alternatives": 39,
+          "vocal_frames": 1060,
+          "correct_pitch_rate": 0.538,
+          "miss_rate": 0.05,
+          "silent_frames": 200,
+          "false_voice_rate": 0.635,
+          "candidate_oracle_pitch_rate": 0.872
+        },
+        "continuity": {
+          "notes": 17,
+          "alternatives": 39,
+          "vocal_frames": 1060,
+          "correct_pitch_rate": 0.552,
+          "miss_rate": 0.05,
+          "silent_frames": 200,
+          "false_voice_rate": 0.635,
+          "candidate_oracle_pitch_rate": 0.872
+        }
+      }
+    },
+    {
+      "id": "FamilyBand_Again_seg_3",
+      "song_id": "FamilyBand_Again",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "development",
+      "duration_seconds": 23.5,
+      "candidate_events": 129,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.01,
+      "variants": {
+        "released_1_18": {
+          "notes": 28,
+          "alternatives": 96,
+          "vocal_frames": 2524,
+          "correct_pitch_rate": 0.249,
+          "miss_rate": 0.161,
+          "silent_frames": 1525,
+          "false_voice_rate": 0.841,
+          "candidate_oracle_pitch_rate": 0.656
+        },
+        "balanced": {
+          "notes": 11,
+          "alternatives": 61,
+          "vocal_frames": 2524,
+          "correct_pitch_rate": 0.143,
+          "miss_rate": 0.459,
+          "silent_frames": 1525,
+          "false_voice_rate": 0.782,
+          "candidate_oracle_pitch_rate": 0.478
+        },
+        "cautious": {
+          "notes": 12,
+          "alternatives": 66,
+          "vocal_frames": 2524,
+          "correct_pitch_rate": 0.143,
+          "miss_rate": 0.389,
+          "silent_frames": 1525,
+          "false_voice_rate": 0.789,
+          "candidate_oracle_pitch_rate": 0.515
+        },
+        "continuity": {
+          "notes": 11,
+          "alternatives": 61,
+          "vocal_frames": 2524,
+          "correct_pitch_rate": 0.143,
+          "miss_rate": 0.459,
+          "silent_frames": 1525,
+          "false_voice_rate": 0.782,
+          "candidate_oracle_pitch_rate": 0.478
+        }
+      }
+    },
+    {
+      "id": "LizNelson_Rainfall_seg_2",
+      "song_id": "LizNelson_Rainfall",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "development",
+      "duration_seconds": 15.479,
+      "candidate_events": 106,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 52,
+          "alternatives": 60,
+          "vocal_frames": 1817,
+          "correct_pitch_rate": 0.4,
+          "miss_rate": 0.081,
+          "silent_frames": 850,
+          "false_voice_rate": 0.721,
+          "candidate_oracle_pitch_rate": 0.556
+        },
+        "balanced": {
+          "notes": 52,
+          "alternatives": 60,
+          "vocal_frames": 1817,
+          "correct_pitch_rate": 0.384,
+          "miss_rate": 0.074,
+          "silent_frames": 850,
+          "false_voice_rate": 0.721,
+          "candidate_oracle_pitch_rate": 0.563
+        },
+        "cautious": {
+          "notes": 51,
+          "alternatives": 59,
+          "vocal_frames": 1817,
+          "correct_pitch_rate": 0.382,
+          "miss_rate": 0.071,
+          "silent_frames": 850,
+          "false_voice_rate": 0.713,
+          "candidate_oracle_pitch_rate": 0.565
+        },
+        "continuity": {
+          "notes": 52,
+          "alternatives": 60,
+          "vocal_frames": 1817,
+          "correct_pitch_rate": 0.384,
+          "miss_rate": 0.074,
+          "silent_frames": 850,
+          "false_voice_rate": 0.721,
+          "candidate_oracle_pitch_rate": 0.563
+        }
+      }
+    },
+    {
+      "id": "LizNelson_Rainfall_seg_3",
+      "song_id": "LizNelson_Rainfall",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "development",
+      "duration_seconds": 15.521,
+      "candidate_events": 109,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 56,
+          "alternatives": 57,
+          "vocal_frames": 1928,
+          "correct_pitch_rate": 0.396,
+          "miss_rate": 0.077,
+          "silent_frames": 745,
+          "false_voice_rate": 0.466,
+          "candidate_oracle_pitch_rate": 0.584
+        },
+        "balanced": {
+          "notes": 56,
+          "alternatives": 57,
+          "vocal_frames": 1928,
+          "correct_pitch_rate": 0.409,
+          "miss_rate": 0.07,
+          "silent_frames": 745,
+          "false_voice_rate": 0.452,
+          "candidate_oracle_pitch_rate": 0.59
+        },
+        "cautious": {
+          "notes": 54,
+          "alternatives": 57,
+          "vocal_frames": 1928,
+          "correct_pitch_rate": 0.403,
+          "miss_rate": 0.075,
+          "silent_frames": 745,
+          "false_voice_rate": 0.417,
+          "candidate_oracle_pitch_rate": 0.59
+        },
+        "continuity": {
+          "notes": 56,
+          "alternatives": 58,
+          "vocal_frames": 1928,
+          "correct_pitch_rate": 0.422,
+          "miss_rate": 0.072,
+          "silent_frames": 745,
+          "false_voice_rate": 0.463,
+          "candidate_oracle_pitch_rate": 0.589
+        }
+      }
+    },
+    {
+      "id": "LizNelson_Rainfall_seg_5",
+      "song_id": "LizNelson_Rainfall",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "development",
+      "duration_seconds": 16.104,
+      "candidate_events": 117,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 54,
+          "alternatives": 76,
+          "vocal_frames": 1786,
+          "correct_pitch_rate": 0.337,
+          "miss_rate": 0.067,
+          "silent_frames": 988,
+          "false_voice_rate": 0.715,
+          "candidate_oracle_pitch_rate": 0.637
+        },
+        "balanced": {
+          "notes": 54,
+          "alternatives": 77,
+          "vocal_frames": 1786,
+          "correct_pitch_rate": 0.336,
+          "miss_rate": 0.067,
+          "silent_frames": 988,
+          "false_voice_rate": 0.715,
+          "candidate_oracle_pitch_rate": 0.636
+        },
+        "cautious": {
+          "notes": 54,
+          "alternatives": 77,
+          "vocal_frames": 1786,
+          "correct_pitch_rate": 0.336,
+          "miss_rate": 0.067,
+          "silent_frames": 988,
+          "false_voice_rate": 0.715,
+          "candidate_oracle_pitch_rate": 0.636
+        },
+        "continuity": {
+          "notes": 55,
+          "alternatives": 77,
+          "vocal_frames": 1786,
+          "correct_pitch_rate": 0.309,
+          "miss_rate": 0.07,
+          "silent_frames": 988,
+          "false_voice_rate": 0.715,
+          "candidate_oracle_pitch_rate": 0.634
+        }
+      }
+    },
+    {
+      "id": "LizNelson_Rainfall_seg_6",
+      "song_id": "LizNelson_Rainfall",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "development",
+      "duration_seconds": 16.396,
+      "candidate_events": 112,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 58,
+          "alternatives": 58,
+          "vocal_frames": 1887,
+          "correct_pitch_rate": 0.399,
+          "miss_rate": 0.099,
+          "silent_frames": 937,
+          "false_voice_rate": 0.49,
+          "candidate_oracle_pitch_rate": 0.579
+        },
+        "balanced": {
+          "notes": 58,
+          "alternatives": 58,
+          "vocal_frames": 1887,
+          "correct_pitch_rate": 0.399,
+          "miss_rate": 0.102,
+          "silent_frames": 937,
+          "false_voice_rate": 0.507,
+          "candidate_oracle_pitch_rate": 0.579
+        },
+        "cautious": {
+          "notes": 55,
+          "alternatives": 55,
+          "vocal_frames": 1887,
+          "correct_pitch_rate": 0.382,
+          "miss_rate": 0.131,
+          "silent_frames": 937,
+          "false_voice_rate": 0.473,
+          "candidate_oracle_pitch_rate": 0.56
+        },
+        "continuity": {
+          "notes": 58,
+          "alternatives": 58,
+          "vocal_frames": 1887,
+          "correct_pitch_rate": 0.399,
+          "miss_rate": 0.102,
+          "silent_frames": 937,
+          "false_voice_rate": 0.507,
+          "candidate_oracle_pitch_rate": 0.579
+        }
+      }
+    },
+    {
+      "id": "LizNelson_Rainfall_seg_7",
+      "song_id": "LizNelson_Rainfall",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "development",
+      "duration_seconds": 14.688,
+      "candidate_events": 87,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 49,
+          "alternatives": 54,
+          "vocal_frames": 1833,
+          "correct_pitch_rate": 0.419,
+          "miss_rate": 0.067,
+          "silent_frames": 697,
+          "false_voice_rate": 0.577,
+          "candidate_oracle_pitch_rate": 0.725
+        },
+        "balanced": {
+          "notes": 48,
+          "alternatives": 54,
+          "vocal_frames": 1833,
+          "correct_pitch_rate": 0.419,
+          "miss_rate": 0.067,
+          "silent_frames": 697,
+          "false_voice_rate": 0.552,
+          "candidate_oracle_pitch_rate": 0.725
+        },
+        "cautious": {
+          "notes": 47,
+          "alternatives": 54,
+          "vocal_frames": 1833,
+          "correct_pitch_rate": 0.464,
+          "miss_rate": 0.069,
+          "silent_frames": 697,
+          "false_voice_rate": 0.552,
+          "candidate_oracle_pitch_rate": 0.723
+        },
+        "continuity": {
+          "notes": 46,
+          "alternatives": 53,
+          "vocal_frames": 1833,
+          "correct_pitch_rate": 0.395,
+          "miss_rate": 0.064,
+          "silent_frames": 697,
+          "false_voice_rate": 0.552,
+          "candidate_oracle_pitch_rate": 0.732
+        }
+      }
+    },
+    {
+      "id": "LizNelson_Rainfall_seg_8",
+      "song_id": "LizNelson_Rainfall",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "development",
+      "duration_seconds": 16.188,
+      "candidate_events": 111,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 65,
+          "alternatives": 63,
+          "vocal_frames": 2150,
+          "correct_pitch_rate": 0.433,
+          "miss_rate": 0.095,
+          "silent_frames": 639,
+          "false_voice_rate": 0.775,
+          "candidate_oracle_pitch_rate": 0.571
+        },
+        "balanced": {
+          "notes": 64,
+          "alternatives": 62,
+          "vocal_frames": 2150,
+          "correct_pitch_rate": 0.44,
+          "miss_rate": 0.102,
+          "silent_frames": 639,
+          "false_voice_rate": 0.773,
+          "candidate_oracle_pitch_rate": 0.571
+        },
+        "cautious": {
+          "notes": 62,
+          "alternatives": 62,
+          "vocal_frames": 2150,
+          "correct_pitch_rate": 0.468,
+          "miss_rate": 0.107,
+          "silent_frames": 639,
+          "false_voice_rate": 0.768,
+          "candidate_oracle_pitch_rate": 0.577
+        },
+        "continuity": {
+          "notes": 64,
+          "alternatives": 62,
+          "vocal_frames": 2150,
+          "correct_pitch_rate": 0.443,
+          "miss_rate": 0.104,
+          "silent_frames": 639,
+          "false_voice_rate": 0.765,
+          "candidate_oracle_pitch_rate": 0.57
+        }
+      }
+    },
+    {
+      "id": "LizNelson_Rainfall_seg_9",
+      "song_id": "LizNelson_Rainfall",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "development",
+      "duration_seconds": 19.687,
+      "candidate_events": 129,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 73,
+          "alternatives": 67,
+          "vocal_frames": 2442,
+          "correct_pitch_rate": 0.478,
+          "miss_rate": 0.081,
+          "silent_frames": 949,
+          "false_voice_rate": 0.503,
+          "candidate_oracle_pitch_rate": 0.565
+        },
+        "balanced": {
+          "notes": 72,
+          "alternatives": 67,
+          "vocal_frames": 2442,
+          "correct_pitch_rate": 0.478,
+          "miss_rate": 0.088,
+          "silent_frames": 949,
+          "false_voice_rate": 0.498,
+          "candidate_oracle_pitch_rate": 0.565
+        },
+        "cautious": {
+          "notes": 67,
+          "alternatives": 65,
+          "vocal_frames": 2442,
+          "correct_pitch_rate": 0.437,
+          "miss_rate": 0.096,
+          "silent_frames": 949,
+          "false_voice_rate": 0.472,
+          "candidate_oracle_pitch_rate": 0.553
+        },
+        "continuity": {
+          "notes": 72,
+          "alternatives": 69,
+          "vocal_frames": 2442,
+          "correct_pitch_rate": 0.5,
+          "miss_rate": 0.077,
+          "silent_frames": 949,
+          "false_voice_rate": 0.487,
+          "candidate_oracle_pitch_rate": 0.573
+        }
+      }
+    },
+    {
+      "id": "Meaxic_TakeAStep_seg_17",
+      "song_id": "Meaxic_TakeAStep",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "holdout",
+      "duration_seconds": 5.875,
+      "candidate_events": 33,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 12,
+          "alternatives": 22,
+          "vocal_frames": 728,
+          "correct_pitch_rate": 0.408,
+          "miss_rate": 0.091,
+          "silent_frames": 284,
+          "false_voice_rate": 0.651,
+          "candidate_oracle_pitch_rate": 0.872
+        },
+        "balanced": {
+          "notes": 11,
+          "alternatives": 21,
+          "vocal_frames": 728,
+          "correct_pitch_rate": 0.402,
+          "miss_rate": 0.113,
+          "silent_frames": 284,
+          "false_voice_rate": 0.585,
+          "candidate_oracle_pitch_rate": 0.867
+        },
+        "cautious": {
+          "notes": 11,
+          "alternatives": 21,
+          "vocal_frames": 728,
+          "correct_pitch_rate": 0.507,
+          "miss_rate": 0.12,
+          "silent_frames": 284,
+          "false_voice_rate": 0.616,
+          "candidate_oracle_pitch_rate": 0.867
+        },
+        "continuity": {
+          "notes": 11,
+          "alternatives": 21,
+          "vocal_frames": 728,
+          "correct_pitch_rate": 0.402,
+          "miss_rate": 0.113,
+          "silent_frames": 284,
+          "false_voice_rate": 0.585,
+          "candidate_oracle_pitch_rate": 0.867
+        }
+      }
+    },
+    {
+      "id": "Meaxic_TakeAStep_seg_23",
+      "song_id": "Meaxic_TakeAStep",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "holdout",
+      "duration_seconds": 5.062,
+      "candidate_events": 34,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 14,
+          "alternatives": 20,
+          "vocal_frames": 626,
+          "correct_pitch_rate": 0.289,
+          "miss_rate": 0.19,
+          "silent_frames": 246,
+          "false_voice_rate": 0.199,
+          "candidate_oracle_pitch_rate": 0.55
+        },
+        "balanced": {
+          "notes": 14,
+          "alternatives": 20,
+          "vocal_frames": 626,
+          "correct_pitch_rate": 0.289,
+          "miss_rate": 0.19,
+          "silent_frames": 246,
+          "false_voice_rate": 0.199,
+          "candidate_oracle_pitch_rate": 0.55
+        },
+        "cautious": {
+          "notes": 14,
+          "alternatives": 20,
+          "vocal_frames": 626,
+          "correct_pitch_rate": 0.327,
+          "miss_rate": 0.187,
+          "silent_frames": 246,
+          "false_voice_rate": 0.199,
+          "candidate_oracle_pitch_rate": 0.553
+        },
+        "continuity": {
+          "notes": 14,
+          "alternatives": 20,
+          "vocal_frames": 626,
+          "correct_pitch_rate": 0.289,
+          "miss_rate": 0.19,
+          "silent_frames": 246,
+          "false_voice_rate": 0.199,
+          "candidate_oracle_pitch_rate": 0.55
+        }
+      }
+    },
+    {
+      "id": "Meaxic_TakeAStep_seg_29",
+      "song_id": "Meaxic_TakeAStep",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "holdout",
+      "duration_seconds": 12.375,
+      "candidate_events": 63,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 36,
+          "alternatives": 46,
+          "vocal_frames": 662,
+          "correct_pitch_rate": 0.893,
+          "miss_rate": 0.041,
+          "silent_frames": 1469,
+          "false_voice_rate": 0.897,
+          "candidate_oracle_pitch_rate": 0.893
+        },
+        "balanced": {
+          "notes": 35,
+          "alternatives": 45,
+          "vocal_frames": 662,
+          "correct_pitch_rate": 0.893,
+          "miss_rate": 0.041,
+          "silent_frames": 1469,
+          "false_voice_rate": 0.867,
+          "candidate_oracle_pitch_rate": 0.893
+        },
+        "cautious": {
+          "notes": 31,
+          "alternatives": 42,
+          "vocal_frames": 662,
+          "correct_pitch_rate": 0.893,
+          "miss_rate": 0.041,
+          "silent_frames": 1469,
+          "false_voice_rate": 0.822,
+          "candidate_oracle_pitch_rate": 0.893
+        },
+        "continuity": {
+          "notes": 35,
+          "alternatives": 45,
+          "vocal_frames": 662,
+          "correct_pitch_rate": 0.893,
+          "miss_rate": 0.041,
+          "silent_frames": 1469,
+          "false_voice_rate": 0.867,
+          "candidate_oracle_pitch_rate": 0.893
+        }
+      }
+    },
+    {
+      "id": "NightPanther_Fire_seg_10",
+      "song_id": "NightPanther_Fire",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "holdout",
+      "duration_seconds": 20.75,
+      "candidate_events": 286,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 50,
+          "alternatives": 239,
+          "vocal_frames": 2811,
+          "correct_pitch_rate": 0.285,
+          "miss_rate": 0.051,
+          "silent_frames": 763,
+          "false_voice_rate": 0.923,
+          "candidate_oracle_pitch_rate": 0.76
+        },
+        "balanced": {
+          "notes": 51,
+          "alternatives": 240,
+          "vocal_frames": 2811,
+          "correct_pitch_rate": 0.285,
+          "miss_rate": 0.053,
+          "silent_frames": 763,
+          "false_voice_rate": 0.917,
+          "candidate_oracle_pitch_rate": 0.758
+        },
+        "cautious": {
+          "notes": 50,
+          "alternatives": 239,
+          "vocal_frames": 2811,
+          "correct_pitch_rate": 0.212,
+          "miss_rate": 0.051,
+          "silent_frames": 763,
+          "false_voice_rate": 0.925,
+          "candidate_oracle_pitch_rate": 0.76
+        },
+        "continuity": {
+          "notes": 50,
+          "alternatives": 238,
+          "vocal_frames": 2811,
+          "correct_pitch_rate": 0.286,
+          "miss_rate": 0.052,
+          "silent_frames": 763,
+          "false_voice_rate": 0.944,
+          "candidate_oracle_pitch_rate": 0.762
+        }
+      }
+    },
+    {
+      "id": "NightPanther_Fire_seg_14",
+      "song_id": "NightPanther_Fire",
+      "source": "MedleyVox main-vs-rest plus MedleyDB MELODY1",
+      "split": "holdout",
+      "duration_seconds": 22.5,
+      "candidate_events": 317,
+      "cache_hit": true,
+      "event_extraction_seconds": 0.0,
+      "variants": {
+        "released_1_18": {
+          "notes": 97,
+          "alternatives": 222,
+          "vocal_frames": 3360,
+          "correct_pitch_rate": 0.07,
+          "miss_rate": 0.137,
+          "silent_frames": 516,
+          "false_voice_rate": 0.657,
+          "candidate_oracle_pitch_rate": 0.752
+        },
+        "balanced": {
+          "notes": 93,
+          "alternatives": 222,
+          "vocal_frames": 3360,
+          "correct_pitch_rate": 0.06,
+          "miss_rate": 0.163,
+          "silent_frames": 516,
+          "false_voice_rate": 0.64,
+          "candidate_oracle_pitch_rate": 0.735
+        },
+        "cautious": {
+          "notes": 87,
+          "alternatives": 218,
+          "vocal_frames": 3360,
+          "correct_pitch_rate": 0.095,
+          "miss_rate": 0.207,
+          "silent_frames": 516,
+          "false_voice_rate": 0.636,
+          "candidate_oracle_pitch_rate": 0.711
+        },
+        "continuity": {
+          "notes": 95,
+          "alternatives": 221,
+          "vocal_frames": 3360,
+          "correct_pitch_rate": 0.02,
+          "miss_rate": 0.17,
+          "silent_frames": 516,
+          "false_voice_rate": 0.638,
+          "candidate_oracle_pitch_rate": 0.727
+        }
+      }
+    }
+  ],
+  "macro": {
+    "development": {
+      "MedleyVox main-vs-rest plus MedleyDB MELODY1": {
+        "released_1_18": {
+          "correct_pitch_rate": 0.407,
+          "miss_rate": 0.086,
+          "false_voice_rate": 0.636,
+          "note_event_f1": null
+        },
+        "balanced": {
+          "correct_pitch_rate": 0.396,
+          "miss_rate": 0.12,
+          "false_voice_rate": 0.626,
+          "note_event_f1": null
+        },
+        "cautious": {
+          "correct_pitch_rate": 0.395,
+          "miss_rate": 0.117,
+          "false_voice_rate": 0.615,
+          "note_event_f1": null
+        },
+        "continuity": {
+          "correct_pitch_rate": 0.394,
+          "miss_rate": 0.119,
+          "false_voice_rate": 0.625,
+          "note_event_f1": null
+        }
+      },
+      "Vocadito v3 solo": {
+        "released_1_18": {
+          "correct_pitch_rate": 0.676,
+          "miss_rate": 0.176,
+          "false_voice_rate": 0.161,
+          "note_event_f1": 0.497
+        },
+        "balanced": {
+          "correct_pitch_rate": 0.676,
+          "miss_rate": 0.178,
+          "false_voice_rate": 0.157,
+          "note_event_f1": 0.497
+        },
+        "cautious": {
+          "correct_pitch_rate": 0.664,
+          "miss_rate": 0.2,
+          "false_voice_rate": 0.145,
+          "note_event_f1": 0.494
+        },
+        "continuity": {
+          "correct_pitch_rate": 0.676,
+          "miss_rate": 0.177,
+          "false_voice_rate": 0.159,
+          "note_event_f1": 0.496
+        }
+      }
+    },
+    "holdout": {
+      "MedleyVox main-vs-rest plus MedleyDB MELODY1": {
+        "released_1_18": {
+          "correct_pitch_rate": 0.416,
+          "miss_rate": 0.078,
+          "false_voice_rate": 0.662,
+          "note_event_f1": null
+        },
+        "balanced": {
+          "correct_pitch_rate": 0.417,
+          "miss_rate": 0.085,
+          "false_voice_rate": 0.645,
+          "note_event_f1": null
+        },
+        "cautious": {
+          "correct_pitch_rate": 0.427,
+          "miss_rate": 0.088,
+          "false_voice_rate": 0.645,
+          "note_event_f1": null
+        },
+        "continuity": {
+          "correct_pitch_rate": 0.41,
+          "miss_rate": 0.086,
+          "false_voice_rate": 0.647,
+          "note_event_f1": null
+        }
+      },
+      "Vocadito v3 solo": {
+        "released_1_18": {
+          "correct_pitch_rate": 0.66,
+          "miss_rate": 0.184,
+          "false_voice_rate": 0.21,
+          "note_event_f1": 0.515
+        },
+        "balanced": {
+          "correct_pitch_rate": 0.657,
+          "miss_rate": 0.188,
+          "false_voice_rate": 0.196,
+          "note_event_f1": 0.513
+        },
+        "cautious": {
+          "correct_pitch_rate": 0.646,
+          "miss_rate": 0.21,
+          "false_voice_rate": 0.187,
+          "note_event_f1": 0.506
+        },
+        "continuity": {
+          "correct_pitch_rate": 0.66,
+          "miss_rate": 0.185,
+          "false_voice_rate": 0.196,
+          "note_event_f1": 0.515
+        }
+      }
+    }
+  },
+  "by_song": {
+    "ClaraBerryAndWooldog_Boys": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.462,
+        "miss_rate": 0.038,
+        "false_voice_rate": 0.655,
+        "note_event_f1": null
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.468,
+        "miss_rate": 0.039,
+        "false_voice_rate": 0.65,
+        "note_event_f1": null
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.459,
+        "miss_rate": 0.033,
+        "false_voice_rate": 0.655,
+        "note_event_f1": null
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.462,
+        "miss_rate": 0.04,
+        "false_voice_rate": 0.648,
+        "note_event_f1": null
+      }
+    },
+    "FacesOnFilm_WaitingForGa": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.552,
+        "miss_rate": 0.05,
+        "false_voice_rate": 0.635,
+        "note_event_f1": null
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.552,
+        "miss_rate": 0.05,
+        "false_voice_rate": 0.635,
+        "note_event_f1": null
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.538,
+        "miss_rate": 0.05,
+        "false_voice_rate": 0.635,
+        "note_event_f1": null
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.552,
+        "miss_rate": 0.05,
+        "false_voice_rate": 0.635,
+        "note_event_f1": null
+      }
+    },
+    "FamilyBand_Again": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.249,
+        "miss_rate": 0.161,
+        "false_voice_rate": 0.841,
+        "note_event_f1": null
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.143,
+        "miss_rate": 0.459,
+        "false_voice_rate": 0.782,
+        "note_event_f1": null
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.143,
+        "miss_rate": 0.389,
+        "false_voice_rate": 0.789,
+        "note_event_f1": null
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.143,
+        "miss_rate": 0.459,
+        "false_voice_rate": 0.782,
+        "note_event_f1": null
+      }
+    },
+    "LizNelson_Rainfall": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.409,
+        "miss_rate": 0.081,
+        "false_voice_rate": 0.607,
+        "note_event_f1": null
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.409,
+        "miss_rate": 0.081,
+        "false_voice_rate": 0.603,
+        "note_event_f1": null
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.41,
+        "miss_rate": 0.088,
+        "false_voice_rate": 0.587,
+        "note_event_f1": null
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.407,
+        "miss_rate": 0.08,
+        "false_voice_rate": 0.601,
+        "note_event_f1": null
+      }
+    },
+    "Meaxic_TakeAStep": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.53,
+        "miss_rate": 0.107,
+        "false_voice_rate": 0.582,
+        "note_event_f1": null
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.528,
+        "miss_rate": 0.115,
+        "false_voice_rate": 0.55,
+        "note_event_f1": null
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.576,
+        "miss_rate": 0.116,
+        "false_voice_rate": 0.546,
+        "note_event_f1": null
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.528,
+        "miss_rate": 0.115,
+        "false_voice_rate": 0.55,
+        "note_event_f1": null
+      }
+    },
+    "NightPanther_Fire": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.177,
+        "miss_rate": 0.094,
+        "false_voice_rate": 0.79,
+        "note_event_f1": null
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.172,
+        "miss_rate": 0.108,
+        "false_voice_rate": 0.778,
+        "note_event_f1": null
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.153,
+        "miss_rate": 0.129,
+        "false_voice_rate": 0.78,
+        "note_event_f1": null
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.153,
+        "miss_rate": 0.111,
+        "false_voice_rate": 0.791,
+        "note_event_f1": null
+      }
+    },
+    "vocadito_1": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.747,
+        "miss_rate": 0.131,
+        "false_voice_rate": 0.175,
+        "note_event_f1": 0.425
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.747,
+        "miss_rate": 0.131,
+        "false_voice_rate": 0.175,
+        "note_event_f1": 0.425
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.742,
+        "miss_rate": 0.144,
+        "false_voice_rate": 0.174,
+        "note_event_f1": 0.431
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.747,
+        "miss_rate": 0.131,
+        "false_voice_rate": 0.175,
+        "note_event_f1": 0.425
+      }
+    },
+    "vocadito_10": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.573,
+        "miss_rate": 0.245,
+        "false_voice_rate": 0.294,
+        "note_event_f1": 0.411
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.573,
+        "miss_rate": 0.245,
+        "false_voice_rate": 0.294,
+        "note_event_f1": 0.411
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.539,
+        "miss_rate": 0.297,
+        "false_voice_rate": 0.229,
+        "note_event_f1": 0.377
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.573,
+        "miss_rate": 0.245,
+        "false_voice_rate": 0.294,
+        "note_event_f1": 0.411
+      }
+    },
+    "vocadito_11": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.716,
+        "miss_rate": 0.165,
+        "false_voice_rate": 0.138,
+        "note_event_f1": 0.444
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.716,
+        "miss_rate": 0.165,
+        "false_voice_rate": 0.138,
+        "note_event_f1": 0.444
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.703,
+        "miss_rate": 0.185,
+        "false_voice_rate": 0.138,
+        "note_event_f1": 0.456
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.715,
+        "miss_rate": 0.166,
+        "false_voice_rate": 0.143,
+        "note_event_f1": 0.42
+      }
+    },
+    "vocadito_12": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.826,
+        "miss_rate": 0.104,
+        "false_voice_rate": 0.173,
+        "note_event_f1": 0.486
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.826,
+        "miss_rate": 0.104,
+        "false_voice_rate": 0.173,
+        "note_event_f1": 0.486
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.826,
+        "miss_rate": 0.104,
+        "false_voice_rate": 0.173,
+        "note_event_f1": 0.486
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.826,
+        "miss_rate": 0.104,
+        "false_voice_rate": 0.173,
+        "note_event_f1": 0.486
+      }
+    },
+    "vocadito_13": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.603,
+        "miss_rate": 0.224,
+        "false_voice_rate": 0.066,
+        "note_event_f1": 0.392
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.603,
+        "miss_rate": 0.232,
+        "false_voice_rate": 0.065,
+        "note_event_f1": 0.395
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.576,
+        "miss_rate": 0.28,
+        "false_voice_rate": 0.054,
+        "note_event_f1": 0.367
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.603,
+        "miss_rate": 0.232,
+        "false_voice_rate": 0.065,
+        "note_event_f1": 0.395
+      }
+    },
+    "vocadito_14": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.593,
+        "miss_rate": 0.204,
+        "false_voice_rate": 0.156,
+        "note_event_f1": 0.448
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.593,
+        "miss_rate": 0.204,
+        "false_voice_rate": 0.156,
+        "note_event_f1": 0.448
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.593,
+        "miss_rate": 0.204,
+        "false_voice_rate": 0.156,
+        "note_event_f1": 0.448
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.593,
+        "miss_rate": 0.204,
+        "false_voice_rate": 0.156,
+        "note_event_f1": 0.448
+      }
+    },
+    "vocadito_15": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.701,
+        "miss_rate": 0.16,
+        "false_voice_rate": 0.077,
+        "note_event_f1": 0.66
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.695,
+        "miss_rate": 0.17,
+        "false_voice_rate": 0.077,
+        "note_event_f1": 0.647
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.678,
+        "miss_rate": 0.199,
+        "false_voice_rate": 0.075,
+        "note_event_f1": 0.646
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.701,
+        "miss_rate": 0.16,
+        "false_voice_rate": 0.077,
+        "note_event_f1": 0.66
+      }
+    },
+    "vocadito_16": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.696,
+        "miss_rate": 0.156,
+        "false_voice_rate": 0.232,
+        "note_event_f1": 0.763
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.696,
+        "miss_rate": 0.156,
+        "false_voice_rate": 0.232,
+        "note_event_f1": 0.763
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.696,
+        "miss_rate": 0.156,
+        "false_voice_rate": 0.232,
+        "note_event_f1": 0.763
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.696,
+        "miss_rate": 0.156,
+        "false_voice_rate": 0.232,
+        "note_event_f1": 0.763
+      }
+    },
+    "vocadito_17": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.743,
+        "miss_rate": 0.152,
+        "false_voice_rate": 0.005,
+        "note_event_f1": 0.439
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.743,
+        "miss_rate": 0.152,
+        "false_voice_rate": 0.005,
+        "note_event_f1": 0.439
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.739,
+        "miss_rate": 0.16,
+        "false_voice_rate": 0.005,
+        "note_event_f1": 0.443
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.743,
+        "miss_rate": 0.153,
+        "false_voice_rate": 0.005,
+        "note_event_f1": 0.439
+      }
+    },
+    "vocadito_18": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.668,
+        "miss_rate": 0.145,
+        "false_voice_rate": 0.096,
+        "note_event_f1": 0.351
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.668,
+        "miss_rate": 0.145,
+        "false_voice_rate": 0.096,
+        "note_event_f1": 0.351
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.659,
+        "miss_rate": 0.167,
+        "false_voice_rate": 0.096,
+        "note_event_f1": 0.357
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.668,
+        "miss_rate": 0.145,
+        "false_voice_rate": 0.096,
+        "note_event_f1": 0.351
+      }
+    },
+    "vocadito_19": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.583,
+        "miss_rate": 0.234,
+        "false_voice_rate": 0.121,
+        "note_event_f1": 0.374
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.578,
+        "miss_rate": 0.239,
+        "false_voice_rate": 0.121,
+        "note_event_f1": 0.376
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.528,
+        "miss_rate": 0.322,
+        "false_voice_rate": 0.109,
+        "note_event_f1": 0.344
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.583,
+        "miss_rate": 0.234,
+        "false_voice_rate": 0.121,
+        "note_event_f1": 0.374
+      }
+    },
+    "vocadito_2": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.827,
+        "miss_rate": 0.1,
+        "false_voice_rate": 0.043,
+        "note_event_f1": 0.45
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.827,
+        "miss_rate": 0.1,
+        "false_voice_rate": 0.043,
+        "note_event_f1": 0.45
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.827,
+        "miss_rate": 0.1,
+        "false_voice_rate": 0.032,
+        "note_event_f1": 0.452
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.827,
+        "miss_rate": 0.098,
+        "false_voice_rate": 0.043,
+        "note_event_f1": 0.447
+      }
+    },
+    "vocadito_20": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.614,
+        "miss_rate": 0.22,
+        "false_voice_rate": 0.211,
+        "note_event_f1": 0.581
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.614,
+        "miss_rate": 0.22,
+        "false_voice_rate": 0.211,
+        "note_event_f1": 0.581
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.614,
+        "miss_rate": 0.228,
+        "false_voice_rate": 0.211,
+        "note_event_f1": 0.581
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.614,
+        "miss_rate": 0.22,
+        "false_voice_rate": 0.211,
+        "note_event_f1": 0.581
+      }
+    },
+    "vocadito_21": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.573,
+        "miss_rate": 0.312,
+        "false_voice_rate": 0.165,
+        "note_event_f1": 0.497
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.573,
+        "miss_rate": 0.312,
+        "false_voice_rate": 0.165,
+        "note_event_f1": 0.497
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.554,
+        "miss_rate": 0.334,
+        "false_voice_rate": 0.144,
+        "note_event_f1": 0.484
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.573,
+        "miss_rate": 0.312,
+        "false_voice_rate": 0.165,
+        "note_event_f1": 0.497
+      }
+    },
+    "vocadito_22": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.702,
+        "miss_rate": 0.183,
+        "false_voice_rate": 0.107,
+        "note_event_f1": 0.536
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.69,
+        "miss_rate": 0.202,
+        "false_voice_rate": 0.091,
+        "note_event_f1": 0.526
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.69,
+        "miss_rate": 0.202,
+        "false_voice_rate": 0.091,
+        "note_event_f1": 0.526
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.702,
+        "miss_rate": 0.183,
+        "false_voice_rate": 0.091,
+        "note_event_f1": 0.542
+      }
+    },
+    "vocadito_23": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.609,
+        "miss_rate": 0.25,
+        "false_voice_rate": 0.139,
+        "note_event_f1": 0.505
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.609,
+        "miss_rate": 0.25,
+        "false_voice_rate": 0.139,
+        "note_event_f1": 0.505
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.587,
+        "miss_rate": 0.297,
+        "false_voice_rate": 0.124,
+        "note_event_f1": 0.471
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.609,
+        "miss_rate": 0.25,
+        "false_voice_rate": 0.139,
+        "note_event_f1": 0.505
+      }
+    },
+    "vocadito_24": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.727,
+        "miss_rate": 0.152,
+        "false_voice_rate": 0.262,
+        "note_event_f1": 0.605
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.727,
+        "miss_rate": 0.152,
+        "false_voice_rate": 0.262,
+        "note_event_f1": 0.605
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.72,
+        "miss_rate": 0.162,
+        "false_voice_rate": 0.262,
+        "note_event_f1": 0.613
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.727,
+        "miss_rate": 0.152,
+        "false_voice_rate": 0.262,
+        "note_event_f1": 0.605
+      }
+    },
+    "vocadito_25": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.681,
+        "miss_rate": 0.185,
+        "false_voice_rate": 0.124,
+        "note_event_f1": 0.517
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.681,
+        "miss_rate": 0.185,
+        "false_voice_rate": 0.124,
+        "note_event_f1": 0.517
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.681,
+        "miss_rate": 0.185,
+        "false_voice_rate": 0.124,
+        "note_event_f1": 0.517
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.681,
+        "miss_rate": 0.185,
+        "false_voice_rate": 0.124,
+        "note_event_f1": 0.517
+      }
+    },
+    "vocadito_26": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.54,
+        "miss_rate": 0.253,
+        "false_voice_rate": 0.252,
+        "note_event_f1": 0.628
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.514,
+        "miss_rate": 0.288,
+        "false_voice_rate": 0.233,
+        "note_event_f1": 0.593
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.472,
+        "miss_rate": 0.378,
+        "false_voice_rate": 0.195,
+        "note_event_f1": 0.559
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.537,
+        "miss_rate": 0.257,
+        "false_voice_rate": 0.233,
+        "note_event_f1": 0.617
+      }
+    },
+    "vocadito_27": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.724,
+        "miss_rate": 0.159,
+        "false_voice_rate": 0.15,
+        "note_event_f1": 0.583
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.724,
+        "miss_rate": 0.159,
+        "false_voice_rate": 0.15,
+        "note_event_f1": 0.583
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.718,
+        "miss_rate": 0.171,
+        "false_voice_rate": 0.15,
+        "note_event_f1": 0.592
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.724,
+        "miss_rate": 0.159,
+        "false_voice_rate": 0.15,
+        "note_event_f1": 0.583
+      }
+    },
+    "vocadito_28": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.612,
+        "miss_rate": 0.199,
+        "false_voice_rate": 0.285,
+        "note_event_f1": 0.543
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.612,
+        "miss_rate": 0.199,
+        "false_voice_rate": 0.285,
+        "note_event_f1": 0.543
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.594,
+        "miss_rate": 0.231,
+        "false_voice_rate": 0.285,
+        "note_event_f1": 0.511
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.612,
+        "miss_rate": 0.199,
+        "false_voice_rate": 0.285,
+        "note_event_f1": 0.543
+      }
+    },
+    "vocadito_29": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.751,
+        "miss_rate": 0.101,
+        "false_voice_rate": 0.231,
+        "note_event_f1": 0.53
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.751,
+        "miss_rate": 0.101,
+        "false_voice_rate": 0.231,
+        "note_event_f1": 0.53
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.751,
+        "miss_rate": 0.101,
+        "false_voice_rate": 0.231,
+        "note_event_f1": 0.53
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.751,
+        "miss_rate": 0.101,
+        "false_voice_rate": 0.231,
+        "note_event_f1": 0.53
+      }
+    },
+    "vocadito_3": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.749,
+        "miss_rate": 0.123,
+        "false_voice_rate": 0.175,
+        "note_event_f1": 0.63
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.749,
+        "miss_rate": 0.123,
+        "false_voice_rate": 0.175,
+        "note_event_f1": 0.63
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.749,
+        "miss_rate": 0.123,
+        "false_voice_rate": 0.175,
+        "note_event_f1": 0.63
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.749,
+        "miss_rate": 0.123,
+        "false_voice_rate": 0.175,
+        "note_event_f1": 0.63
+      }
+    },
+    "vocadito_30": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.515,
+        "miss_rate": 0.309,
+        "false_voice_rate": 0.175,
+        "note_event_f1": 0.505
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.515,
+        "miss_rate": 0.309,
+        "false_voice_rate": 0.175,
+        "note_event_f1": 0.505
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.461,
+        "miss_rate": 0.403,
+        "false_voice_rate": 0.156,
+        "note_event_f1": 0.467
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.515,
+        "miss_rate": 0.309,
+        "false_voice_rate": 0.175,
+        "note_event_f1": 0.505
+      }
+    },
+    "vocadito_31": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.645,
+        "miss_rate": 0.212,
+        "false_voice_rate": 0.121,
+        "note_event_f1": 0.705
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.645,
+        "miss_rate": 0.212,
+        "false_voice_rate": 0.121,
+        "note_event_f1": 0.705
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.645,
+        "miss_rate": 0.212,
+        "false_voice_rate": 0.121,
+        "note_event_f1": 0.705
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.645,
+        "miss_rate": 0.212,
+        "false_voice_rate": 0.121,
+        "note_event_f1": 0.705
+      }
+    },
+    "vocadito_32": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.676,
+        "miss_rate": 0.164,
+        "false_voice_rate": 0.189,
+        "note_event_f1": 0.418
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.676,
+        "miss_rate": 0.164,
+        "false_voice_rate": 0.189,
+        "note_event_f1": 0.418
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.676,
+        "miss_rate": 0.164,
+        "false_voice_rate": 0.189,
+        "note_event_f1": 0.418
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.676,
+        "miss_rate": 0.164,
+        "false_voice_rate": 0.189,
+        "note_event_f1": 0.418
+      }
+    },
+    "vocadito_33": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.592,
+        "miss_rate": 0.198,
+        "false_voice_rate": 0.228,
+        "note_event_f1": 0.387
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.592,
+        "miss_rate": 0.198,
+        "false_voice_rate": 0.228,
+        "note_event_f1": 0.387
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.554,
+        "miss_rate": 0.264,
+        "false_voice_rate": 0.201,
+        "note_event_f1": 0.4
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.592,
+        "miss_rate": 0.198,
+        "false_voice_rate": 0.228,
+        "note_event_f1": 0.387
+      }
+    },
+    "vocadito_34": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.663,
+        "miss_rate": 0.204,
+        "false_voice_rate": 0.459,
+        "note_event_f1": 0.464
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.663,
+        "miss_rate": 0.214,
+        "false_voice_rate": 0.217,
+        "note_event_f1": 0.484
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.652,
+        "miss_rate": 0.232,
+        "false_voice_rate": 0.199,
+        "note_event_f1": 0.47
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.663,
+        "miss_rate": 0.214,
+        "false_voice_rate": 0.217,
+        "note_event_f1": 0.484
+      }
+    },
+    "vocadito_35": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.626,
+        "miss_rate": 0.163,
+        "false_voice_rate": 0.358,
+        "note_event_f1": 0.283
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.626,
+        "miss_rate": 0.163,
+        "false_voice_rate": 0.322,
+        "note_event_f1": 0.286
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.613,
+        "miss_rate": 0.197,
+        "false_voice_rate": 0.186,
+        "note_event_f1": 0.283
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.626,
+        "miss_rate": 0.163,
+        "false_voice_rate": 0.345,
+        "note_event_f1": 0.283
+      }
+    },
+    "vocadito_36": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.691,
+        "miss_rate": 0.155,
+        "false_voice_rate": 0.48,
+        "note_event_f1": 0.383
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.691,
+        "miss_rate": 0.155,
+        "false_voice_rate": 0.477,
+        "note_event_f1": 0.383
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.684,
+        "miss_rate": 0.169,
+        "false_voice_rate": 0.45,
+        "note_event_f1": 0.377
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.691,
+        "miss_rate": 0.155,
+        "false_voice_rate": 0.48,
+        "note_event_f1": 0.383
+      }
+    },
+    "vocadito_37": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.809,
+        "miss_rate": 0.08,
+        "false_voice_rate": 0.124,
+        "note_event_f1": 0.261
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.809,
+        "miss_rate": 0.08,
+        "false_voice_rate": 0.098,
+        "note_event_f1": 0.263
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.806,
+        "miss_rate": 0.087,
+        "false_voice_rate": 0.096,
+        "note_event_f1": 0.267
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.809,
+        "miss_rate": 0.08,
+        "false_voice_rate": 0.098,
+        "note_event_f1": 0.263
+      }
+    },
+    "vocadito_38": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.622,
+        "miss_rate": 0.206,
+        "false_voice_rate": 0.11,
+        "note_event_f1": 0.577
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.622,
+        "miss_rate": 0.206,
+        "false_voice_rate": 0.1,
+        "note_event_f1": 0.581
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.615,
+        "miss_rate": 0.221,
+        "false_voice_rate": 0.1,
+        "note_event_f1": 0.588
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.622,
+        "miss_rate": 0.206,
+        "false_voice_rate": 0.1,
+        "note_event_f1": 0.581
+      }
+    },
+    "vocadito_39": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.68,
+        "miss_rate": 0.159,
+        "false_voice_rate": 0.143,
+        "note_event_f1": 0.493
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.68,
+        "miss_rate": 0.159,
+        "false_voice_rate": 0.143,
+        "note_event_f1": 0.493
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.668,
+        "miss_rate": 0.183,
+        "false_voice_rate": 0.143,
+        "note_event_f1": 0.502
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.68,
+        "miss_rate": 0.159,
+        "false_voice_rate": 0.143,
+        "note_event_f1": 0.493
+      }
+    },
+    "vocadito_4": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.676,
+        "miss_rate": 0.188,
+        "false_voice_rate": 0.289,
+        "note_event_f1": 0.486
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.669,
+        "miss_rate": 0.197,
+        "false_voice_rate": 0.287,
+        "note_event_f1": 0.476
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.661,
+        "miss_rate": 0.215,
+        "false_voice_rate": 0.287,
+        "note_event_f1": 0.482
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.676,
+        "miss_rate": 0.188,
+        "false_voice_rate": 0.289,
+        "note_event_f1": 0.486
+      }
+    },
+    "vocadito_40": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.675,
+        "miss_rate": 0.145,
+        "false_voice_rate": 0.148,
+        "note_event_f1": 0.454
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.675,
+        "miss_rate": 0.145,
+        "false_voice_rate": 0.148,
+        "note_event_f1": 0.454
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.658,
+        "miss_rate": 0.171,
+        "false_voice_rate": 0.144,
+        "note_event_f1": 0.426
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.675,
+        "miss_rate": 0.145,
+        "false_voice_rate": 0.148,
+        "note_event_f1": 0.454
+      }
+    },
+    "vocadito_5": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.653,
+        "miss_rate": 0.192,
+        "false_voice_rate": 0.232,
+        "note_event_f1": 0.578
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.653,
+        "miss_rate": 0.201,
+        "false_voice_rate": 0.232,
+        "note_event_f1": 0.581
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.65,
+        "miss_rate": 0.207,
+        "false_voice_rate": 0.232,
+        "note_event_f1": 0.573
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.653,
+        "miss_rate": 0.201,
+        "false_voice_rate": 0.232,
+        "note_event_f1": 0.581
+      }
+    },
+    "vocadito_6": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.56,
+        "miss_rate": 0.237,
+        "false_voice_rate": 0.066,
+        "note_event_f1": 0.503
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.56,
+        "miss_rate": 0.237,
+        "false_voice_rate": 0.066,
+        "note_event_f1": 0.503
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.542,
+        "miss_rate": 0.287,
+        "false_voice_rate": 0.06,
+        "note_event_f1": 0.525
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.56,
+        "miss_rate": 0.237,
+        "false_voice_rate": 0.066,
+        "note_event_f1": 0.503
+      }
+    },
+    "vocadito_7": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.703,
+        "miss_rate": 0.136,
+        "false_voice_rate": 0.259,
+        "note_event_f1": 0.598
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.703,
+        "miss_rate": 0.136,
+        "false_voice_rate": 0.259,
+        "note_event_f1": 0.598
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.707,
+        "miss_rate": 0.145,
+        "false_voice_rate": 0.259,
+        "note_event_f1": 0.611
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.703,
+        "miss_rate": 0.136,
+        "false_voice_rate": 0.259,
+        "note_event_f1": 0.598
+      }
+    },
+    "vocadito_8": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.738,
+        "miss_rate": 0.113,
+        "false_voice_rate": 0.183,
+        "note_event_f1": 0.701
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.738,
+        "miss_rate": 0.113,
+        "false_voice_rate": 0.183,
+        "note_event_f1": 0.701
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.738,
+        "miss_rate": 0.113,
+        "false_voice_rate": 0.183,
+        "note_event_f1": 0.701
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.738,
+        "miss_rate": 0.113,
+        "false_voice_rate": 0.183,
+        "note_event_f1": 0.701
+      }
+    },
+    "vocadito_9": {
+      "released_1_18": {
+        "correct_pitch_rate": 0.638,
+        "miss_rate": 0.19,
+        "false_voice_rate": 0.179,
+        "note_event_f1": 0.634
+      },
+      "balanced": {
+        "correct_pitch_rate": 0.634,
+        "miss_rate": 0.198,
+        "false_voice_rate": 0.179,
+        "note_event_f1": 0.639
+      },
+      "cautious": {
+        "correct_pitch_rate": 0.627,
+        "miss_rate": 0.204,
+        "false_voice_rate": 0.164,
+        "note_event_f1": 0.628
+      },
+      "continuity": {
+        "correct_pitch_rate": 0.638,
+        "miss_rate": 0.19,
+        "false_voice_rate": 0.179,
+        "note_event_f1": 0.634
+      }
+    }
+  }
+}
